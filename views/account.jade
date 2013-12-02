@@ -1,0 +1,14 @@
+extends layout
+    block head
+    block content
+        h1 My Profile
+            div.account-detail
+                p Username: #{user.username}
+                p Email: #{user.email}
+            div.account-groups
+                p Groups:
+                ul
+                    for group in user.groups
+                        li= group
+                    else
+                        li sorry, no groups!
