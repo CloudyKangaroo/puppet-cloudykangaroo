@@ -1,15 +1,18 @@
 extends layout
+block head
+    link(rel='stylesheet', href='/stylesheets/login.css')
 block content
-    #message
+     #container
+        #message
         if message
             p(class='text-error') #{message}
-    #login
-    form(action='/login', method='post')
-        .username
-            label Username
-            input(type='text', name='username')
-        .password
-            label Password
-            input(type='password', name='password')
-        .submit
-            input(type='submit', name='submit')
+        form(class='form-signin',action='/login',method='post')
+            h2(class='form-signin-heading') Please sign in
+            .username
+                label Username
+                input(type='text', name='username', class='form-control')
+            .password
+                label Password
+                input(type='password', name='password', class='form-control')
+            .submit
+                input(type='submit', name='submit', class='btn btn-lg btn-primary btn-block')
