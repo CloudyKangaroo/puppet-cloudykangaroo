@@ -1,6 +1,8 @@
 extends layout
 
 block content
+    if !user
+
     div.top
         form.form-horizontal(method="post", id="loginForm")
             label Username

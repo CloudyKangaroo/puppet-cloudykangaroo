@@ -10,6 +10,6 @@ lib-cov
 pids
 logs
 results
-
+crowd-credentials.js
 npm-debug.log
 node_modules

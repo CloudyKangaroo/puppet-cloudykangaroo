@@ -3,12 +3,14 @@
  * Module dependencies.
  */
 
+require('./crowd-credentials.js');
 var express = require('express');
 var routes = require('./routes');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var flash = require('connect-flash');
+var _ = require('underscore');
 var passport = require('passport');
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
@@ -41,9 +43,9 @@ passport.deserializeUser(function (username, done) {
 //   with a user object.  In the real world, this would query a database;
 //   however, in this example we are using a baked-in set of users.
 passport.use(new AtlassianCrowdStrategy({
-    crowdServer:"http://localhost:2990/jira/",
-    crowdApplication:"nodejs",
-    crowdApplicationPassword:"password",
+    crowdServer:CrowdAuth['server'],
+    crowdApplication:CrowdAuth['application'],
+    crowdApplicationPassword:CrowdAuth['password'],
     retrieveGroupMemberships:true
   },
   function (userprofile, done) {
@@ -88,13 +90,12 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
-
 
 /*
  User Account Routes
  */
-app.get('/account', ensureAuthenticated, function (req, res) {
+app.put('/account/*', ensureAuthenticated);
+app.get('/account', function (req, res) {
   res.render('account', { user:req.user });
 });
 
@@ -105,12 +106,20 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('atlassian-crowd', { failureRedirect:'/login', failureFlash:"Invalid username or password."}),
   function (req, res) {
-    res.redirect('/');
+    res.redirect('/account');
   });
 
 app.get('/logout', function (req, res) {
   req.logout();
   res.redirect('/');
+});
+
+/*
+  Monitoring System Routes (the meat of the app)
+ */
+app.put('/monitoring/*', requireGroup('Engineers'));
+app.get('/monitoring', function (req, res) {
+  res.render('monitoring', { user:req.user });
 });
 
 http.createServer(app).listen(app.get('port'), function(){
@@ -128,3 +137,12 @@ function ensureAuthenticated(req, res, next) {
   }
   res.redirect('/login')
 }
+
+function requireGroup(group) {
+  return function(req, res, next) {
+    if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1)
+      next();
+    else
+      res.send(401, 'Unauthorized');
+  }
+};

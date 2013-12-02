@@ -1,5 +1,8 @@
 extends layout
 block content
+    #message
+        if message
+            p(class='text-error') #{message}
     #login
     form(action='/login', method='post')
         .username
