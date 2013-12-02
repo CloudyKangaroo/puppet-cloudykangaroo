@@ -1,0 +1,15 @@
+extends layout
+block content
+    #message
+        if message
+            p(class='text-error') #{message}
+    #login
+    form(action='/login', method='post')
+        .username
+            label Username
+            input(type='text', name='username')
+        .password
+            label Password
+            input(type='password', name='password')
+        .submit
+            input(type='submit', name='submit')
