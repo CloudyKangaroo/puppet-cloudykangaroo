@@ -1,25 +1,29 @@
 extends layout
 block head
+    link(rel='stylesheet', href='/stylesheets/sticky-footer-navbar.css')
 block content
-    h1 My Profile
-    div.account-detail
-        p Provider: #{user.provider}
-        p ID: #{user.id}
-        p displayName: #{user.displayname}
-
-        p Username: #{user.username}
-        p Primary Email: #{user.email}
-    div.account-emails
-        p Email Addresses:
-        ul
-            for email in user.emails
-                li #{email.value} (#{email.type})
-            else
-                li sorry, no email addresses!
-    div.account-groups
-        p Groups:
-        ul
-            for group in user.groups
-                li= group
-            else
-                li sorry, no groups!
+    include _navbar
+    .container
+        .page-header
+            h1 My Profile
+        p(class="lead")
+            div.account-detail
+                p Provider: #{user.provider}
+                p ID: #{user.id}
+                p displayName: #{user.displayname}
+                p Username: #{user.username}
+                p Primary Email: #{user.email}
+            div.account-emails
+                p Email Addresses:
+                ul
+                    for email in user.emails
+                        li #{email.value} (#{email.type})
+                    else
+                        li sorry, no email addresses!
+            div.account-groups
+                p Groups:
+                ul
+                    for group in user.groups
+                        li= group
+                    else
+                        li sorry, no groups!
