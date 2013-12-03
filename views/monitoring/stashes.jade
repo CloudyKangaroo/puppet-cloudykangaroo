@@ -1,29 +1,14 @@
 extends layout
 block head
-        link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
 block navbar
     include _navbar
 block content
     .container
         .page-header
-            h1 Current Event Status
+            h1 Current Stashes
         .container
-          table.table.table-condensed.sortable
-            thead
-              tr
-                th(data-defaultsort='desc') Issued
-                th(data-defaultsort='disabled') Client
-                th(data-defaultsort='disabled') Check
-                th(data-defaultsort='disabled').visible-lg Output
-
-            tbody
-              each event,i in events
-                if event.status > 1
-                  tr(class="#{getEventClass(event.status)}", id="row-#{i}")
-                    td(data-value="#{event.issued}") #{moment(event.issued).format('MMM Do YYYY, h:mm:ss a')}
-                    td #{event.client}
-                    td #{event.check}
-                    td.visible-lg #{event.output}
+            ul.list-unstyled
+                each stash in stashes
+                    li= stash
 block footer
-    script(src='/javascripts/bootstrap-sortable.js')
-    script(src='/javascripts/moment.min.js')

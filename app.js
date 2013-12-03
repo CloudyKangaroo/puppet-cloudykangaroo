@@ -88,7 +88,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.all("*", function (req, res) { });
+// app.all("*", function (req, res) { });
 
 /*
  User Account Routes
@@ -116,12 +116,21 @@ app.get('/logout', function (req, res) {
 /*
   Monitoring System Routes
 */
+
+var navLinks = [
+  { label: 'Home', key: 'info', path: '/monitoring' },
+  { label: 'Events', key: 'events', path: '/monitoring/events' },
+  { label: 'Clients', key: 'clients', path: '/monitoring/clients' },
+  { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
+  { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
+]
+
 app.put('/monitoring/*', requireGroup('Engineers'));
 app.get('/monitoring', function (req, res) {
   var request = require('request');
   request({ url: 'http://sensu.lan.myogre.com:4567/info', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring', {info: body, user:req.user });
+      res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: navLinks });
     }
   })
 });
@@ -130,7 +139,7 @@ app.get('/monitoring/events', function (req, res) {
   var request = require('request');
   request({ url: 'http://sensu.lan.myogre.com:4567/events', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring/events', {events: body, user:req.user });
+      res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: navLinks });
     }
   })
 });
@@ -139,12 +148,30 @@ app.get('/monitoring/stashes', function (req, res) {
   var request = require('request');
   request({ url: 'http://sensu.lan.myogre.com:4567/stashes', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring/stashes', {stashes: body, user:req.user });
+      res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: navLinks });
     }
   })
 });
 
-app.get('/monitoring/stashes/:server', function (req, res) {
+app.get('/monitoring/checks', function (req, res) {
+  var request = require('request');
+  request({ url: 'http://sensu.lan.myogre.com:4567/checks', json: true }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: navLinks });
+    }
+  })
+});
+
+app.get('/monitoring/clients', function (req, res) {
+  var request = require('request');
+  request({ url: 'http://sensu.lan.myogre.com:4567/clients', json: true }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: navLinks });
+    }
+  })
+});
+
+app.post('/monitoring/stashes/:server', function (req, res) {
   var request = require('request');
   var expiration = new Date(oldDateObj.getTime() + 30*60000);
   request.post({
