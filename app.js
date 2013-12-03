@@ -12,6 +12,10 @@ var _ = require('underscore');
 var passport = require('passport');
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
+var metrics    = require('measured');
+var collection = new metrics.Collection('http');
+var rps = collection.meter('requestsPerSecond')
+
 var users = [];
 
 // Passport session setup.
@@ -79,16 +83,31 @@ app.use(express.session());
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(rpsMeter);
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 app.locals.moment = require('moment');
 
-// development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+/***
+ * Metrics Middleware
+ ***/
+
+function rpsMeter(req, res, next) {
+  rps.mark();
+  next();
 }
 
-// app.all("*", function (req, res) { });
+/***
+ * End Metrics
+ ***/
+
+// development only
+if ('development' == app.get('env')) {
+  setInterval(function() {
+    console.log(collection.toJSON());
+  }, 5000);
+  app.use(express.errorHandler());
+}
 
 /*
  User Account Routes
@@ -97,18 +116,14 @@ app.get('/account', ensureAuthenticated, function (req, res) {
   res.render('account', { user:req.user });
 });
 
-app.get('/login', function (req, res) {
-  res.render('login', { user:req.user, message:req.flash('error') });
-});
-
-app.post('/login',
+app.post('/account/login',
   passport.authenticate('atlassian-crowd', { failureRedirect:'/login', failureFlash:"Invalid username or password."}),
   function (req, res) {
     backURL=req.header('Referer') || '/account';
     res.redirect(backURL);
   });
 
-app.get('/logout', function (req, res) {
+app.get('/account/logout', function (req, res) {
   req.logout();
   res.redirect('/');
 });
@@ -128,16 +143,40 @@ var navLinks = [
 app.put('/monitoring/*', requireGroup('Engineers'));
 app.get('/monitoring', function (req, res) {
   var request = require('request');
-  request({ url: 'http://sensu.lan.myogre.com:4567/info', json: true }, function (error, response, body) {
+  request({ url: 'http://192.168.65.102:4567/info', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: navLinks });
     }
   })
 });
 
+/*
+app.get('/monitor', function (req, res) {
+  var options = {
+      host: '192.168.65.102',
+      port: 4567,
+      path: '/info',
+      method: 'GET'
+  }
+  var req = http.get(options, function(req) {
+    var pageData = '';
+    req.setEncoding('utf8');
+
+    req.on('data', function (chunk) {
+      pageData += chunk;
+    });
+
+    req.on('end', function(){
+      var info = JSON.parse(pageData)
+      res.render('monitoring', {info: info, user:req.user, section: 'info', navLinks: navLinks });
+    });
+  })
+});
+*/
+
 app.get('/monitoring/events', function (req, res) {
   var request = require('request');
-  request({ url: 'http://sensu.lan.myogre.com:4567/events', json: true }, function (error, response, body) {
+  request({ url: 'http://192.168.65.102:4567/events', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: navLinks });
     }
@@ -146,7 +185,7 @@ app.get('/monitoring/events', function (req, res) {
 
 app.get('/monitoring/stashes', function (req, res) {
   var request = require('request');
-  request({ url: 'http://sensu.lan.myogre.com:4567/stashes', json: true }, function (error, response, body) {
+  request({ url: 'http://192.168.65.102:4567/stashes', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: navLinks });
     }
@@ -155,7 +194,7 @@ app.get('/monitoring/stashes', function (req, res) {
 
 app.get('/monitoring/checks', function (req, res) {
   var request = require('request');
-  request({ url: 'http://sensu.lan.myogre.com:4567/checks', json: true }, function (error, response, body) {
+  request({ url: 'http://192.168.65.102:4567/checks', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: navLinks });
     }
@@ -164,7 +203,7 @@ app.get('/monitoring/checks', function (req, res) {
 
 app.get('/monitoring/clients', function (req, res) {
   var request = require('request');
-  request({ url: 'http://sensu.lan.myogre.com:4567/clients', json: true }, function (error, response, body) {
+  request({ url: 'http://192.168.65.102:4567/clients', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: navLinks });
     }
@@ -175,7 +214,7 @@ app.post('/monitoring/stashes/:server', function (req, res) {
   var request = require('request');
   var expiration = new Date(oldDateObj.getTime() + 30*60000);
   request.post({
-    url: 'http://sensu.lan.myogre.com:4567/stashes/silence/' + server,
+    url: 'http://192.168.65.102:4567/stashes/silence/' + server,
     body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }" 
   }, function(error, response, body){
     console.log(body);
@@ -186,12 +225,6 @@ http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-/*
-setInterval(function() {
-  console.log(metrics.Report.summary);
-}, 1000);
-*/
-
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
 //   the request is authenticated (typically via a persistent login session),
@@ -201,7 +234,7 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   } else {
-    res.render('login', { user:req.user, message:req.flash('error') });
+    res.render('account/login', { user:req.user, message:req.flash('error') });
   }
 }
 
@@ -210,7 +243,7 @@ function requireGroup(group) {
     if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
       next();
     } else {
-      res.render('login', { user:req.user, message:req.flash('error') });
+      res.render('account/login', { user:req.user, message:req.flash('error') });
     }
   }
 };
@@ -218,6 +251,5 @@ function requireGroup(group) {
 app.locals.getEventClass = function(eventStatus){
   var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
   var eventClass = StatusEnum.get(eventStatus);
-//  console.log("event status is " + eventStatus + " so I am returning " + eventClass);
   return eventClass;
 }
