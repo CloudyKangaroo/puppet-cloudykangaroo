@@ -117,7 +117,7 @@ app.get('/account', ensureAuthenticated, function (req, res) {
 });
 
 app.post('/account/login',
-  passport.authenticate('atlassian-crowd', { failureRedirect:'/login', failureFlash:"Invalid username or password."}),
+  passport.authenticate('atlassian-crowd', { failureRedirect:'/account/login', failureFlash:"Invalid username or password."}),
   function (req, res) {
     backURL=req.header('Referer') || '/account';
     res.redirect(backURL);
