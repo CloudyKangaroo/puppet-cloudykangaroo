@@ -1,12 +1,10 @@
-
 /**
  * Module dependencies.
  */
 
 require('./crowd-credentials.js');
+require('enum').register();
 var express = require('express');
-var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var flash = require('connect-flash');
@@ -83,19 +81,19 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+app.locals.moment = require('moment');
 
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+app.all("*", function (req, res) { });
 
 /*
  User Account Routes
  */
-app.put('/account/*', ensureAuthenticated);
-app.get('/account', function (req, res) {
+app.get('/account', ensureAuthenticated, function (req, res) {
   res.render('account', { user:req.user });
 });
 
@@ -106,7 +104,8 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('atlassian-crowd', { failureRedirect:'/login', failureFlash:"Invalid username or password."}),
   function (req, res) {
-    res.redirect('/account');
+    backURL=req.header('Referer') || '/account';
+    res.redirect(backURL);
   });
 
 app.get('/logout', function (req, res) {
@@ -115,16 +114,56 @@ app.get('/logout', function (req, res) {
 });
 
 /*
-  Monitoring System Routes (the meat of the app)
- */
+  Monitoring System Routes
+*/
 app.put('/monitoring/*', requireGroup('Engineers'));
 app.get('/monitoring', function (req, res) {
-  res.render('monitoring', { user:req.user });
+  var request = require('request');
+  request({ url: 'http://sensu.lan.myogre.com:4567/info', json: true }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.render('monitoring', {info: body, user:req.user });
+    }
+  })
+});
+
+app.get('/monitoring/events', function (req, res) {
+  var request = require('request');
+  request({ url: 'http://sensu.lan.myogre.com:4567/events', json: true }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.render('monitoring/events', {events: body, user:req.user });
+    }
+  })
+});
+
+app.get('/monitoring/stashes', function (req, res) {
+  var request = require('request');
+  request({ url: 'http://sensu.lan.myogre.com:4567/stashes', json: true }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.render('monitoring/stashes', {stashes: body, user:req.user });
+    }
+  })
+});
+
+app.get('/monitoring/stashes/:server', function (req, res) {
+  var request = require('request');
+  var expiration = new Date(oldDateObj.getTime() + 30*60000);
+  request.post({
+    url: 'http://sensu.lan.myogre.com:4567/stashes/silence/' + server,
+    body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }" 
+  }, function(error, response, body){
+    console.log(body);
+  });
 });
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+/*
+setInterval(function() {
+  console.log(metrics.Report.summary);
+}, 1000);
+*/
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -134,15 +173,24 @@ http.createServer(app).listen(app.get('port'), function(){
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
+  } else {
+    res.render('login', { user:req.user, message:req.flash('error') });
   }
-  res.redirect('/login')
 }
 
 function requireGroup(group) {
   return function(req, res, next) {
-    if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1)
+    if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
       next();
-    else
-      res.send(401, 'Unauthorized');
+    } else {
+      res.render('login', { user:req.user, message:req.flash('error') });
+    }
   }
 };
+
+app.locals.getEventClass = function(eventStatus){
+  var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
+  var eventClass = StatusEnum.get(eventStatus);
+//  console.log("event status is " + eventStatus + " so I am returning " + eventClass);
+  return eventClass;
+}
