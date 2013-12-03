@@ -1,30 +1,29 @@
 extends layout
 block head
-    link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+  link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
 block navbar
-    include _navbar
+  include _navbar
 block content
+  .container
+    .page-header
+      h1 Current Client List
     .container
-        .page-header
-            h1 Current Client List
-        .container
-            table.table.table-condensed.sortable
-                thead
-                    tr
-                        th Name
-                        th Address
-                        th Timestamp
-                        th Subscriptions
-                tbody
-                    each client in clients
-                        tr
-                            td #{client.name}
-                            td #{client.address}
-                            td #{moment(client.timestamp).format('MMM Do YYYY, h:mm:ss a')}
-                            td
-                                ul.list-unstyled
-                                    each subscription in client.subscriptions
-                                        li= subscription
-
+      table.table.table-condensed.sortable
+        thead
+          tr
+            th Name
+            th Address
+            th Timestamp
+            th Subscriptions
+        tbody
+          each client in clients
+            tr
+              td #{client.name}
+              td #{client.address}
+              td #{moment(client.timestamp).format('MMM Do YYYY, h:mm:ss a')}
+              td
+                ul.list-unstyled
+                  each subscription in client.subscriptions
+                    li= subscription
 block footer
-    script(src='/javascripts/moment.min.js')
+  script(src='/javascripts/moment.min.js')
