@@ -1,0 +1,30 @@
+extends layout
+block head
+    link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+block navbar
+    include _navbar
+block content
+    .container
+        .page-header
+            h1 Current Checks
+        .container
+            table.table.table-condensed
+                thead
+                    tr
+                        th Name
+                        th Interval
+                        th Subscribers
+                        th.visible-lg Command
+                tbody
+                    each check in checks
+                        tr
+                            td #{check.name}
+                            td #{check.interval}
+                            td
+                                ul.list-unstyled
+                                    each subscriber in check.subscribers
+                                        li= subscriber
+                            td.visible-lg #{check.command}
+block footer
+    script(src='/javascripts/bootstrap-sortable.js')
+    script(src='/javascripts/moment.min.js')

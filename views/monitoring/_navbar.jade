@@ -8,13 +8,8 @@ div(class='navbar navbar-default navbar-fixed-top', role='navigation')
                 span.icon-bar
         div(class='nav navbar-nav')
             ul(class='nav navbar-nav')
-                li.active
-                    a(href='/monitoring') Home
-                li
-                    a(href='/monitoring/events') Events
-                li
-                    a(href='/monitoring/stashes') Stashes
-                li
-                    a(href='/monitoring/clients') Clients
-                li
-                    a(href='/monitoring/checks') Checks
+                - navLinks.forEach(function(link){
+                    - var isActive = (link.key == section ? 'active' : '')
+                    li(class=isActive)
+                        a(href=link.path)= link.label
+                - })
