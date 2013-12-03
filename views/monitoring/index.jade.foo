@@ -1,0 +1,37 @@
+extends layout
+block head
+        link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+block navbar
+    include _navbar
+block content
+    .container
+        .page-header
+            h1 Current System Info
+        .container
+          ul.nav.nav-pills.nav-stacked
+            li.success
+              a(href='#')
+                span.badge.pull-right #{info.rabbitmq.keepalives.messages}
+                Home
+
+          h3 Sensu
+            p Sensu Version: #{info.sensu.version}
+          h3 Redis
+            p Connected: #{info.redis.connected}
+          h3 RabbitMQ
+            p Connected: #{info.rabbitmq.connected}
+            table.table.table-condensed
+              thead
+                tr
+                  th type
+                  th messages
+                  th consumers
+              tbody
+                tr
+                  td keepalives
+                  td #{info.rabbitmq.keepalives.messages}
+                  td #{info.rabbitmq.keepalives.consumers}
+                tr
+                  td results
+                  td #{info.rabbitmq.results.messages}
+                  td #{info.rabbitmq.results.consumers}
