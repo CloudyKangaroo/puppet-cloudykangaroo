@@ -10,7 +10,7 @@ config.navLinks = [
 
 config.sensu = {};
 config.redis = {};
-config.web = {};
+config.http = {};
 config.cookie = {};
 
 config.sensu.host = process.env.SENSU_HOST || '192.168.65.102';
