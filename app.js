@@ -1,10 +1,22 @@
+
+/**
+ * Application Dependencies
+ */
+
+require('./crowd-credentials.js');
+
+/**
+ * Configuration
+ */
+
+var config = require('./config');
+
 /**
  * Module dependencies.
  */
 
-require('./crowd-credentials.js');
 require('enum').register();
-var config = require('./config');
+
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -13,17 +25,29 @@ var _ = require('underscore');
 var passport = require('passport');
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
+/**
+ * Metrics Objects
+ */
+
 var metrics    = require('measured');
 var collection = new metrics.Collection('http');
 var rps = collection.meter('requestsPerSecond')
 
+/**
+ * Authentication System
+ */
+
 var users = [];
+
+// passport-attlassian-crowd from : https://bitbucket.org/knecht_andreas/passport-atlassian-crowd
+// MIT License
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
 //   serialize users into and deserialize users out of the session.  Typically,
 //   this will be as simple as storing the user ID when serializing, and finding
 //   the user by ID when deserializing.
+
 passport.serializeUser(function (user, done) {
   done(null, user.username);
 });
@@ -39,12 +63,11 @@ passport.deserializeUser(function (username, done) {
   }
 });
 
-
 // Use the AtlassianCrowdStrategy within Passport.
 //   Strategies in passport require a `verify` function, which accept
 //   credentials (in this case a crowd user profile), and invoke a callback
-//   with a user object.  In the real world, this would query a database;
-//   however, in this example we are using a baked-in set of users.
+//   with a user object.
+
 passport.use(new AtlassianCrowdStrategy({
     crowdServer:CrowdAuth['server'],
     crowdApplication:CrowdAuth['application'],
@@ -68,6 +91,10 @@ passport.use(new AtlassianCrowdStrategy({
 ));
 
 
+/**
+ * The Start of the Application Logic
+ */
+
 var app = express();
 
 // all environments
@@ -75,6 +102,8 @@ app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
+app.locals.moment = require('moment');
+
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -83,74 +112,105 @@ app.use(express.methodOverride());
 app.use(express.cookieParser(config.cookie.secret));
 app.use(express.session());
 app.use(flash());
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(rpsMeter);
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-app.locals.moment = require('moment');
 
-/***
+/**
  * Metrics Middleware
- ***/
+ *  Called by app.use(rpsMeter);
+ *  This adds the RPS metric, we are using this
+ *  middleware so that every request is counted.
+ */
 
 function rpsMeter(req, res, next) {
   rps.mark();
   next();
 }
 
-/***
+/**
  * End Metrics
- ***/
+ */
 
-// development only
+/**
+ * Development Enironment Code
+ */
+
 if ('development' == app.get('env')) {
-  setInterval(function() {
-    console.log(collection.toJSON());
-  }, 15000);
+
+  // Log the Metrics Collection to stdout every 15 Seconds
+  setInterval(function() { console.log(collection.toJSON());}, 15000);
+
+  // Use the express errorHandler
   app.use(express.errorHandler());
 }
 
-app.get('/', function (req, res) {
-  res.render('index', { user:req.user });
-});
+/**
+ * Routes for incoming Requests
+ *  Used by app.use(app.router);
+ */
+
+app.get('/'
+  , function (req, res) {
+      res.render('index', { user:req.user });
+  }
+);
 
 /*
  User Account Routes
  */
-app.get('/account', ensureAuthenticated, function (req, res) {
-  res.render('account', { user:req.user });
-});
+app.get('/account'
+  , ensureAuthenticated
+  , function (req, res) {
+      res.render('account', { user:req.user });
+    }
+);
 
-app.get('/account/login', function (req, res) {
-  res.render('account/login', { user:req.user, message:req.flash('error') });
-});
+app.get('/account/login'
+  , function (req, res) {
+      res.render('account/login', { user:req.user, message:req.flash('error') });
+    }
+);
 
-app.post('/account/login',
-  passport.authenticate('atlassian-crowd', { failureRedirect:'/account.login', failureFlash:"Invalid username or password."}),
-  function (req, res) {
-    backURL=req.header('Referer') || '/account';
-    res.redirect(backURL);
-  });
+app.post('/account/login'
+  , passport.authenticate('atlassian-crowd'
+  , { failureRedirect:'/account.login', failureFlash:"Invalid username or password."})
+  , function (req, res) {
+      backURL=req.header('Referer') || '/account';
+      res.redirect(backURL);
+    }
+);
 
-app.get('/account/logout', function (req, res) {
-  req.logout();
-  res.redirect('/');
-});
+app.get('/account/logout'
+  , function (req, res) {
+      req.logout();
+      res.redirect('/');
+    }
+);
 
 /*
   Monitoring System Routes
 */
 
-app.put('/monitoring/*', requireGroup('Engineers'));
-app.get('/monitoring', function (req, res) {
-  var request = require('request');
-  request({ url: app.get('sensu_uri') + '/info', json: true }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks });
+app.put('/monitoring/*'
+  , requireGroup('Engineers')
+);
+
+app.get('/monitoring'
+  , function (req, res) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/info', json: true }
+        , function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks });
+            }
+          }
+      )
     }
-  })
-});
+);
 
 /*
 app.get('/monitor', function (req, res) {
@@ -241,7 +301,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 function requireGroup(group) {
-  return function(req, res, next) {
+   return function(req, res, next) {
     if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
       next();
     } else {
