@@ -4,7 +4,7 @@
 
 require('./crowd-credentials.js');
 require('enum').register();
-var config = require('config');
+var config = require('./config');
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -145,7 +145,7 @@ app.get('/account/logout', function (req, res) {
 app.put('/monitoring/*', requireGroup('Engineers'));
 app.get('/monitoring', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/info', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/info', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks });
     }
@@ -178,7 +178,7 @@ app.get('/monitor', function (req, res) {
 
 app.get('/monitoring/events', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/events', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks });
     }
@@ -187,7 +187,7 @@ app.get('/monitoring/events', function (req, res) {
 
 app.get('/monitoring/stashes', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/stashes', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks });
     }
@@ -196,7 +196,7 @@ app.get('/monitoring/stashes', function (req, res) {
 
 app.get('/monitoring/checks', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/checks', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/checks', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: config.navLinks });
     }
@@ -205,7 +205,7 @@ app.get('/monitoring/checks', function (req, res) {
 
 app.get('/monitoring/clients', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/clients', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks });
     }
@@ -216,7 +216,7 @@ app.post('/monitoring/stashes/:server', function (req, res) {
   var request = require('request');
   var expiration = new Date(oldDateObj.getTime() + 30*60000);
   request.post({
-    url: 'http://192.168.65.102:4567/stashes/silence/' + server,
+    url: app.get('sensu_uri') + '/stashes/silence/' + server,
     body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }" 
   }, function(error, response, body){
     console.log(body);
