@@ -5,9 +5,11 @@ Sensu Monitoring Interface
 
 Notes:
 
-.git/config:
+Add to .git/config:
+```
+[core]
   whitespace = tabwidth=2,tab-in-indent,cr-at-eol,trailing-space
-
+```
 
 example contents for crowd-credentials.js
 ```
