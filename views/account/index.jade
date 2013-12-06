@@ -4,27 +4,45 @@ block head
 block navbar
     include _navbar
 block content
-    .container
-        .page-header
-            h1 My Profile
-        p(class="lead")
-            div.account-detail
-                p Provider: #{user.provider}
-                p ID: #{user.id}
-                p displayName: #{user.displayname}
-                p Username: #{user.username}
-                p Primary Email: #{user.email}
-            div.account-emails
-                p Email Addresses:
-                ul
-                    for email in user.emails
-                        li #{email.value} (#{email.type})
-                    else
-                        li sorry, no email addresses!
-            div.account-groups
-                p Groups:
-                ul
-                    for group in user.groups
-                        li= group
-                    else
-                        li sorry, no groups!
+  .container.col-xs-12.col-md-8
+    .row
+      .page-header
+        h1 My Profile
+    .row
+      .col-xs-6.col-md-4
+        .panel.panel-default
+          if user.displayname
+            .panel-heading #{user.displayname}
+          else
+            .panel-heading #{user.username}
+          .panel-body
+            p Provider: #{user.provider}
+            p ID: #{user.id}
+            if user.displayname
+              p Display Name: #{user.displayname}
+            p User Name: #{user.username}
+        if user.photos
+          .panel.panel-default
+            .panel-heading Photos
+            .panel-body
+              ul.list-inline
+                for photo in user.photos
+                  li
+                    img(src="#{photo.value}").img-thumbnail
+      .col-xs-6.col-md-4
+        .panel.panel-default
+          .panel-heading Primary Email: #{user.email}
+          .panel-body
+            ul
+              for email in user.emails
+                li #{email.value} (#{email.type})
+              else
+                li No additional Addresses
+        .panel.panel-default
+          .panel-heading Account Groups
+          .panel-body
+            ul
+              for group in user.groups
+                li= group
+              else
+                li No Groups Memberships
