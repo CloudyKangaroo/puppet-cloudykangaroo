@@ -315,3 +315,11 @@ app.locals.getEventClass = function(eventStatus){
   var eventClass = StatusEnum.get(eventStatus);
   return eventClass;
 }
+
+app.locals.getFormattedTimestamp = function(timeStamp, dateString){
+  if (arguments.length == 1) {
+    var dateString = 'MMM DD H:mm:ss';
+  }
+  var offset = moment(timeStamp*1000);
+  return offset.format(dateString);
+}
