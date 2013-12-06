@@ -20,10 +20,9 @@ block content
             tr
               td #{client.name}
               td #{client.address}
-              td #{moment(client.timestamp).format('MMM Do YYYY, h:mm:ss a')}
+              td #{getFormattedTimestamp(client.timestamp)}
               td
                 ul.list-unstyled
                   each subscription in client.subscriptions
                     li= subscription
 block footer
-  script(src='/javascripts/moment.min.js')
