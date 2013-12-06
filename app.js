@@ -4,6 +4,7 @@
 
 require('./crowd-credentials.js');
 require('enum').register();
+var config = require('./config');
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -70,15 +71,16 @@ passport.use(new AtlassianCrowdStrategy({
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(express.cookieParser('your secret here'));
+app.use(express.cookieParser(config.cookie.secret));
 app.use(express.session());
 app.use(flash());
 app.use(passport.initialize());
@@ -105,9 +107,13 @@ function rpsMeter(req, res, next) {
 if ('development' == app.get('env')) {
   setInterval(function() {
     console.log(collection.toJSON());
-  }, 5000);
+  }, 15000);
   app.use(express.errorHandler());
 }
+
+app.get('/', function (req, res) {
+  res.render('index', { user:req.user });
+});
 
 /*
  User Account Routes
@@ -116,8 +122,12 @@ app.get('/account', ensureAuthenticated, function (req, res) {
   res.render('account', { user:req.user });
 });
 
+app.get('/account/login', function (req, res) {
+  res.render('account/login', { user:req.user, message:req.flash('error') });
+});
+
 app.post('/account/login',
-  passport.authenticate('atlassian-crowd', { failureRedirect:'/account/login', failureFlash:"Invalid username or password."}),
+  passport.authenticate('atlassian-crowd', { failureRedirect:'/account.login', failureFlash:"Invalid username or password."}),
   function (req, res) {
     backURL=req.header('Referer') || '/account';
     res.redirect(backURL);
@@ -132,20 +142,12 @@ app.get('/account/logout', function (req, res) {
   Monitoring System Routes
 */
 
-var navLinks = [
-  { label: 'Home', key: 'info', path: '/monitoring' },
-  { label: 'Events', key: 'events', path: '/monitoring/events' },
-  { label: 'Clients', key: 'clients', path: '/monitoring/clients' },
-  { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
-  { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
-]
-
 app.put('/monitoring/*', requireGroup('Engineers'));
 app.get('/monitoring', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/info', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/info', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: navLinks });
+      res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks });
     }
   })
 });
@@ -168,7 +170,7 @@ app.get('/monitor', function (req, res) {
 
     req.on('end', function(){
       var info = JSON.parse(pageData)
-      res.render('monitoring', {info: info, user:req.user, section: 'info', navLinks: navLinks });
+      res.render('monitoring', {info: info, user:req.user, section: 'info', navLinks: config.navLinks });
     });
   })
 });
@@ -176,36 +178,36 @@ app.get('/monitor', function (req, res) {
 
 app.get('/monitoring/events', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/events', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: navLinks });
+      res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks });
     }
   })
 });
 
 app.get('/monitoring/stashes', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/stashes', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: navLinks });
+      res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks });
     }
   })
 });
 
 app.get('/monitoring/checks', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/checks', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/checks', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: navLinks });
+      res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: config.navLinks });
     }
   })
 });
 
 app.get('/monitoring/clients', function (req, res) {
   var request = require('request');
-  request({ url: 'http://192.168.65.102:4567/clients', json: true }, function (error, response, body) {
+  request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: navLinks });
+      res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks });
     }
   })
 });
@@ -214,7 +216,7 @@ app.post('/monitoring/stashes/:server', function (req, res) {
   var request = require('request');
   var expiration = new Date(oldDateObj.getTime() + 30*60000);
   request.post({
-    url: 'http://192.168.65.102:4567/stashes/silence/' + server,
+    url: app.get('sensu_uri') + '/stashes/silence/' + server,
     body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }" 
   }, function(error, response, body){
     console.log(body);
