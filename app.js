@@ -3,7 +3,7 @@
  * Application Dependencies
  */
 
-require('./crowd-credentials.js');
+require('./system-credentials.js');
 
 /**
  * Configuration
@@ -16,7 +16,7 @@ var config = require('./config');
  */
 
 require('enum').register();
-
+var ubersmith = require('ubersmith');
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -24,6 +24,7 @@ var flash = require('connect-flash');
 var _ = require('underscore');
 var passport = require('passport');
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
+var request = require('request')
 
 /**
  * Metrics Objects
@@ -32,6 +33,21 @@ var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 var metrics    = require('measured');
 var collection = new metrics.Collection('http');
 var rps = collection.meter('requestsPerSecond')
+
+/**
+ * Ubersmith Integration
+ */
+ubersmith.uberRefreshData('device.list');
+ubersmith.uberScheduleRefresh('device.list', 1);
+ubersmith.on('ready.device.list',
+  function(body) {
+    console.log(body);
+  }
+);
+
+/**
+ * End Ubersmith
+ */
 
 /**
  * Authentication System
