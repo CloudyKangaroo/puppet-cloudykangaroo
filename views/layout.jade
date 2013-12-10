@@ -19,9 +19,11 @@ html
     a(href="#content").sr-only Skip to main content
     .container
       #nav.container
+        include _navbar
         block navbar
       #content.container
         block content
+    include _footer
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
     script(src='/bootstrap/js/bootstrap.min.js')
     block footer
