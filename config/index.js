@@ -20,8 +20,11 @@ config.sensu = {};
 config.redis = {};
 config.http = {};
 config.cookie = {};
+config.log = {};
 
-config.sensu.host = process.env.SENSU_HOST || '192.168.65.102';
+config.log.access_log = './access.log';
+
+config.sensu.host = process.env.SENSU_HOST || 'mgmt-data01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 config.redis.uri = process.env.REDIS_URI;
 config.redis.host = process.env.REDIS_HOST || 'localhost';
