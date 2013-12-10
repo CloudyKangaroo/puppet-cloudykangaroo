@@ -4,6 +4,7 @@
  */
 
 require('./system-credentials.js');
+require('./lib/ubersmith.js');
 
 /**
  * Configuration
@@ -14,9 +15,7 @@ var config = require('./config');
 /**
  * Module dependencies.
  */
-
 require('enum').register();
-var ubersmith = require('ubersmith');
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -30,24 +29,9 @@ var request = require('request')
  * Metrics Objects
  */
 
-var metrics    = require('measured');
+var metrics = require('measured');
 var collection = new metrics.Collection('http');
 var rps = collection.meter('requestsPerSecond')
-
-/**
- * Ubersmith Integration
- */
-ubersmith.uberRefreshData('device.list');
-ubersmith.uberScheduleRefresh('device.list', 1);
-ubersmith.on('ready.device.list',
-  function(body) {
-    console.log(body);
-  }
-);
-
-/**
- * End Ubersmith
- */
 
 /**
  * Authentication System
