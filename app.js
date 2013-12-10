@@ -24,6 +24,10 @@ var _ = require('underscore');
 var passport = require('passport');
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 var request = require('request')
+var formidable = require('formidable');
+
+var fs = require('fs');
+var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
 
 /**
  * Metrics Objects
@@ -103,7 +107,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.locals.moment = require('moment');
-
+app.use(express.logger({stream: logstream }));
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -177,7 +181,7 @@ app.get('/account/login'
 
 app.post('/account/login'
   , passport.authenticate('atlassian-crowd'
-  , { failureRedirect:'/account.login', failureFlash:"Invalid username or password."})
+  , { failureRedirect:'/account', failureFlash:"Invalid username or password."})
   , function (req, res) {
       backURL=req.header('Referer') || '/account';
       res.redirect(backURL);
@@ -194,6 +198,28 @@ app.get('/account/logout'
 /*
   Monitoring System Routes
 */
+
+app.post('/ubersmith/event/*', function(req, res){
+  var form = new formidable.IncomingForm;
+  console.log(req.path);
+  form.parse(req, function(err, fields, files){
+    if (err) return res.end('You found error');
+    console.log(fields);
+  });
+
+  form.on('progress', function(bytesReceived, bytesExpected) {
+//    console.log(bytesReceived + ' ' + bytesExpected);
+  });
+
+  form.on('error', function(err) {
+      res.writeHead(200, {'content-type': 'text/plain'});
+      res.end('error:\n\n'+util.inspect(err));
+  });
+
+  res.writeHead(200, {'content-type': 'text/plain'});
+  res.end('complete');
+});  
+
 
 app.put('/monitoring/*'
   , requireGroup('Engineers')
