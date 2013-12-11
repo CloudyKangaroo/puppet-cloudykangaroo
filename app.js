@@ -312,20 +312,24 @@ app.get('/account/logout'
   Monitoring System Routes
 */
 
-app.get('/ubersmith/devices', function (req, res) {
-  res.render('ubersmith/devices', {devices: uberData['device.list'], device_types: uberData['device.type_list'], user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+app.get('/ubersmith/devices'
+  , ensureAuthenticated
+  , function (req, res) {
+    res.render('ubersmith/devices', {devices: uberData['device.list'], device_types: uberData['device.type_list'], user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
 });
 
-app.get('/ubersmith', function (req, res) {
-  res.render('ubersmith', {ticket_count: { low: uberData['support.ticket_count.low'], normal: uberData['support.ticket_count.normal'], high: uberData['support.ticket_count.high'], urgent: uberData['support.ticket_count.urgent']}, event_list: uberData['uber.event_list'], user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
+app.get('/ubersmith'
+  , ensureAuthenticated
+  , function (req, res) {
+    res.render('ubersmith', {ticket_count: { low: uberData['support.ticket_count.low'], normal: uberData['support.ticket_count.normal'], high: uberData['support.ticket_count.high'], urgent: uberData['support.ticket_count.urgent']}, event_list: uberData['uber.event_list'], user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
 });
 
 app.post('/ubersmith/event/*', function(req, res){
-  var form = new formidable.IncomingForm;
-  console.log(req.path);
-  form.parse(req, function(err, fields, files){
-    if (err) return res.end('You found error');
-    console.log(fields);
+    var form = new formidable.IncomingForm;
+    console.log(req.path);
+    form.parse(req, function(err, fields, files){
+      if (err) return res.end('You found error');
+      console.log(fields);
   });
 
   form.on('progress', function(bytesReceived, bytesExpected) {
@@ -347,6 +351,7 @@ app.put('/monitoring/*'
 );
 
 app.get('/monitoring'
+  , requireGroup('Engineers')
   , function (req, res) {
       var request = require('request');
       request({ url: app.get('sensu_uri') + '/info', json: true }
@@ -383,40 +388,48 @@ app.get('/monitor', function (req, res) {
 });
 */
 
-app.get('/monitoring/events', function (req, res) {
-  var request = require('request');
-  request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks.monitoring });
-    }
-  })
+app.get('/monitoring/events'
+  , requireGroup('Engineers')
+  , function (req, res) {
+    var request = require('request');
+    request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks.monitoring });
+      }
+    })
 });
 
-app.get('/monitoring/stashes', function (req, res) {
-  var request = require('request');
-  request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks.monitoring });
-    }
-  })
+app.get('/monitoring/stashes'
+  , requireGroup('Engineers')
+  , function (req, res) {
+    var request = require('request');
+    request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks.monitoring });
+      }
+    })
 });
 
-app.get('/monitoring/checks', function (req, res) {
-  var request = require('request');
-  request({ url: app.get('sensu_uri') + '/checks', json: true }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: config.navLinks.monitoring });
-    }
-  })
+app.get('/monitoring/checks'
+  , requireGroup('Engineers')
+  , function (req, res) {
+    var request = require('request');
+    request({ url: app.get('sensu_uri') + '/checks', json: true }, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: config.navLinks.monitoring });
+      }
+    })
 });
 
-app.get('/monitoring/clients', function (req, res) {
-  var request = require('request');
-  request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
-    }
-  })
+app.get('/monitoring/clients'
+  , requireGroup('Engineers')
+  , function (req, res) {
+    var request = require('request');
+    request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
+      }
+    })
 });
 
 app.post('/monitoring/stashes/:server', function (req, res) {
