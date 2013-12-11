@@ -38,8 +38,10 @@ ubersmith.uberAuth = UberAuth;
 
 ubersmith.uberRefreshData('device.list');
 ubersmith.uberRefreshData('client.list');
+ubersmith.uberRefreshData('ticket.list');
 
 ubersmith.uberScheduleRefresh('device.list', 1);
+ubersmith.uberScheduleRefresh('ticket.list', 1);
 ubersmith.uberScheduleRefresh('client.list', 10);
 
 ubersmith.uberRefreshData('device.type_list');
@@ -209,7 +211,7 @@ function rpsMeter(req, res, next) {
 if ('development' == app.get('env')) {
 
   // Log the Metrics Collection to stdout every 15 Seconds
-  setInterval(function() { console.log(collection.toJSON());}, 15000);
+//  setInterval(function() { console.log(collection.toJSON());}, 15000);
 
   // Use the express errorHandler
   app.use(express.errorHandler());
