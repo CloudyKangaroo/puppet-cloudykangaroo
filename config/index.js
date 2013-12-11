@@ -3,7 +3,7 @@ var config = {}
 config.navLinks = {
   ubersmith: [
     { label: 'Dashboard', key: 'dashboard', path: '/ubersmith' },
-    { label: 'Clients', key: 'clients', path: '/ubersmith/clients' },
+    { label: 'Customers', key: 'clients', path: '/ubersmith/customers' },
     { label: 'Devices', key: 'devices', path: '/ubersmith/devices' },
     { label: 'Tickets', key: 'tickets', path: '/ubersmith/tickets' }
   ],
@@ -24,7 +24,7 @@ config.log = {};
 
 config.log.access_log = './access.log';
 
-config.sensu.host = process.env.SENSU_HOST || 'mgmt-data01.contegix.com';
+config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 config.redis.uri = process.env.REDIS_URI;
 config.redis.host = process.env.REDIS_HOST || 'localhost';
