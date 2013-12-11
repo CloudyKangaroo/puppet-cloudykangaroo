@@ -1,25 +1,27 @@
 doctype 5
 html
-    head
-        meta(charset='utf-8')
-        meta(http-equiv='X-UA-Compatible' content='IE=edge')
-        meta(name='viewport', content='width=device-width, initial-scale=1.0')
-        meta(name='description', content='')
-        meta(name='author', content='')
-        title= title
-        link(rel='stylesheet', href='/stylesheets/style.css')
-        link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
-        link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.min.css')
-        //if IE
-            script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
-        block head
-    body
-        a(href="#content").sr-only Skip to main content
-        .container
-            #nav.container
-              block nav
-            #content.container
-              block content
-        script(src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
-        script(src='/bootstrap/js/bootstrap.min.js')
-        block footer
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='description', content='')
+    meta(name='author', content='')
+    title= title
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap-theme.min.css')
+    link(rel='stylesheet', href='/bootstrap/css/ionicons.min.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')
+    //if IE
+      script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
+    block head
+  body
+    .container
+      #content.container
+        .row
+          .col-md-14
+            block content
+    include ../_footer
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
+    script(src='/bootstrap/js/bootstrap.min.js')
+    block footer

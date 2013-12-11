@@ -1,6 +1,12 @@
 var config = {}
 
 config.navLinks = {
+  account: [
+    { label: 'Home', key: 'profile', path: '/account' },
+    { label: 'Monitoring', key: 'monitoring', path: '/monitoring' },
+    { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' },
+    { label: 'Logout', key: 'logout', path: '/account/logout' }
+  ],
   ubersmith: [
     { label: 'Dashboard', key: 'dashboard', path: '/ubersmith' },
     { label: 'Customers', key: 'clients', path: '/ubersmith/customers' },

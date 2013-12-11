@@ -38,10 +38,15 @@ ubersmith.uberAuth = UberAuth;
 
 ubersmith.uberRefreshData('device.list');
 ubersmith.uberRefreshData('client.list');
-ubersmith.uberRefreshData('ticket.list');
+ubersmith.uberRefreshData('support.ticket_list');
+ubersmith.uberRefreshData('support.ticket_count', '&priority=0&type=ClientAll', 'support.ticket_count.low');
+ubersmith.uberRefreshData('support.ticket_count', '&priority=1&type=ClientAll', 'support.ticket_count.normal');
+ubersmith.uberRefreshData('support.ticket_count', '&priority=2&type=ClientAll', 'support.ticket_count.high');
+ubersmith.uberRefreshData('support.ticket_count', '&priority=3&type=ClientAll', 'support.ticket_count.urgent');
+ubersmith.uberRefreshData('support.ticket_count', '&type=ClientAll', 'support.ticket_count.total');
 
 ubersmith.uberScheduleRefresh('device.list', 1);
-ubersmith.uberScheduleRefresh('ticket.list', 1);
+ubersmith.uberScheduleRefresh('support.ticket_list', 1);
 ubersmith.uberScheduleRefresh('client.list', 10);
 
 ubersmith.uberRefreshData('device.type_list');
@@ -50,9 +55,52 @@ ubersmith.uberScheduleRefresh('device.type_list', 10);
 ubersmith.uberRefreshData('device.type_list');
 ubersmith.uberScheduleRefresh('device.type_list', 10);
 
+ubersmith.uberRefreshData('uber.event_list');
+ubersmith.uberScheduleRefresh('uber.event_list', 10);
+
+ubersmith.on('ready.support.ticket_count',
+  function(body, key) {
+    uberData[key] = body;
+    console.log(key);
+    console.log(body);
+    console.log('uberData support.ticket_count populated');
+  }
+);
+
+ubersmith.on('failed.support.ticket_count',
+  function(err) {
+    console.log(err);
+  }
+);
+
+ubersmith.on('ready.support.ticket_list',
+  function(body, key) {
+    uberData[key] = body;
+    console.log('uberData support.ticket_list populated');
+  }
+);
+
+ubersmith.on('failed.support.ticket_list',
+  function(err) {
+    console.log(err);
+  }
+);
+
+ubersmith.on('ready.uber.event_list',
+  function(body, key) {
+    uberData['uber.event_list'] = body;
+    console.log('uberData uber.event_list populated');
+  }
+);
+
+ubersmith.on('failed.uber.event_list',
+  function(err) {
+    console.log(err);
+  }
+);
 
 ubersmith.on('ready.device.list',
-  function(body) {
+  function(body, key) {
     uberData['device.list'] = body;
     console.log('uberData device.list populated');
   }
@@ -65,7 +113,7 @@ ubersmith.on('failed.device.list',
 );
 
 ubersmith.on('ready.device.type_list',
-  function(body) {
+  function(body, key) {
     uberData['device.type_list'] = body;
     console.log('uberData device.type_list populated');
   }
@@ -78,7 +126,7 @@ ubersmith.on('failed.device.type_list',
 );
 
 ubersmith.on('ready.client.list',
-  function(body) {
+  function(body, key) {
     uberData['client.list'] = body;
   }
 );
@@ -234,13 +282,13 @@ app.get('/'
 app.get('/account'
   , ensureAuthenticated
   , function (req, res) {
-      res.render('account', { user:req.user });
+      res.render('account', { user:req.user, section: 'profile', navLinks: config.navLinks.account });
     }
 );
 
 app.get('/account/login'
   , function (req, res) {
-      res.render('account/login', { user:req.user, message:req.flash('error') });
+      res.render('account/login', { user:req.user, message:req.flash('error'), section: 'logout', navLinks: config.navLinks.account });
     }
 );
 
@@ -266,6 +314,10 @@ app.get('/account/logout'
 
 app.get('/ubersmith/devices', function (req, res) {
   res.render('ubersmith/devices', {devices: uberData['device.list'], device_types: uberData['device.type_list'], user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+});
+
+app.get('/ubersmith', function (req, res) {
+  res.render('ubersmith', {ticket_count: { low: uberData['support.ticket_count.low'], normal: uberData['support.ticket_count.normal'], high: uberData['support.ticket_count.high'], urgent: uberData['support.ticket_count.urgent']}, event_list: uberData['uber.event_list'], user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
 });
 
 app.post('/ubersmith/event/*', function(req, res){
