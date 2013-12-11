@@ -4,7 +4,6 @@
  */
 
 require('./config/system-credentials.js');
-require('./lib/ubersmith.js');
 
 /**
  * Configuration
@@ -28,6 +27,69 @@ var formidable = require('formidable');
 
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
+
+/**
+ * Ubersmith Integration
+ */
+var ubersmith = require('ubersmith');
+var uberData = new Array();
+
+ubersmith.uberAuth = UberAuth;
+
+ubersmith.uberRefreshData('device.list');
+ubersmith.uberRefreshData('client.list');
+
+ubersmith.uberScheduleRefresh('device.list', 1);
+ubersmith.uberScheduleRefresh('client.list', 10);
+
+ubersmith.uberRefreshData('device.type_list');
+ubersmith.uberScheduleRefresh('device.type_list', 10);
+
+ubersmith.uberRefreshData('device.type_list');
+ubersmith.uberScheduleRefresh('device.type_list', 10);
+
+
+ubersmith.on('ready.device.list',
+  function(body) {
+    uberData['device.list'] = body;
+    console.log('uberData device.list populated');
+  }
+);
+
+ubersmith.on('failed.device.list',
+  function(err) {
+    console.log(err);
+  }
+);
+
+ubersmith.on('ready.device.type_list',
+  function(body) {
+    uberData['device.type_list'] = body;
+    console.log('uberData device.type_list populated');
+  }
+);
+
+ubersmith.on('failed.device.type_list',
+  function(err) {
+    console.log(err);
+  }
+);
+
+ubersmith.on('ready.client.list',
+  function(body) {
+    uberData['client.list'] = body;
+  }
+);
+
+ubersmith.on('failed.client.list',
+  function(err) {
+    console.log(err);
+  }
+);
+
+/**
+ * End Ubersmith
+ */
 
 /**
  * Metrics Objects
@@ -107,6 +169,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.locals.moment = require('moment');
+app.locals.uberData = uberData;
 app.use(express.logger({stream: logstream }));
 app.use(express.favicon());
 app.use(express.logger('dev'));
@@ -198,6 +261,10 @@ app.get('/account/logout'
 /*
   Monitoring System Routes
 */
+
+app.get('/ubersmith/devices', function (req, res) {
+  res.render('ubersmith/devices', {devices: uberData['device.list'], device_types: uberData['device.type_list'], user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+});
 
 app.post('/ubersmith/event/*', function(req, res){
   var form = new formidable.IncomingForm;
