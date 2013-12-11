@@ -22,7 +22,9 @@ html
         include _navbar
         block navbar
       #content.container
-        block content
+        .row
+          .col-md-14
+            block content
     include _footer
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
     script(src='/bootstrap/js/bootstrap.min.js')
