@@ -37,12 +37,12 @@ block content
                           td #{device.location}
                           td #{device.device_status}
                             br
-                              span.label.label-primary #{device.total}
-                              span.label.label-danger #{device.down}
-                              span.label.label-warning #{device.warn}
-                              span.label.label-success #{device.up}
-                              span.label.label-default #{device.disabled}
-                        
+                            span.label.label-primary #{device.total}
+                            span.label.label-danger #{device.down}
+                            span.label.label-warning #{device.warn}
+                            span.label.label-success #{device.up}
+                            span.label.label-default #{device.disabled}
+
 block footer
   script(src='/javascripts/jquery.dataTables.min.js')
   script(src='/javascripts/dataTables.bootstrap.js')
