@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "express": "3.4.x",
+    "redis": "0.9.x",
+    "connect-redis": "1.4.x",
     "passport": "0.1.x",
     "metrics": "0.1.x",
     "measured": "0.1.x",

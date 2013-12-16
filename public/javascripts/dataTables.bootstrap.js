@@ -7,16 +7,12 @@ $.extend( true, $.fn.dataTable.defaults, {
 	}
 } );
 
-
-
-
 /* Default class modification */
 $.extend( $.fn.dataTableExt.oStdClasses, {
 	"sWrapper": "dataTables_wrapper form-inline",
 	"sFilterInput": "form-control input-sm",
 	"sLengthSelect": "form-control input-sm"
 } );
-
 
 /* API method to get paging information */
 $.fn.dataTableExt.oApi.fnPagingInfo = function ( oSettings )
@@ -33,7 +29,6 @@ $.fn.dataTableExt.oApi.fnPagingInfo = function ( oSettings )
 			0 : Math.ceil( oSettings.fnRecordsDisplay() / oSettings._iDisplayLength )
 	};
 };
-
 
 /* Bootstrap style pagination control */
 $.extend( $.fn.dataTableExt.oPagination, {
@@ -111,7 +106,6 @@ $.extend( $.fn.dataTableExt.oPagination, {
 		}
 	}
 } );
-
 
 /*
  * TableTools Bootstrap compatibility

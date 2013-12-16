@@ -15,6 +15,7 @@ var config = require('./config');
  * Module dependencies.
  */
 require('enum').register();
+var redis = require('redis');
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -24,118 +25,65 @@ var passport = require('passport');
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 var request = require('request')
 var formidable = require('formidable');
-
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
+
+var redisClient = redis.createClient(config.redis.port, config.redis.host);
+
+redisClient.on('error', function(error) { console.log(error) });
+redisClient.on("connect", function () {
+  redisClient.set("foo_rand000000000000", "Redis Connect Test: OK", redis.print);
+  redisClient.get("foo_rand000000000000", redis.print);
+});
 
 /**
  * Ubersmith Integration
  */
 var ubersmith = require('ubersmith');
-var uberData = new Array();
 
 ubersmith.uberAuth = UberAuth;
 
-ubersmith.uberRefreshData('device.list');
-ubersmith.uberRefreshData('client.list');
-ubersmith.uberRefreshData('support.ticket_list');
-ubersmith.uberRefreshData('support.ticket_count', '&priority=0&type=ClientAll', 'support.ticket_count.low');
-ubersmith.uberRefreshData('support.ticket_count', '&priority=1&type=ClientAll', 'support.ticket_count.normal');
-ubersmith.uberRefreshData('support.ticket_count', '&priority=2&type=ClientAll', 'support.ticket_count.high');
-ubersmith.uberRefreshData('support.ticket_count', '&priority=3&type=ClientAll', 'support.ticket_count.urgent');
-ubersmith.uberRefreshData('support.ticket_count', '&type=ClientAll', 'support.ticket_count.total');
+populateUberData('support.ticket_count', '&priority=0&type=ClientAll', 'support.ticket_count.low');
+populateUberData('support.ticket_count', '&priority=1&type=ClientAll', 'support.ticket_count.normal');
+populateUberData('support.ticket_count', '&priority=2&type=ClientAll', 'support.ticket_count.high');
+populateUberData('support.ticket_count', '&priority=3&type=ClientAll', 'support.ticket_count.urgent');
+populateUberData('support.ticket_count', '&type=ClientAll', 'support.ticket_count.total');
 
-ubersmith.uberScheduleRefresh('device.list', 1);
-ubersmith.uberScheduleRefresh('support.ticket_list', 1);
-ubersmith.uberScheduleRefresh('client.list', 10);
+populateUberData('client.list');
+populateUberData('device.list');
+populateUberData('device.type_list');
+populateUberData('event_list');
+populateUberData('support.ticket_list');
+populateUberData('support.ticket_count');
 
-ubersmith.uberRefreshData('device.type_list');
-ubersmith.uberScheduleRefresh('device.type_list', 10);
 
-ubersmith.uberRefreshData('device.type_list');
-ubersmith.uberScheduleRefresh('device.type_list', 10);
-
-ubersmith.uberRefreshData('uber.event_list');
-ubersmith.uberScheduleRefresh('uber.event_list', 10);
-
-ubersmith.on('ready.support.ticket_count',
-  function(body, key) {
-    uberData[key] = body;
-    console.log(key);
-    console.log(body);
-    console.log('uberData support.ticket_count populated');
+function populateUberData(method, params, key)
+{
+  if (arguments.length == 1) {
+    var params = '';
+    var key = method;
   }
-);
 
-ubersmith.on('failed.support.ticket_count',
-  function(err) {
-    console.log(err);
+  if (arguments.length == 2) {
+    var key = method;
   }
-);
 
-ubersmith.on('ready.support.ticket_list',
-  function(body, key) {
-    uberData[key] = body;
-    console.log('uberData support.ticket_list populated');
-  }
-);
+  ubersmith.uberRefreshData(method, params, key);
+  ubersmith.uberScheduleRefresh(key, 10);
+  ubersmith.on('ready.' + key, function(body, key) { storeUberData(body, key)});
+  ubersmith.on('failed.' + key, function(err) { uberError(err)});
+}
 
-ubersmith.on('failed.support.ticket_list',
-  function(err) {
-    console.log(err);
-  }
-);
+function uberError(err)
+{
+  console.log(err);
+}
 
-ubersmith.on('ready.uber.event_list',
-  function(body, key) {
-    uberData['uber.event_list'] = body;
-    console.log('uberData uber.event_list populated');
-  }
-);
-
-ubersmith.on('failed.uber.event_list',
-  function(err) {
-    console.log(err);
-  }
-);
-
-ubersmith.on('ready.device.list',
-  function(body, key) {
-    uberData['device.list'] = body;
-    console.log('uberData device.list populated');
-  }
-);
-
-ubersmith.on('failed.device.list',
-  function(err) {
-    console.log(err);
-  }
-);
-
-ubersmith.on('ready.device.type_list',
-  function(body, key) {
-    uberData['device.type_list'] = body;
-    console.log('uberData device.type_list populated');
-  }
-);
-
-ubersmith.on('failed.device.type_list',
-  function(err) {
-    console.log(err);
-  }
-);
-
-ubersmith.on('ready.client.list',
-  function(body, key) {
-    uberData['client.list'] = body;
-  }
-);
-
-ubersmith.on('failed.client.list',
-  function(err) {
-    console.log(err);
-  }
-);
+function storeUberData(body, key)
+{
+  console.log(key);
+  redisClient.set(key, JSON.stringify(body.data));
+}
 
 /**
  * End Ubersmith
@@ -197,6 +145,7 @@ passport.use(new AtlassianCrowdStrategy({
       var exists = _.any(users, function (user) {
         return user.id == userprofile.id;
       });
+
       if (!exists) {
         users.push(userprofile);
       }
@@ -205,7 +154,6 @@ passport.use(new AtlassianCrowdStrategy({
     });
   }
 ));
-
 
 /**
  * The Start of the Application Logic
@@ -219,7 +167,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.locals.moment = require('moment');
-app.locals.uberData = uberData;
 app.use(express.logger({stream: logstream }));
 app.use(express.favicon());
 app.use(express.logger('dev'));
@@ -313,15 +260,85 @@ app.get('/account/logout'
 */
 
 app.get('/ubersmith/devices'
-  , ensureAuthenticated
   , function (req, res) {
-    res.render('ubersmith/devices', {devices: uberData['device.list'], device_types: uberData['device.type_list'], user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+    deviceTypeList = [];
+    redisClient.get('device.type_list', function (err, reply) { 
+      var deviceTypeList = JSON.parse(reply);
+      console.log(reply);
+      res.render('ubersmith/devices', { device_types: deviceTypeList, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+  });    
 });
+
+app.get('/ubersmith/data/:key'
+    , function (req, res) {
+        var key = req.params.key;
+        switch(key.toLowerCase())
+        {
+          case 'support.ticket_count.urgent':
+          case 'support.ticket_count.normal':
+          case 'support.ticket_count.low':
+          case 'support.ticket_count.high':
+          case 'support.ticket_count.total':
+          case 'event_list':
+          case 'device.type_list':
+          case 'support.ticket_count':
+          case 'support.ticket_list':
+          case 'client.list':
+          case 'device.list':
+            redisClient.get(key.toLowerCase(), function (err, reply) {
+              if (!reply) {
+                res.send(500);
+              } else {
+                res.type('application/json');
+                res.send(reply);
+              }
+            });
+            break;
+          default:
+            res.send(400);
+            break;
+        }
+  });
+
+app.get('/ubersmith/devices/list/:devtype_group_id'
+  , function (req, res) {
+      var aReturn = Array();
+      var foundSome = false;
+      var filteredDevice = Array();
+      var deviceList = redisClient.get('device.list');
+
+      Object.keys(deviceList).forEach(function(device_id) {
+        device = deviceList[device_id];
+        if (device.devtype_group_id == req.params.devtype_group_id) {
+          filteredDevice = Array(device.type, device.dev_desc, device.company, device.location, device.device_status);
+          aReturn.push(filteredDevice);
+          foundSome = true;
+        }
+      })
+
+      if (foundSome) {
+        res.type('application/json');
+        res.send(JSON.stringify(aReturn));
+      } else {
+        res.send(404);
+      }
+  });
+
+app.get('/ubersmith/devices/device/:device_id'
+  , function (req, res) {
+      var deviceList = redisClient.get('device.list');
+      if (!deviceList[req.params.device_id]) {
+        res.send(404);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(deviceList[req.params.device_id]));
+      }
+  });
 
 app.get('/ubersmith'
   , ensureAuthenticated
   , function (req, res) {
-    res.render('ubersmith', {ticket_count: { low: uberData['support.ticket_count.low'], normal: uberData['support.ticket_count.normal'], high: uberData['support.ticket_count.high'], urgent: uberData['support.ticket_count.urgent']}, event_list: uberData['uber.event_list'], user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
+    res.render('ubersmith', {ticket_count: { low: redist.get('support.ticket_count.low'), normal: redisClient.get('support.ticket_count.normal'), high: redisClient.get('support.ticket_count.high'), urgent: redisClient.get('support.ticket_count.urgent')}, event_list: redisClient.get('uber.event_list'), user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
 });
 
 app.post('/ubersmith/event/*', function(req, res){
@@ -457,6 +474,14 @@ function ensureAuthenticated(req, res, next) {
     return next();
   } else {
     res.render('account/login', { user:req.user, message:req.flash('error') });
+  }
+}
+
+function ensureAPIAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  } else {
+    res.send(403);
   }
 }
 
