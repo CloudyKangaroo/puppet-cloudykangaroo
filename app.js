@@ -264,7 +264,6 @@ app.get('/ubersmith/devices'
     deviceTypeList = [];
     redisClient.get('device.type_list', function (err, reply) { 
       var deviceTypeList = JSON.parse(reply);
-      console.log(reply);
       res.render('ubersmith/devices', { device_types: deviceTypeList, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
   });    
 });
@@ -304,24 +303,29 @@ app.get('/ubersmith/devices/list/:devtype_group_id'
   , function (req, res) {
       var aReturn = Array();
       var foundSome = false;
-      var filteredDevice = Array();
-      var deviceList = redisClient.get('device.list');
-
-      Object.keys(deviceList).forEach(function(device_id) {
-        device = deviceList[device_id];
-        if (device.devtype_group_id == req.params.devtype_group_id) {
-          filteredDevice = Array(device.type, device.dev_desc, device.company, device.location, device.device_status);
-          aReturn.push(filteredDevice);
-          foundSome = true;
+      var filteredDevice = {};
+      redisClient.get('device.list', function (err, reply) {
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceList = JSON.parse(reply);
+          Object.keys(deviceList).forEach(function(device_id) {
+            device = deviceList[device_id];
+            if (device.devtype_group_id == req.params.devtype_group_id) {
+              filteredDevice = Array(device.dev, device.type, device.dev_desc, device.company, device.location, device.device_status);
+              aReturn.push(filteredDevice);
+              foundSome = true;
+            }
+          })
+   
+          if (foundSome) {
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: aReturn }));
+            } else {
+            res.send(404);
+          }
         }
-      })
-
-      if (foundSome) {
-        res.type('application/json');
-        res.send(JSON.stringify(aReturn));
-      } else {
-        res.send(404);
-      }
+      });
   });
 
 app.get('/ubersmith/devices/device/:device_id'

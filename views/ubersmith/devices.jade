@@ -6,7 +6,7 @@ block content
     .page-header
       h1 Device List
     .container
-      ul.nav.nav-tabs
+      #navTabs.ul.nav.nav-tabs
         each group,group_id in device_types
           if group_id != 0
             li
@@ -53,18 +53,20 @@ block footer
             e.preventDefault()
             $(this).tab('show')
           })
-  each group,group_id in device_types
-    if group_id != 0
+
         script(type='text/javascript').
           $(document).ready(function() {
             $('#tableid_#{group.devtype_group_id}').dataTable( {
               "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
               "sPaginationType": "bootstrap",
-              "sAjaxSource": '/ubsersmith/devices/list',
+              "sAjaxSource": '/ubersmith/devices/list/#{group.devtype_group_id}',
+              "iDisplayLength": 10,
+              "bSortClasses": false,
+              "aaSorting": [[4,'asc']],
               "oLanguage": {
                 "sLengthMenu": "_MENU_ records per page"
               }
             });
           });       
   script(type='text/javascript').
-    $('#tableid_3 a[href="#tableid_3"]').tab('show')
+    $('#navTabs a:first').tab('show')
