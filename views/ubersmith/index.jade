@@ -19,7 +19,7 @@ block content
                   th User
                   th Action
               tbody
-                each event,id in event_list.data
+                each event,id in event_list
                   if event.client_viewable == 1
                     tr
                       td #{getFormattedTimestamp(event.time)}
@@ -33,13 +33,13 @@ block content
               .col-xs-7.col-md-5
                 h4 Ticket Status
                 p Low
-                  span.label.label-primary.pull-right #{ticket_count.low.data}
+                  span.label.label-primary.pull-right #{ticket_count.low}
                 p Normal
-                  span.label.label-success.pull-right #{ticket_count.normal.data}
+                  span.label.label-success.pull-right #{ticket_count.normal}
                 p High
-                  span.label.label-warning.pull-right #{ticket_count.high.data}
+                  span.label.label-warning.pull-right #{ticket_count.high}
                 p Urgent
-                  span.label.label-danger.pull-right #{ticket_count.urgent.data}
+                  span.label.label-danger.pull-right #{ticket_count.urgent}
               .col-xs-7.col-md-5
                 h4 Order Status
                 p New Orders

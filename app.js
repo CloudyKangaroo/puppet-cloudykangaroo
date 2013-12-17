@@ -50,26 +50,32 @@ populateUberData('support.ticket_count', '&priority=3&type=ClientAll', 'support.
 populateUberData('support.ticket_count', '&type=ClientAll', 'support.ticket_count.total');
 
 populateUberData('client.list');
-populateUberData('device.list');
+populateUberData('device.list', '', 'device.list', '30');
 populateUberData('device.type_list');
 populateUberData('event_list');
-populateUberData('support.ticket_list');
-populateUberData('support.ticket_count');
+populateUberData('support.ticket_list', '', 'support.ticket_list', '60');
+populateUberData('support.ticket_count', '', 'support.ticket_count', '60');
 
 
-function populateUberData(method, params, key)
+function populateUberData(method, params, key, interval)
 {
   if (arguments.length == 1) {
     var params = '';
     var key = method;
+    var interval = 300;
   }
 
   if (arguments.length == 2) {
     var key = method;
+    var interval = 300;
+  }
+
+  if (arguments.length == 3) {
+    var interval = 300;
   }
 
   ubersmith.uberRefreshData(method, params, key);
-  ubersmith.uberScheduleRefresh(key, 10);
+  ubersmith.uberScheduleRefresh(method, interval, params, key);
   ubersmith.on('ready.' + key, function(body, key) { storeUberData(body, key)});
   ubersmith.on('failed.' + key, function(err) { uberError(err)});
 }
@@ -81,7 +87,8 @@ function uberError(err)
 
 function storeUberData(body, key)
 {
-  console.log(key);
+  console.log('Storing ' + JSON.stringify(body.data).length + ' bytes as ' + key);
+  redisClient.del(key);
   redisClient.set(key, JSON.stringify(body.data));
 }
 
@@ -236,8 +243,7 @@ app.get('/account'
 app.get('/account/login'
   , function (req, res) {
       res.render('account/login', { user:req.user, message:req.flash('error'), section: 'logout', navLinks: config.navLinks.account });
-    }
-);
+  });
 
 app.post('/account/login'
   , passport.authenticate('atlassian-crowd'
@@ -245,29 +251,26 @@ app.post('/account/login'
   , function (req, res) {
       backURL=req.header('Referer') || '/account';
       res.redirect(backURL);
-    }
-);
+  });
 
 app.get('/account/logout'
   , function (req, res) {
       req.logout();
       res.redirect('/');
-    }
-);
+  });
 
 /*
   Monitoring System Routes
 */
 
-app.get('/ubersmith/devices'
+// Ubersmith Overall Status
+app.get('/ubersmith'
+  , ensureAuthenticated
   , function (req, res) {
-    deviceTypeList = [];
-    redisClient.get('device.type_list', function (err, reply) { 
-      var deviceTypeList = JSON.parse(reply);
-      res.render('ubersmith/devices', { device_types: deviceTypeList, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
-  });    
-});
+    res.render('ubersmith', {ticket_count: { low: redisClient.get('support.ticket_count.low'), normal: redisClient.get('support.ticket_count.normal'), high: redisClient.get('support.ticket_count.high'), urgent: redisClient.get('support.ticket_count.urgent')}, event_list: redisClient.get('uber.event_list'), user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
+  });
 
+// Ubersmith API Passthru
 app.get('/ubersmith/data/:key'
     , function (req, res) {
         var key = req.params.key;
@@ -299,6 +302,22 @@ app.get('/ubersmith/data/:key'
         }
   });
 
+// Device Browser
+app.get('/ubersmith/devices'
+  , function (req, res) {
+    redisClient.get('device.type_list', function (err, reply) {
+      console.log(err);
+      console.log(reply);
+      if (!reply) {
+        res.send(500);
+      } else {
+        var deviceTypeList = JSON.parse(reply);
+        res.render('ubersmith/devices', { device_types: deviceTypeList, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+      }
+    });
+  });
+
+// Used by device browser, returns table data
 app.get('/ubersmith/devices/list/:devtype_group_id'
   , function (req, res) {
       var aReturn = Array();
@@ -317,59 +336,88 @@ app.get('/ubersmith/devices/list/:devtype_group_id'
               foundSome = true;
             }
           })
-   
+
           if (foundSome) {
             res.type('application/json');
             res.send(JSON.stringify({ aaData: aReturn }));
-            } else {
+          } else {
             res.send(404);
           }
         }
       });
   });
 
+// Not yet used, returns a specific device
 app.get('/ubersmith/devices/device/:device_id'
   , function (req, res) {
-      var deviceList = redisClient.get('device.list');
-      if (!deviceList[req.params.device_id]) {
-        res.send(404);
-      } else {
-        res.type('application/json');
-        res.send(JSON.stringify(deviceList[req.params.device_id]));
-      }
+    var deviceList = redisClient.get('device.list');
+    if (!deviceList[req.params.device_id]) {
+      res.send(404);
+    } else {
+      res.type('application/json');
+      res.send(JSON.stringify(deviceList[req.params.device_id]));
+    }
   });
 
-app.get('/ubersmith'
-  , ensureAuthenticated
+// Ubersmith Customer Browser
+app.get('/ubersmith/clients'
   , function (req, res) {
-    res.render('ubersmith', {ticket_count: { low: redist.get('support.ticket_count.low'), normal: redisClient.get('support.ticket_count.normal'), high: redisClient.get('support.ticket_count.high'), urgent: redisClient.get('support.ticket_count.urgent')}, event_list: redisClient.get('uber.event_list'), user:req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
-});
+    res.render('ubersmith/clients', { user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+  });
 
-app.post('/ubersmith/event/*', function(req, res){
+// Used by Customer Browser, returns table data
+app.get('/ubersmith/clients/list'
+  , function (req, res) {
+      var aReturn = Array();
+      var foundSome = false;
+      var filteredDevice = {};
+      redisClient.get('client.list', function (err, reply) {
+        if (!reply) {
+          res.send(500);
+        } else {
+          var clientList= JSON.parse(reply);
+          Object.keys(clientList).forEach(function(clientid) {
+            client = clientList[clientid];
+            if (client.company != 'REMOVED') {
+              var offset = moment(client.created*1000);
+              var created = offset.format('MMM DD H:mm:ss');
+              filteredDevice = Array(client.clientid, client.full_name, client.listed_company, client.salesperson, client.acctmgr, created);
+              aReturn.push(filteredDevice);
+              foundSome = true;
+            }
+          })
+   
+          if (foundSome) {
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: aReturn }));
+          } else {
+            res.send(404);
+          }
+        }
+      });
+  });
+
+app.post('/ubersmith/event/*'
+  , function(req, res){
     var form = new formidable.IncomingForm;
     console.log(req.path);
     form.parse(req, function(err, fields, files){
       if (err) return res.end('You found error');
       console.log(fields);
-  });
+    });
 
-  form.on('progress', function(bytesReceived, bytesExpected) {
+    form.on('progress', function(bytesReceived, bytesExpected) {
 //    console.log(bytesReceived + ' ' + bytesExpected);
-  });
+    });
 
-  form.on('error', function(err) {
+    form.on('error', function(err) {
       res.writeHead(200, {'content-type': 'text/plain'});
       res.end('error:\n\n'+util.inspect(err));
+    });
+
+    res.writeHead(200, {'content-type': 'text/plain'});
+    res.end('complete');
   });
-
-  res.writeHead(200, {'content-type': 'text/plain'});
-  res.end('complete');
-});  
-
-
-app.put('/monitoring/*'
-  , requireGroup('Engineers')
-);
 
 app.get('/monitoring'
   , requireGroup('Engineers')
@@ -380,34 +428,8 @@ app.get('/monitoring'
             if (!error && response.statusCode == 200) {
               res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks.monitoring });
             }
-          }
-      )
-    }
-);
-
-/*
-app.get('/monitor', function (req, res) {
-  var options = {
-      host: '192.168.65.102',
-      port: 4567,
-      path: '/info',
-      method: 'GET'
-  }
-  var req = http.get(options, function(req) {
-    var pageData = '';
-    req.setEncoding('utf8');
-
-    req.on('data', function (chunk) {
-      pageData += chunk;
-    });
-
-    req.on('end', function(){
-      var info = JSON.parse(pageData)
-      res.render('monitoring', {info: info, user:req.user, section: 'info', navLinks: config.navLinks.monitoring });
-    });
-  })
-});
-*/
+        })
+  });
 
 app.get('/monitoring/events'
   , requireGroup('Engineers')
@@ -418,7 +440,7 @@ app.get('/monitoring/events'
         res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks.monitoring });
       }
     })
-});
+  });
 
 app.get('/monitoring/stashes'
   , requireGroup('Engineers')
@@ -429,7 +451,7 @@ app.get('/monitoring/stashes'
         res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks.monitoring });
       }
     })
-});
+  });
 
 app.get('/monitoring/checks'
   , requireGroup('Engineers')
@@ -440,7 +462,7 @@ app.get('/monitoring/checks'
         res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: config.navLinks.monitoring });
       }
     })
-});
+  });
 
 app.get('/monitoring/clients'
   , requireGroup('Engineers')
@@ -451,18 +473,19 @@ app.get('/monitoring/clients'
         res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
       }
     })
-});
-
-app.post('/monitoring/stashes/:server', function (req, res) {
-  var request = require('request');
-  var expiration = new Date(oldDateObj.getTime() + 30*60000);
-  request.post({
-    url: app.get('sensu_uri') + '/stashes/silence/' + server,
-    body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }" 
-  }, function(error, response, body){
-    console.log(body);
   });
-});
+
+app.post('/monitoring/stashes/:server'
+  , function (req, res) {
+    var request = require('request');
+    var expiration = new Date(oldDateObj.getTime() + 30*60000);
+    request.post({
+      url: app.get('sensu_uri') + '/stashes/silence/' + server,
+      body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }"
+    }, function(error, response, body){
+      console.log(body);
+    });
+  });
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
@@ -491,13 +514,14 @@ function ensureAPIAuthenticated(req, res, next) {
 
 function requireGroup(group) {
    return function(req, res, next) {
-    if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
-      next();
-    } else {
-      res.render('account/login', { user:req.user, message:req.flash('error') });
+      if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
+        next();
+      } else {
+        res.render('account/login', { user:req.user, message:req.flash('error') });
+      }
     }
-  }
 };
+
 
 app.locals.getEventClass = function(eventStatus){
   var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
