@@ -6,26 +6,16 @@ block content
     .page-header
       h1 Device List
     .container
-      #navTabs.ul.nav.nav-tabs
-        each group,group_id in device_types
-          if group_id != 0
-            li
-              a(href="#groupid_#{group.devtype_group_id}", data-toggle="tab") #{group.name}
-
-      .tab-content
-        each group,group_id in device_types
-          if group_id != 0
-            .tab-pane(id="groupid_#{group.devtype_group_id}").active
-                table(id="tableid_#{group.devtype_group_id}").table.table-condensed.table-striped
-                  thead
-                    tr
-                      th ID
-                      th Type
-                      th Description
-                      th Company
-                      th Location
-                      th Status
-                  tbody
+      #table_clients.table.table.table-condensed.table-striped
+        thead
+          tr
+            th IDa
+            th Type
+            th Description
+            th Company
+            th Location
+            th Status
+        tbody
 #                    each device,device_id in devices
 #                      if device.devtype_group_id == group.devtype_group_id
 #                        tr
@@ -62,23 +52,6 @@ block footer
               "sAjaxSource": '/ubersmith/devices/list/#{group.devtype_group_id}',
               "iDisplayLength": 10,
               "bSortClasses": false,
-              "aoColumns": [
-              {
-                "mData": "device",
-                "mRender": function (device) {
-                            return '<a href="/ubersmith/devices/'+device+'">' + device + '</a>';
-                          }
-              }, {
-                "mData": "type"
-              }, {
-                "mData": "desc"
-              }, {
-                "mData": "company"
-              }, {
-                "mData": "location"
-              }, {
-                "mData": "status"
-              }],
               "aaSorting": [[4,'asc']],
               "oLanguage": {
                 "sLengthMenu": "_MENU_ records per page"
