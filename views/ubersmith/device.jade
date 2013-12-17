@@ -20,7 +20,7 @@ block content
                     th Count
                     th(data-defaultsort='disabled').visible-lg Output
                 tbody
-                  each event in events
+                  each event in sensuEvents
                     tr(class="#{getEventClass(event.status)}")
                       td #{getEventClass(event.status)}
                       td #{event.check}
@@ -34,30 +34,30 @@ block content
               .panel-heading Sensu Information
               .panel-body
                 p IP Address
-                  span.pull-right #{sensuclient.address}
+                  span.pull-right #{sensuClient.address}
                 p Name
-                  span.pull-right #{sensuclient.name}
+                  span.pull-right #{sensuClient.name}
                 p Subscriptions
                    ul.list-group
-                    each subscription in sensuclient.subscriptions
+                    each subscription in sensuClient.subscriptions
                       li.list-group-item #{subscription}
           .col-md-6
             .panel.panel-default
               .panel-heading Ubersmith Information
               .panel-body
                 p Type:
-                  span.pull-right #{device.devtype_group}/#{device.type}   
+                  span.pull-right #{uberDevice.devtype_group}/#{uberDevice.type}   
                 p Active:
-                  span.label.label-success.pull-right #{device.active}
+                  span.label.label-success.pull-right #{uberDevice.active}
                 p Location:
-                  span.label.label-success.pull-right #{device.location}
+                  span.label.label-success.pull-right #{uberDevice.location}
                 p Company:
-                  span.pull-right #{device.company}   
+                  span.pull-right #{uberDevice.company}   
                 p Contact Information:
                   ul.list-group
                     li.list-group-item Email:
-                      span.pull-right #{device.email}   
+                      span.pull-right #{uberDevice.email}   
                     li.list-group-item Phone:
-                      span.pull-right #{device.phone}   
+                      span.pull-right #{uberDevice.phone}   
 
 block footer

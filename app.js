@@ -351,7 +351,7 @@ app.get('/ubersmith/devices/:deviceid'
                           var sensuClient = { address: 'unknown', name: uberDevice.dev_desc, safe_mode: 0, subscriptions: [], timestamp: 0 };
                         }
                         console.log(sensuClient);
-                        res.render('ubersmith/device', {device: uberDevice, sensuclient: sensuClient, events: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+                        res.render('ubersmith/device', {uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                       } else {
                         console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
                         res.send(500);
