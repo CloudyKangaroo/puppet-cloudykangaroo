@@ -396,6 +396,47 @@ app.get('/ubersmith/devices/list/:devtype_group_id'
       });
   });
 
+app.get('/ubersmith/devices/exceptions'
+  , function (req, res) {
+      var aReturn = Array();
+      var foundSome = false;
+      redisClient.get('device.list', function (err, reply) {
+        if (!reply) {
+          console.log(err);
+          res.send(500);
+        } else {
+          var deviceList = JSON.parse(reply);
+console.log(deviceList);
+          Object.keys(deviceList).forEach(function(device_id) {
+            console.log('Checking device ' + device_id);
+/*
+            var uberDevice = deviceList[device_id];
+            var request = require('request');
+            console.log(app.get('sensu_uri') + '/client/' + uberDevice.dev_desc + '.contegix.mgmt');
+            request({ url: app.get('sensu_uri') + '/client/' + uberDevice.dev_desc + '.contegix.mgmt', json: true }
+              , function (error, response, body) {
+                  if (!error) {
+                    if (response.statusCode == 404) {
+                      aReturn.push(uberDevice);
+                      foundSome = true;
+                    }
+                  } else {
+                    console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
+                    res.send(500);
+                  }
+            })
+*/
+          })
+          if (foundSome) {
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: aReturn }));
+          } else {
+            res.send(404);
+          }
+        }
+      });
+  });
+
 // Not yet used, returns a specific device
 app.get('/ubersmith/devices/device/:device_id'
   , function (req, res) {
