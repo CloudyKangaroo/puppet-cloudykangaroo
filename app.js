@@ -88,7 +88,7 @@ function uberError(err)
 function storeUberData(body, key)
 {
   console.log('Storing ' + JSON.stringify(body.data).length + ' bytes as ' + key);
-  redisClient.del(key);
+//  redisClient.del(key);
   redisClient.set(key, JSON.stringify(body.data));
 }
 
@@ -469,7 +469,7 @@ app.post('/ubersmith/event/*'
   });
 
 app.get('/monitoring'
-  , requireGroup('Engineers')
+  , requireGroup('users')
   , function (req, res) {
       var request = require('request');
       request({ url: app.get('sensu_uri') + '/info', json: true }
@@ -481,7 +481,7 @@ app.get('/monitoring'
   });
 
 app.get('/monitoring/events'
-  , requireGroup('Engineers')
+  , requireGroup('users')
   , function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
@@ -492,7 +492,7 @@ app.get('/monitoring/events'
   });
 
 app.get('/monitoring/stashes'
-  , requireGroup('Engineers')
+  , requireGroup('users')
   , function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
@@ -503,7 +503,7 @@ app.get('/monitoring/stashes'
   });
 
 app.get('/monitoring/checks'
-  , requireGroup('Engineers')
+  , requireGroup('users')
   , function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/checks', json: true }, function (error, response, body) {
@@ -514,7 +514,7 @@ app.get('/monitoring/checks'
   });
 
 app.get('/monitoring/clients'
-  , requireGroup('Engineers')
+  , requireGroup('users')
   , function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
@@ -566,6 +566,7 @@ function requireGroup(group) {
       if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
         next();
       } else {
+	console.log('User: ' + req.user + ' is not a member of ' + group);
         res.render('account/login', { user:req.user, message:req.flash('error') });
       }
     }
