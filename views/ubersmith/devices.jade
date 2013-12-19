@@ -50,6 +50,9 @@ block footer
     if group_id != 0
         script(type='text/javascript').
           $('#groupid_#{group.devtype_group_id} a').click(function (e) {
+            if($(this).parent('li').hasClass('active')){
+              $( $(this).attr('href') ).hide();
+            }
             e.preventDefault()
             $(this).tab('show')
           })

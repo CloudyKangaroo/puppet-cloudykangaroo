@@ -165,6 +165,7 @@ app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
+app.set('puppetdb_uri', 'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3');
 app.locals.moment = require('moment');
 app.use(express.logger({stream: logstream }));
 app.use(express.favicon());

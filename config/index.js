@@ -17,6 +17,7 @@ config.navLinks = {
     { label: 'Home', key: 'info', path: '/monitoring' },
     { label: 'Events', key: 'events', path: '/monitoring/events' },
     { label: 'Clients', key: 'clients', path: '/monitoring/clients' },
+    { label: 'Failures', key: 'failures', path: '/monitoring/failures' },
     { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
     { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }
   ] 
@@ -24,6 +25,7 @@ config.navLinks = {
 
 config.sensu = {};
 config.redis = {};
+config.puppetdb = {};
 config.http = {};
 config.cookie = {};
 config.log = {};
@@ -32,6 +34,8 @@ config.log.access_log = './access.log';
 
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
+config.puppetdb.host = process.env.PUPPETDB_HOST || 'puppet-db01.contegix.com';
+config.puppetdb.port = process.env.PUPPETDB_PORT || 8080;
 config.redis.uri = process.env.REDIS_URI;
 config.redis.host = process.env.REDIS_HOST || 'localhost';
 config.redis.port = process.env.REDIS_PORT || 6379;
