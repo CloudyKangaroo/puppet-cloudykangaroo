@@ -42,6 +42,16 @@ module.exports = function (app, config, passport, redisClient) {
       })
     });
 
+  app.get('/monitoring/failures'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        request({ url: app.get('puppetdb_uri') + '/events?query=["and",%20["=",%20"status",%20"failure"],["=",%20"resource-title",%20"contegix-sensu-client"],["=",%20"resource-type",%20"Service"]]]&limit=1000', json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          res.render('monitoring/failures', {failures: body, user:req.user, section: 'failures', navLinks: config.navLinks.monitoring });
+        }
+      })
+    });
+
   app.get('/monitoring/clients'
     , app.locals.requireGroup('users')
     , function (req, res) {
