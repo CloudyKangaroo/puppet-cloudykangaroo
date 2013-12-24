@@ -5,7 +5,7 @@ block navbar
 block content
   .container
     .page-header
-      h1 Current Service Failure List
+      h1 Service Failure List (Last #{hoursAgo} hours)
     .container
       table.table.table-condensed.sortable
         thead
@@ -18,7 +18,7 @@ block content
           each failure in failures
             tr
               td #{failure.certname}
-              td #{getFormattedTimestamp(failure.timestamp)}
+              td #{getFormattedISO8601(failure.timestamp)}
               td #{failure.status}
               td #{failure.message}
 block footer
