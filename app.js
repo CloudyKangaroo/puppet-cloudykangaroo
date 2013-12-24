@@ -242,6 +242,89 @@ app.locals.getFormattedTimestamp = function (timeStamp, dateString) {
   return offset.format(dateString);
 }
 
+app.locals.getFormattedISO8601 = function (timeStamp, dateString) {
+  if (arguments.length == 1) {
+    var dateString = 'MMM DD H:mm:ss';
+  }
+  var offset = moment(timeStamp);
+  return offset.format(dateString);
+}
+
+app.locals.getCombinedDevices = function () {
+  var url = app.get('puppetdb_uri') + '/nodes?query=["=", ["fact", "kernel"], "Linux"]';
+  var async = require('async');
+  var request = require('request')
+
+  request({ url: url, json: true }
+    , function (error, response, body) {
+        if (error) {
+          console.log(error);
+          res.send(500);
+        } else {
+          var nodes = body;
+          var aReturn = Array();
+          var aSyncRequests = Array();
+          var foundSome = false;
+
+          aSyncRequests.push(
+            function (callback) {
+              var url = app.get('sensu_uri') + '/clients/';
+              request({ url: url, json: true }
+                , function (error, response) {
+                    callback(error, response);
+                }
+              );
+            }
+          );
+
+          aSyncRequests.push(
+            function (callback) {
+              redisClient.get('device.list'
+                , function (error, response) {
+                    callback(error, response);
+                }
+              );
+            }
+          );
+
+          for(i = 0; i<nodes.length; i++) {
+            var node = nodes[i];
+            aSyncRequests.push(
+              function (callback) {
+                request({ url: app.get('puppetdb_uri') + '/nodes/' + node.name + '/facts', json: true}
+                  , function (error, response, body) {
+                      if (error) {
+                        callback(error, response);
+                      } else {
+                        var facts = body;
+                        var nodeFacts = { hostname: node.name, node: node, facts: body };
+                        callback(error, nodeFacts);
+                      }
+                    }
+                );
+              }
+            );
+          }
+
+          async.parallel(aSyncRequests
+            , function(error, results) {
+                if (error) {
+                  console.log(error);
+                res.send(500);
+                } else {
+                  for(i = 0; i<results.length; i++)
+                  {
+                    console.log(results[i]);
+                  }
+                  return JSON.stringify(results);
+                }
+            }
+          );
+        }
+    }
+  );
+}
+
 require("./routes")(app, config, passport, redisClient);
 
 http.createServer(app).listen(app.get('port'), function () {
