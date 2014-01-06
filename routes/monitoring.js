@@ -209,13 +209,18 @@ app.get('/devices'
 );
 
   app.get('/monitoring/clients'
-    , app.locals.requireGroup('users')
     , function (req, res) {
         request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
         }
       })
+    });
+
+  app.get('/monitoring/devices'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      res.render('monitoring/devices', {user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
     });
 
   app.get('/monitoring/exceptions'
