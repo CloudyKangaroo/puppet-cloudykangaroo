@@ -45,7 +45,6 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       redisClient.get('device.type_list', function (err, reply) {
         console.log(err);
-        console.log(reply);
         if (!reply) {
           res.send(500);
         } else {
@@ -56,7 +55,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   // Used to view a single device
-  app.get('/ubersmith/devices/:deviceid'
+  app.get('/ubersmith/devices/deviceid/:deviceid'
     , function (req, res) {
       redisClient.get('device.list', function (err, reply) {
         if (!reply) {
@@ -65,8 +64,6 @@ module.exports = function (app, config, passport, redisClient) {
         } else {
           var deviceList = JSON.parse(reply);
           var uberDevice = deviceList[req.params.deviceid];
-          console.log(uberDevice);
-          console.log(app.get('sensu_uri') + '/events/' + uberDevice.dev_desc + '.contegix.mgmt');
           request({ url: app.get('sensu_uri') + '/events/' + uberDevice.dev_desc + '.contegix.mgmt', json: true }
             , function (error, response, body) {
               if (!error) {
@@ -76,8 +73,6 @@ module.exports = function (app, config, passport, redisClient) {
                 } else {
                   var sensuEvents = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
                 }
-                console.log(sensuEvents);
-                console.log(app.get('sensu_uri')+ '/client/' + uberDevice.dev_desc + '.contegix.mgmt')
                 request({url: app.get('sensu_uri')+ '/client/' + uberDevice.dev_desc + '.contegix.mgmt', json: true}
                   , function (error, response, body) {
                     if (!error) {
@@ -87,7 +82,48 @@ module.exports = function (app, config, passport, redisClient) {
                       } else {
                         var sensuClient = { address: 'unknown', name: uberDevice.dev_desc, safe_mode: 0, subscriptions: [], timestamp: 0 };
                       }
-                      console.log(sensuClient);
+                      res.render('ubersmith/device', {uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+                    } else {
+                      console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
+                      res.send(500);
+                    }
+                  })
+              } else {
+                console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
+                res.send(500);
+              }
+            })
+        }
+      });
+    });
+
+  app.get('/ubersmith/devices/clientid/:clientid'
+    , function (req, res) {
+      redisClient.get('device.list', function (err, reply) {
+        if (!reply) {
+          console.log('Sending 500: ' + err);
+          res.send(500);
+        } else {
+          var deviceList = JSON.parse(reply);
+          var uberDevice = deviceList[req.params.deviceid];
+          request({ url: app.get('sensu_uri') + '/events/' + uberDevice.dev_desc + '.contegix.mgmt', json: true }
+            , function (error, response, body) {
+              if (!error) {
+                if (response.statusCode < 300 && body.length > 0)
+                {
+                  var sensuEvents = body;
+                } else {
+                  var sensuEvents = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
+                }
+                request({url: app.get('sensu_uri')+ '/client/' + uberDevice.dev_desc + '.contegix.mgmt', json: true}
+                  , function (error, response, body) {
+                    if (!error) {
+                      if (response.statusCode < 300)
+                      {
+                        var sensuClient = body;
+                      } else {
+                        var sensuClient = { address: 'unknown', name: uberDevice.dev_desc, safe_mode: 0, subscriptions: [], timestamp: 0 };
+                      }
                       res.render('ubersmith/device', {uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                     } else {
                       console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
@@ -183,7 +219,7 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
-  // Not yet used, returns a specific device
+/*  // Not yet used, returns a specific device
   app.get('/ubersmith/devices/device/:device_id'
     , function (req, res) {
       var deviceList = redisClient.get('device.list');
@@ -194,7 +230,7 @@ module.exports = function (app, config, passport, redisClient) {
         res.send(JSON.stringify(deviceList[req.params.device_id]));
       }
     });
-
+*/
   // Ubersmith Customer Browser
   app.get('/ubersmith/clients'
     , function (req, res) {
@@ -235,7 +271,9 @@ module.exports = function (app, config, passport, redisClient) {
       var aReturn = Array();
       var foundSome = false;
       var filteredDevice = {};
+
       redisClient.get('client.list', function (err, reply) {
+
         if (!reply) {
           res.send(500);
         } else {
