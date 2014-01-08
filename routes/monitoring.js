@@ -93,7 +93,8 @@ app.get('/devices'
       aSyncRequests.push(
         function (callback) {
           var request = require('request')
-          request({ url: app.get('puppetdb_uri') + '/nodes?query=["=", ["fact", "kernel"], "Linux"]', json: true }
+          //request({ url: app.get('puppetdb_uri') + '/nodes?query=["=", ["fact", ""], "Linux"]', json: true }
+          request({ url: app.get('puppetdb_uri') + '/facts/serialnumber', json: true }
             , function (error, response, body) {
               if (error)
               {
@@ -138,19 +139,21 @@ app.get('/devices'
                     Object.keys(deviceList).forEach(function(device_id) {
                       var device = deviceList[device_id];
                       // Only Servers right now.
-                      if (device.type == 1)
+                      if (device.type_id == 1)
                       {
                         var hostname = device.dev_desc + '.contegix.mgmt';
 
-                        console.log(result.type + ' ' + hostname);
+//                        console.log(result.type + ' ' + hostname);
 
                         if (hostname in hosts)
                         {
-                          console.log('setting ubersmith to true for ' + hostname);
+//                          console.log('setting ubersmith to true for ' + hostname);
                           hosts[hostname].ubersmith = true;
+                          hosts[hostname].ubersmith_deviceid = device.dev;
+                          hosts[hostname].ubersmith_serialnumber = device.serialid;
                         } else {
-                          console.log('adding new entry, via ubersmith, for  ' + hostname);
-                          hosts[hostname] = {hostname: hostname, ubersmith: true, puppet: false, sensu:false};
+//                          console.log('adding new entry, via ubersmith, for  ' + hostname);
+                          hosts[hostname] = {hostname: hostname, ubersmith_deviceid: device.dev, ubersmith_serialnumber: device.serialid, ubersmith: true, puppet_serialnumber: 'null', puppet: false, sensu:false};
                         }
                       }
                     });
@@ -161,15 +164,16 @@ app.get('/devices'
                     for (t=0; t<deviceList.length; t++)
                     {
                       var device = deviceList[t];
-                      var hostname = device.name;
-                      console.log(result.type + ' ' + hostname);
+                      var hostname = device.certname;
+//                      console.log(result.type + ' ' + hostname);
                       if (hostname in hosts)
                       {
-                        console.log('setting puppet to true for ' + hostname);
+//                        console.log('setting puppet to true for ' + hostname);
                         hosts[hostname].puppet = true;
+                        hosts[hostname].puppet_serialnumber = device.value;
                       } else {
-                        console.log('adding new entry, via puppet, for  ' + hostname);
-                        hosts[hostname] = {hostname: hostname, ubersmith: false, puppet: true, sensu:false};
+//                        console.log('adding new entry, via puppet, for  ' + hostname);
+                        hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null',  ubersmith: false, puppet_serialnumber: device.value, puppet: true, sensu:false};
                       }
                     }
                     break;
@@ -180,14 +184,14 @@ app.get('/devices'
                     {
                       var device = deviceList[z];
                       var hostname = device.name;
-                      console.log(result.type + ' ' + hostname);
+//                      console.log(result.type + ' ' + hostname);
                       if (hostname in hosts)
                       {
-                        console.log('setting sensu to true for ' + hostname);
+//                        console.log('setting sensu to true for ' + hostname);
                         hosts[hostname].sensu = true;
                       } else {
-                        console.log('adding new entry, via sensu, for  ' + hostname);
-                        hosts[hostname] = {hostname: hostname, ubersmith: false, puppet: false, sensu: true};
+//                        console.log('adding new entry, via sensu, for  ' + hostname);
+                        hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null', ubersmith: false, puppet_serialnumber: 'null', puppet: false, sensu: true};
                       }
                     }
                     break;
