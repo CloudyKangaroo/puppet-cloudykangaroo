@@ -74,7 +74,7 @@ module.exports = function (app, config, passport, redisClient) {
                 {
                   var sensuEvents = body;
                 } else {
-                  var sensuEvents = [ { output: "No Events Found", status: 0, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
+                  var sensuEvents = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
                 }
                 console.log(sensuEvents);
                 console.log(app.get('sensu_uri')+ '/client/' + uberDevice.dev_desc + '.contegix.mgmt')
@@ -199,6 +199,34 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/clients'
     , function (req, res) {
       res.render('ubersmith/clients', { user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+    });
+
+  app.get('/ubersmith/clients/company/:company/devices'
+    , function (req, res) {
+      redisClient.get('device.list.company', function (err, reply) {
+        if (!reply)
+        {
+          res.send(500);
+        } else {
+          var deviceListByCompany = JSON.parse(reply);
+          var deviceList = deviceListByCompany[req.params.company];
+          res.send(JSON.stringify(deviceList));
+        }
+      })
+    });
+
+  app.get('/ubersmith/clients/clientid/:clientid/devices'
+    , function (req, res) {
+      redisClient.get('device.list.clientid', function (err, reply) {
+        if (!reply)
+        {
+          res.send(500);
+        } else {
+          var deviceListByClientID = JSON.parse(reply);
+          var deviceList = deviceListByClientID[req.params.clientid];
+          res.send(JSON.stringify(deviceList));
+        }
+      })
     });
 
   // Used by Customer Browser, returns table data
