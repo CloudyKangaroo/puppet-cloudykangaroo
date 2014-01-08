@@ -137,17 +137,21 @@ app.get('/devices'
 
                     Object.keys(deviceList).forEach(function(device_id) {
                       var device = deviceList[device_id];
-                      var hostname = device.dev_desc + '.contegix.mgmt';
-
-                      console.log(result.type + ' ' + hostname);
-
-                      if (hostname in hosts)
+                      // Only Servers right now.
+                      if (device.type == 1)
                       {
-                        console.log('setting ubersmith to true for ' + hostname);
-                        hosts[hostname].ubersmith = true;
-                      } else {
-                        console.log('adding new entry, via ubersmith, for  ' + hostname);
-                        hosts[hostname] = {hostname: hostname, ubersmith: true, puppet: false, sensu:false};
+                        var hostname = device.dev_desc + '.contegix.mgmt';
+
+                        console.log(result.type + ' ' + hostname);
+
+                        if (hostname in hosts)
+                        {
+                          console.log('setting ubersmith to true for ' + hostname);
+                          hosts[hostname].ubersmith = true;
+                        } else {
+                          console.log('adding new entry, via ubersmith, for  ' + hostname);
+                          hosts[hostname] = {hostname: hostname, ubersmith: true, puppet: false, sensu:false};
+                        }
                       }
                     });
                     break;
