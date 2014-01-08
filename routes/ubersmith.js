@@ -39,7 +39,90 @@ module.exports = function (app, config, passport, redisClient) {
           break;
       }
     });
-
+  app.get('/ubersmith/devices/location/rack/:rack'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation['racks'][req.params.rack]);
+        }
+      });
+    });
+  app.get('/ubersmith/devices/location/facility/:facility'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation[req.params.facility]);
+        }
+      });
+    });
+  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation[req.params.facility][req.params.zone]);
+        }
+      });
+    });
+  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage]);
+        }
+      });
+    });
+  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage][req.params.row]);
+        }
+      });
+    });
+  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row/rack/:rack'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage][req.params.row][req.params.rack]);
+        }
+      });
+    });
+  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row/rack/:rack/pos/:pos'
+    , function (req, res) {
+      redisClient.get('device.list.location', function (err, reply) {
+        console.log(err);
+        if (!reply) {
+          res.send(500);
+        } else {
+          var deviceListbyLocation = JSON.parse(reply);
+          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage][req.params.row][req.params.rack][req.params.pos]);
+        }
+      });
+    });
   // Device Browser
   app.get('/ubersmith/devices'
     , function (req, res) {
