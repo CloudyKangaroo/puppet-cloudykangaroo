@@ -22,6 +22,38 @@ module.exports = function (app, config, passport, redisClient) {
       })
     });
 
+  app.get('/sensu/events'
+    , function (req, res) {
+        request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            res.send(JSON.stringify(body));
+          } else {
+            res.send(500);
+          }
+    })
+  });
+
+  app.get('/sensu/events/device/:device'
+    , function (req, res) {
+      request({ url: app.get('sensu_uri') + '/events/' + req.params.device, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          res.send(JSON.stringify(body));
+        } else {
+          res.send(500);
+        }
+      })
+    });
+
+  app.get('/monitoring/events/device/:hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      request({ url: app.get('sensu_uri') + '/events/' + req.params.hostname, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks.monitoring });
+        }
+      })
+    });
+
   app.get('/monitoring/stashes'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -53,8 +85,35 @@ module.exports = function (app, config, passport, redisClient) {
       })
     });
 
-app.get('/devices'
-  , function (req, res) {
+
+  app.get('/monitoring/clients'
+    , function (req, res) {
+      request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
+        }
+      })
+    });
+
+  app.get('/monitoring/devices'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      res.render('monitoring/devices', {user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
+    });
+
+  app.post('/monitoring/stashes/:server'
+    , function (req, res) {
+      var expiration = new Date(oldDateObj.getTime() + 30*60000);
+      request.post({
+        url: app.get('sensu_uri') + '/stashes/silence/' + server,
+        body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }"
+      }, function(error, response, body){
+        console.log(body);
+      });
+    });
+
+  app.get('/devices'
+    , function (req, res) {
       var async = require('async');
       var aSyncRequests = Array();
 
@@ -151,9 +210,9 @@ app.get('/devices'
                           hosts[hostname].ubersmith = true;
                           hosts[hostname].ubersmith_deviceid = device.dev;
                           hosts[hostname].ubersmith_serialnumber = device.serialid;
+                          hosts[hostname].ubersmith_location = device.rack_code;
                         } else {
-//                          console.log('adding new entry, via ubersmith, for  ' + hostname);
-                          hosts[hostname] = {hostname: hostname, ubersmith_deviceid: device.dev, ubersmith_serialnumber: device.serialid, ubersmith: true, puppet_serialnumber: 'null', puppet: false, sensu:false};
+                          hosts[hostname] = {hostname: hostname, ubersmith_deviceid: device.dev, ubersmith_serialnumber: device.serialid, ubersmith_location: device.rack_code, ubersmith: true, puppet_serialnumber: 'null', puppet: false, sensu:false};
                         }
                       }
                     });
@@ -173,7 +232,7 @@ app.get('/devices'
                         hosts[hostname].puppet_serialnumber = device.value;
                       } else {
 //                        console.log('adding new entry, via puppet, for  ' + hostname);
-                        hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null',  ubersmith: false, puppet_serialnumber: device.value, puppet: true, sensu:false};
+                        hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null', ubersmith_location: 'null', ubersmith: false, puppet_serialnumber: device.value, puppet: true, sensu:false};
                       }
                     }
                     break;
@@ -191,7 +250,7 @@ app.get('/devices'
                         hosts[hostname].sensu = true;
                       } else {
 //                        console.log('adding new entry, via sensu, for  ' + hostname);
-                        hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null', ubersmith: false, puppet_serialnumber: 'null', puppet: false, sensu: true};
+                        hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null', ubersmith_location: 'null', ubersmith: false, puppet_serialnumber: 'null', puppet: false, sensu: true};
                       }
                     }
                     break;
@@ -213,43 +272,6 @@ app.get('/devices'
             }
         }
       );
-  }
-);
-
-  app.get('/monitoring/clients'
-    , function (req, res) {
-        request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
-        }
-      })
-    });
-
-  app.get('/monitoring/devices'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      res.render('monitoring/devices', {user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
-    });
-
-  app.get('/monitoring/exceptions'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-        request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          var sensuClients = body;
-          console.log(sensuClients);
-        }
-      })
-    });
-
-  app.post('/monitoring/stashes/:server'
-    , function (req, res) {
-      var expiration = new Date(oldDateObj.getTime() + 30*60000);
-      request.post({
-        url: app.get('sensu_uri') + '/stashes/silence/' + server,
-        body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }"
-      }, function(error, response, body){
-        console.log(body);
-      });
-    });
+    }
+  );
 }
