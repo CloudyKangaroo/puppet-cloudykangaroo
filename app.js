@@ -5,30 +5,43 @@
 require('./config/system-credentials.js');
 
 var config = require('./config');
-
-require('enum').register();
+var winston = require('winston');
+var reqLogger = require('express-request-logger');
+var moment = require('moment');
 var redis = require('redis');
 var express = require('express');
 var http = require('http');
 var path = require('path');
 var flash = require('connect-flash');
 var _ = require('underscore');
-
 var passport = require('passport');
+var uuid = require('node-uuid');
+
+require('enum').register();
+
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
-//var formidable = require('formidable');
+var ctxlog = require('./lib/ctxlog');
+var logger = ctxlog('main');
+
 var redisClient = redis.createClient(config.redis.port, config.redis.host);
-var fs = require('fs');
-var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
 
 redisClient.on('error', function (error) {
-  console.log(error)
+  console.error(error)
 });
 
 redisClient.on("connect", function () {
-  redisClient.set("foo_rand000000000000", "Redis Connectivity Test Complete");
-  redisClient.get("foo_rand000000000000", redis.print);
+  var redisTestUUID = uuid.v4();
+  redisClient.set('test_' + redisTestUUID, redisTestUUID);
+  redisClient.get('test_' + redisTestUUID
+    , function (error, response) {
+      if (error)
+      {
+        logger.error('error', 'Error retrieving value from Redis during startup test', error);
+      }
+    }
+  );
+
 });
 
 var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
@@ -40,6 +53,25 @@ var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAut
 var metrics = require('measured');
 var collection = new metrics.Collection('http');
 var rps = collection.meter('requestsPerSecond')
+
+/**
+ * Logging System
+ */
+
+var fs = require('fs');
+var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
+
+var util = require('util');
+
+util.inspect.styles =
+{ special: 'cyan',
+  number: 'yellow',
+  boolean: 'yellow',
+  undefined: 'grey',
+  null: 'bold',
+  string: 'green',
+  date: 'magenta',
+  regexp: 'red' };
 
 /**
  * Authentication System
@@ -114,7 +146,8 @@ app.set('puppetdb_uri', 'http://' + config.puppetdb.host + ':' + config.puppetdb
 app.locals.moment = require('moment');
 app.use(express.logger({stream: logstream }));
 app.use(express.favicon());
-app.use(express.logger('dev'));
+app.use(reqLogger.create(logger));
+//app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
@@ -135,9 +168,49 @@ app.use(express.static(path.join(__dirname, 'public')));
  *  middleware so that every request is counted.
  */
 function rpsMeter(req, res, next) {
+
+  // Perform some work at the begining of every request
+
   rps.mark();
+
+  // Save the real end that we will wrap
+  // http://stackoverflow.com/questions/8719626/adding-a-hook-to-globally-log-all-node-http-responses-in-node-js-express
+
+  var rEnd = res.end;
+
+  // To track response time
+  req._rlStartTime = new Date();
+
+
+  // The following function will be executed when we send our response:
+  res.end = function(chunk, encoding) {
+    // Do the work expected
+    res.end = rEnd;
+    res.end(chunk, encoding);
+  
+    // And do the work we want now (logging!)
+
+    // Save a few more variables that we can only get at the end
+    req.kvLog.status = res.statusCode;
+    req.kvLog.response_time = (new Date() - req._rlStartTime);
+    
+    // Send the log off to winston
+    var level = req.kvLog._rlLevel;
+    delete req.kvLog._rlLevel;
+    var entry = {};
+    Object.keys(req.kvLog).forEach(function(key) {
+      value = req.kvLog[key];
+      if (key !== 'date')
+      {
+        entry[key] = value;
+      }
+    });
+    logger.log(level, '', entry);
+  };
+
   next();
 }
+
 /**
  * End Metrics
  */
@@ -169,7 +242,7 @@ app.locals.requireGroup = function (group) {
     if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
       next();
     } else {
-      console.log('User: ' + req.user + ' is not a member of ' + group);
+      console.info('User: ' + req.user + ' is not a member of ' + group);
       res.render('account/login', { user: req.user, message: req.flash('error') });
     }
   }
@@ -203,7 +276,7 @@ app.locals.getCombinedDevices = function () {
   request({ url: url, json: true }
     , function (error, response, body) {
         if (error) {
-          console.log(error);
+          console.error(error);
           res.send(500);
         } else {
           var nodes = body;
@@ -257,10 +330,6 @@ app.locals.getCombinedDevices = function () {
                   console.log(error);
                 res.send(500);
                 } else {
-                  for(i = 0; i<results.length; i++)
-                  {
-                    console.log(results[i]);
-                  }
                   return JSON.stringify(results);
                 }
             }
@@ -273,5 +342,5 @@ app.locals.getCombinedDevices = function () {
 require("./routes")(app, config, passport, redisClient);
 
 http.createServer(app).listen(app.get('port'), function () {
-  console.log('Express server listening on port ' + app.get('port'));
+  logger.info('Express server listening on port ' + app.get('port'));
 });
