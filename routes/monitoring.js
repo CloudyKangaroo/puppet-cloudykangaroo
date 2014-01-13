@@ -35,7 +35,13 @@ module.exports = function (app, config, passport, redisClient) {
 
   app.get('/sensu/events/device/:device'
     , function (req, res) {
-      request({ url: app.get('sensu_uri') + '/events/' + req.params.device, json: true }, function (error, response, body) {
+      if (req.params.device && req.params.device != '')
+      {
+       var uri = '/events/' + req.params.device;
+      } else {
+        var uri = '/events';
+      }
+      request({ url: app.get('sensu_uri') + uri, json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           res.send(JSON.stringify(body));
         } else {
