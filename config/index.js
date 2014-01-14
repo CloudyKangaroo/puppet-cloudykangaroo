@@ -29,9 +29,10 @@ config.puppetdb = {};
 config.http = {};
 config.cookie = {};
 config.log = {};
+config.metrics = {}
 
 config.log.access_log = './access.log';
-
+config.metrics.interval = 15000;
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 config.puppetdb.host = process.env.PUPPETDB_HOST || 'puppet-db01.contegix.com';

@@ -179,6 +179,59 @@ module.exports = function (app, config, passport, redisClient) {
         }
       });
     });
+  app.get('/ubersmith/devices/hostname/:hostname'
+    , function (req, res) {
+      redisClient.get('device.list.hostname', function (err, reply) {
+        if (!reply) {
+          console.log('Sending 500: ' + err);
+          res.send(500);
+        } else {
+          var deviceList = JSON.parse(reply);
+          if (!(req.params.hostname in deviceList))
+          {
+            app.locals.logger.log('error', 'invalid hostname', {error: 'hostname ' + req.params.hostname + ' not in device list'});
+            res.send(500);
+            return;
+          }
+          var uberDevice = deviceList[req.params.hostname][0];
+
+          app.locals.logger.log('debug', 'requested hostname ' + req.params.hostname);
+
+
+          request({ url: app.get('sensu_uri') + '/events/' +  req.params.hostname, json: true }
+            , function (error, response, body) {
+              if (!error) {
+                if (response.statusCode < 300 && body.length > 0)
+                {
+                  var sensuEvents = body;
+                } else {
+                  var sensuEvents = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client:  req.params.hostname, check: 'N/A'}];
+                }
+                request({url: app.get('sensu_uri')+ '/client/' +  req.params.hostname, json: true}
+                  , function (error, response, body) {
+                    if (!error) {
+                      if (response.statusCode < 300)
+                      {
+                        var sensuClient = body;
+                      } else {
+                        var sensuClient = { address: 'unknown', name:  req.params.hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
+                      }
+                      console.log(uberDevice);
+                      //app.locals.logger.log('debug', 'device', {device: JSON.stringify(uberDevice)});
+                      res.render('ubersmith/device', {uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+                    } else {
+                      console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
+                      res.send(500);
+                    }
+                  })
+              } else {
+                console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
+                res.send(500);
+              }
+            })
+        }
+      });
+    });
 
   app.get('/ubersmith/devices/clientid/:clientid'
     , function (req, res) {
