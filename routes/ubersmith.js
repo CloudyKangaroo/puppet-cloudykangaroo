@@ -194,9 +194,7 @@ module.exports = function (app, config, passport, redisClient) {
             return;
           }
           var uberDevice = deviceList[req.params.hostname][0];
-
           app.locals.logger.log('debug', 'requested hostname ' + req.params.hostname);
-
 
           request({ url: app.get('sensu_uri') + '/events/' +  req.params.hostname, json: true }
             , function (error, response, body) {
@@ -216,8 +214,6 @@ module.exports = function (app, config, passport, redisClient) {
                       } else {
                         var sensuClient = { address: 'unknown', name:  req.params.hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
                       }
-                      console.log(uberDevice);
-                      //app.locals.logger.log('debug', 'device', {device: JSON.stringify(uberDevice)});
                       res.render('ubersmith/device', {uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                     } else {
                       console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
