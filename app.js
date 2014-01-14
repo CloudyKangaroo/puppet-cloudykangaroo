@@ -20,43 +20,11 @@ var useragent = require('express-useragent');
 
 require('enum').register();
 
-var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
-
+/*
+  Initialize the Logging Framework
+ */
 var ctxlog = require('./lib/ctxlog');
-var logger = ctxlog('main', 'debug');
-
-var redisClient = redis.createClient(config.redis.port, config.redis.host);
-
-redisClient.on('error', function (error) {
-  console.error(error)
-});
-
-redisClient.on("connect", function () {
-  var redisTestUUID = uuid.v4();
-  redisClient.set('test_' + redisTestUUID, redisTestUUID);
-  redisClient.get('test_' + redisTestUUID
-    , function (error, response) {
-      if (error)
-      {
-        logger.log('error', 'Error retrieving value from Redis during startup test', error);
-      }
-    }
-  );
-});
-
-var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
-
-/**
- * Metrics Objects
- */
-
-var metrics = require('measured');
-var collection = new metrics.Collection('http');
-var rps = collection.meter('requestsPerSecond')
-
-/**
- * Logging System
- */
+var logger = ctxlog('main', 'info', { level: 'debug'});
 
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
@@ -71,7 +39,41 @@ util.inspect.styles =
   null: 'bold',
   string: 'green',
   date: 'magenta',
-  regexp: 'red' };
+  regexp: 'red'
+};
+
+/*
+  Connect to Redis
+ */
+
+var redisClient = redis.createClient(config.redis.port, config.redis.host);
+
+redisClient.on('error', function (error) {
+  logger.log('error', 'Redis Connect Error', { error: error });
+});
+
+redisClient.on("connect", function () {
+  var redisTestUUID = uuid.v4();
+  redisClient.set('test_' + redisTestUUID, redisTestUUID);
+  redisClient.get('test_' + redisTestUUID
+    , function (error, response) {
+        if (error)
+        {
+          logger.log('error', 'Error retrieving value from Redis during startup test', error);
+        } else {
+          if (response != redisTestUUID)
+          {
+            logger.log('error', 'Redis returned the incorrect value for redisTestUUID', { redisTestUUID: redisTestUUID, response: response });
+          }
+        }
+    }
+  );
+});
+
+/*
+  Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
+ */
+var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
 
 /**
  * Authentication System
@@ -81,28 +83,6 @@ var users = [];
 
 // passport-attlassian-crowd from : https://bitbucket.org/knecht_andreas/passport-atlassian-crowd
 // MIT License
-
-// Passport session setup.
-//   To support persistent login sessions, Passport needs to be able to
-//   serialize users into and deserialize users out of the session.  Typically,
-//   this will be as simple as storing the user ID when serializing, and finding
-//   the user by ID when deserializing.
-/*
-passport.serializeUser(function (user, done) {
-  done(null, user.username);
-});
-
-passport.deserializeUser(function (username, done) {
-  var user = _.find(users, function (user) {
-    return user.username == username;
-  });
-  if (user === undefined) {
-    done(new Error("No user with username '" + username + "' found."));
-  } else {
-    done(null, user);
-  }
-});
-*/
 
 passport.serializeUser(function(user, done) {
   var userId = RegExp('[^/]*$').exec(user.id)||[,null][1];
@@ -117,10 +97,7 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-// Use the AtlassianCrowdStrategy within Passport.
-//   Strategies in passport require a `verify` function, which accept
-//   credentials (in this case a crowd user profile), and invoke a callback
-//   with a user object.
+var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
 passport.use(new AtlassianCrowdStrategy({
     crowdServer: CrowdAuth['server'],
@@ -157,7 +134,7 @@ var RedisStore = require('connect-redis')(express);
 
 app.locals.logger = logger;
 app.locals.moment = require('moment')
-
+app.enable('trust proxy');
 app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -173,6 +150,11 @@ app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+
+/*
+ Initialize the session and prepare user authentication
+ */
+
 app.use(express.cookieParser(config.cookie.secret));
 app.use(express.session({
   store: new RedisStore({
@@ -181,19 +163,32 @@ app.use(express.session({
   }),
   secret: config.cookie.secret
 }));
-//app.use(express.session());
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+/*
+   Route requests through the metrics and logging processing
+ */
 app.use(rpsMeter);
+
+/*
+  Pass the requests through the routes
+ */
 app.use(app.router);
-/*app.use(function(err, req, res, next) {
+
+/*
+  Handle Errors
+ */
+app.use(function(err, req, res, next) {
   if(!err) return next(); // you also need this line
   logger.log('error', 'Express caught error in request', { error: err, requestID: req.id, sessionID: req.sessionID});
   res.send(500);
 //  next(err);
-});*/
+});
+
+/*
+  Last chance, perhaps it is a static resource, most of this offloaded to Nginx
+ */
 app.use(express.static(path.join(__dirname, 'public')));
 
 /*
@@ -202,6 +197,19 @@ app.use(express.static(path.join(__dirname, 'public')));
  *  This adds the RPS metric, we are using this
  *  middleware so that every request is counted.
  */
+var metrics = require('measured');
+var collection = new metrics.Collection('http');
+var rps = collection.meter('requestsPerSecond');
+var timer = collection.timer('requestTime');
+
+/*
+   Periodically output metrics to the log file
+ */
+setInterval(function() {
+  var metricslogger = ctxlog('metrics', 'debug', {level: 'error'});
+  metricslogger.log('debug', 'metrics output', collection.toJSON());
+}, config.metrics.interval || 15000);
+
 function rpsMeter(req, res, next) {
 
   // Perform some work at the beginning of every request
@@ -210,23 +218,33 @@ function rpsMeter(req, res, next) {
 
   logger.req = req;
 
+  // To track response time
+  req._rlStartTime = new Date();
+
+  var stopwatch = timer.start();
+
+  req.on('end', function() {
+    logger.log('debug', 'ending request', {});
+    stopwatch.end();
+  });
+
+  req.on('error', function(err) {
+    logger.log('error', 'Error in Express Request', { error: err });
+  });
+
   // Save the real end that we will wrap
   // http://stackoverflow.com/questions/8719626/adding-a-hook-to-globally-log-all-node-http-responses-in-node-js-express
 
   var rEnd = res.end;
 
-  // To track response time
-  req._rlStartTime = new Date();
-
   // The following function will be executed when we send our response:
   res.end = function(chunk, encoding) {
+
     // Do the work expected
     res.end = rEnd;
     res.end(chunk, encoding);
   
     // And do the work we want now (logging!)
-
-    // Save a few more variables that we can only get at the end
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
 
@@ -242,11 +260,9 @@ function rpsMeter(req, res, next) {
     req.kvLog.isMobile = req.useragent.isMobile;
     req.kvLog.isDesktop = req.useragent.isDesktop;
 
-    //logger.log('debug', 'useragent debug', req.useragent);
-
-    // Send the log off to winston
     var level = req.kvLog._rlLevel;
     delete req.kvLog._rlLevel;
+
     var entry = {};
     Object.keys(req.kvLog).forEach(function(key) {
       value = req.kvLog[key];
@@ -255,9 +271,8 @@ function rpsMeter(req, res, next) {
         entry[key] = value;
       }
     });
-    //logger.log('debug', 'request debug output', req);
 
-    logger.log(level, '', entry);
+    logger.log(level, 'request analytics', entry);
   };
 
   next();
@@ -304,18 +319,19 @@ app.locals.requireGroup = function (group) {
         logger.log('debug', 'this request requires authentication',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
       }
       res.render('account/login', { user: req.user, message: req.flash('error') });
-    /*, function (err, html) {
-        if (err)
-        {
-          logger.log('error', 'error rendering jade template', {error: err, requestID: req.id, sessionID: req.sessionID});
-          res.send(500);
-        } else {
-          res.end(html);
-        }
-      });*/
+      /*, function (err, html) {
+       if (err)
+       {
+       logger.log('error', 'error rendering jade template', {error: err, requestID: req.id, sessionID: req.sessionID});
+       res.send(500);
+       } else {
+       res.end(html);
+       }
+       });*/
     }
   }
 };
+
 
 app.locals.getEventClass = function (eventStatus) {
   var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
@@ -413,5 +429,5 @@ app.locals.getCombinedDevices = function () {
 require("./routes")(app, config, passport, redisClient);
 
 http.createServer(app).listen(app.get('port'), function () {
-  logger.log('info', 'Express server listening on port ' + app.get('port'));
+  logger.log('info', 'Express server listening on port ' + app.get('port'), {});
 });

@@ -35,7 +35,7 @@ module.exports = function (app, config, passport, redisClient) {
         request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
           if (!error && response.statusCode == 200) {
             app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-            res.send(JSON.stringify(body));
+            res.send(JSON.stringify({ aaData: body }));
           } else {
             app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
             res.send(500);
@@ -120,6 +120,24 @@ module.exports = function (app, config, passport, redisClient) {
       })
     });
 
+  app.get('/puppet/facts/:fact'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      request({ url: app.get('puppetdb_uri') + '/facts/' + req.params.fact, json: true }
+        , function (error, response, body) {
+          if (error)
+          {
+            app.locals.logger.log('debug', 'failed to get data from PuppetDB', { uri: app.get('puppetdb_uri') + '/facts/' + req.params.fact});
+            res.send(500);
+          } else {
+            app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/facts/' + req.params.fact});
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.write(JSON.stringify(body));
+            res.end();
+          }
+        })
+    });
 
   app.get('/monitoring/clients'
     , function (req, res) {

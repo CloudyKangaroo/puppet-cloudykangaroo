@@ -7,7 +7,7 @@ block content
     .page-header
       h1 Current Event Status
     .container
-      table(id="table_events").table.table-condensed.sortable
+      table(id='table_events').table.table-condensed.sortable
         thead
           tr
             th(data-defaultsort='desc') Issued
@@ -31,10 +31,10 @@ block footer
   script(src='/javascripts/dataTables.bootstrap.js')
   script(type='text/javascript').
     $(document).ready(function() {
-      $('table_events').dataTable( {
+      $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/sensu/events/device',
+        "sAjaxSource": '/sensu/events',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "aoColumns": [
@@ -43,7 +43,7 @@ block footer
           }, {
             "mData": "client",
             "mRender": function (client) {
-              return '<a href="/monitoring/events/device/'+client+'>' + client + '</a>';
+              return '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>';
             }
           }, {
             "mData": "check"
@@ -53,7 +53,7 @@ block footer
               return output.slice(0,65);
             }
           }],
-        "aaSorting": [[4,'asc']],
+        "aaSorting": [[1,'asc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }

@@ -5,7 +5,7 @@ module.exports = function (app, config, passport, redisClient) {
 
   app.get('/'
     , function (req, res) {
-        res.render('index', { user:req.user })
+      res.redirect('/account');
     });
 }
 
