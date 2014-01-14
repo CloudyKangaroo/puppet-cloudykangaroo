@@ -7,7 +7,11 @@ module.exports = function (app, config, passport, redisClient) {
         request({ url: app.get('sensu_uri') + '/info', json: true }
         , function (error, response, body) {
           if (!error && response.statusCode == 200) {
+            app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/info'});
             res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks.monitoring });
+          } else {
+            app.locals.logger.log('error', 'error processing request', { error: error, uri: app.get('sensu_uri') + '/info'})
+            res.send(500);
           }
         })
     });
@@ -17,7 +21,11 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
         request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
           res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks.monitoring });
+        } else {
+          app.locals.logger.log('error', 'error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+          res.send(500);
         }
       })
     });
@@ -26,8 +34,10 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
         request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
           if (!error && response.statusCode == 200) {
+            app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
             res.send(JSON.stringify(body));
           } else {
+            app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
             res.send(500);
           }
     })
@@ -43,8 +53,10 @@ module.exports = function (app, config, passport, redisClient) {
       }
       request({ url: app.get('sensu_uri') + uri, json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + uri});
           res.send(JSON.stringify(body));
         } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + uri})
           res.send(500);
         }
       })
@@ -55,7 +67,11 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       request({ url: app.get('sensu_uri') + '/events/' + req.params.hostname, json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events/' + req.params.hostname});
           res.render('monitoring/events', {events: body, user:req.user, section: 'events', navLinks: config.navLinks.monitoring });
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events/' + req.params.hostname})
+          res.send(500);
         }
       })
     });
@@ -65,7 +81,11 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
         request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/stashes'});
           res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks.monitoring });
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/stashes'})
+          res.send(500);
         }
       })
     });
@@ -75,7 +95,11 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
         request({ url: app.get('sensu_uri') + '/checks', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/checks'});
           res.render('monitoring/checks', {checks: body, user:req.user, section: 'checks', navLinks: config.navLinks.monitoring });
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/checks'})
+          res.send(500);
         }
       })
     });
@@ -84,9 +108,14 @@ module.exports = function (app, config, passport, redisClient) {
     , app.locals.requireGroup('users')
     , function (req, res) {
         var hoursAgo = 10;
-        request({ url: app.get('puppetdb_uri') + '/events?query=["and", ["=", "status", "failure"],["=", "resource-type", "Service"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]]&limit=1000', json: true }, function (error, response, body) {
+        var URL = app.get('puppetdb_uri') + '/events?query=["and", ["=", "status", "failure"],["=", "resource-type", "Service"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]]&limit=1000';
+        request({ url: URL, json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: URL});
           res.render('monitoring/failures', {hoursAgo: hoursAgo, failures: body, user:req.user, section: 'failures', navLinks: config.navLinks.monitoring });
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: URL})
+          res.send(500);
         }
       })
     });
@@ -96,7 +125,11 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       request({ url: app.get('sensu_uri') + '/clients', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('sensu_uri') + '/clients'});
           res.render('monitoring/clients', {clients: body, user:req.user, section: 'clients', navLinks: config.navLinks.monitoring });
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/clients'})
+          res.send(500);
         }
       })
     });
@@ -114,7 +147,7 @@ module.exports = function (app, config, passport, redisClient) {
         url: app.get('sensu_uri') + '/stashes/silence/' + server,
         body: "{ 'timestamp': " + Date.now() + ", 'expires': " + expiration + " }"
       }, function(error, response, body){
-        console.log(body);
+        app.locals.logger.log('debug', body);
       });
     });
 
@@ -130,7 +163,6 @@ module.exports = function (app, config, passport, redisClient) {
           request({ url: url, json: true }
             , function (error, response, body) {
                 if (error || !body || response.statusCode != 200) {
-                  console.log(error);
                   callback(error, { response: response, type: 'error'});
                 } else {
                   callback(error, { response: body, type: 'sensu'});
@@ -175,7 +207,7 @@ module.exports = function (app, config, passport, redisClient) {
       async.parallel(aSyncRequests
         , function(error, results) {
             if (error) {
-              console.log(error);
+              app.locals.logger.log('error', 'Error executing parallel requests',{error: error});
               res.send(500);
             } else {
               var hosts = {};
@@ -185,7 +217,7 @@ module.exports = function (app, config, passport, redisClient) {
                 var result = results[g];
                 if (!result.type)
                 {
-                  console.log(JSON.stringify(result));
+                  app.locals.logger.log('error', 'Could not parse results' , {error: JSON.stringify(result)});
                   res.send(500);
                   return;
                 }
@@ -193,7 +225,7 @@ module.exports = function (app, config, passport, redisClient) {
                 switch (result.type)
                 {
                   case 'error':
-                    console.log(result);
+                    app.locals.logger.log('error',  'Could not parse results' , {error: JSON.stringify(result)});
                     res.send(500);
                     return;
                     break;
@@ -208,11 +240,11 @@ module.exports = function (app, config, passport, redisClient) {
                       {
                         var hostname = device.dev_desc + '.contegix.mgmt';
 
-//                        console.log(result.type + ' ' + hostname);
+//                        app.locals.logger.log('debug', result.type + ' ' + hostname);
 
                         if (hostname in hosts)
                         {
-//                          console.log('setting ubersmith to true for ' + hostname);
+//                          app.locals.logger.log('debug', 'setting ubersmith to true for ' + hostname);
                           hosts[hostname].ubersmith = true;
                           hosts[hostname].ubersmith_deviceid = device.dev;
                           hosts[hostname].ubersmith_serialnumber = device.serialid;
@@ -230,14 +262,14 @@ module.exports = function (app, config, passport, redisClient) {
                     {
                       var device = deviceList[t];
                       var hostname = device.certname;
-//                      console.log(result.type + ' ' + hostname);
+//                      app.locals.logger.log('debug', result.type + ' ' + hostname);
                       if (hostname in hosts)
                       {
-//                        console.log('setting puppet to true for ' + hostname);
+//                        app.locals.logger.log('debug', 'setting puppet to true for ' + hostname);
                         hosts[hostname].puppet = true;
                         hosts[hostname].puppet_serialnumber = device.value;
                       } else {
-//                        console.log('adding new entry, via puppet, for  ' + hostname);
+//                        app.locals.logger.log('debug', 'adding new entry, via puppet, for  ' + hostname);
                         hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null', ubersmith_location: 'null', ubersmith: false, puppet_serialnumber: device.value, puppet: true, sensu:false};
                       }
                     }
@@ -249,19 +281,19 @@ module.exports = function (app, config, passport, redisClient) {
                     {
                       var device = deviceList[z];
                       var hostname = device.name;
-//                      console.log(result.type + ' ' + hostname);
+//                      app.locals.logger.log('debug', result.type + ' ' + hostname);
                       if (hostname in hosts)
                       {
-//                        console.log('setting sensu to true for ' + hostname);
+//                        app.locals.logger.log('debug', 'setting sensu to true for ' + hostname);
                         hosts[hostname].sensu = true;
                       } else {
-//                        console.log('adding new entry, via sensu, for  ' + hostname);
+//                        app.locals.logger.log('debug', 'adding new entry, via sensu, for  ' + hostname);
                         hosts[hostname] = {hostname: hostname, ubersmith_deviceid: 'null', ubersmith_serialnumber: 'null', ubersmith_location: 'null', ubersmith: false, puppet_serialnumber: 'null', puppet: false, sensu: true};
                       }
                     }
                     break;
                   default:
-                    console.log(result);
+                    app.locals.logger.log('debug', result);
                 }
               }
               var retHosts = {};

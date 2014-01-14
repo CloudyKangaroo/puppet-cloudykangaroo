@@ -15,14 +15,15 @@ var path = require('path');
 var flash = require('connect-flash');
 var _ = require('underscore');
 var passport = require('passport');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
+var useragent = require('express-useragent');
 
 require('enum').register();
 
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
 var ctxlog = require('./lib/ctxlog');
-var logger = ctxlog('main');
+var logger = ctxlog('main', 'debug');
 
 var redisClient = redis.createClient(config.redis.port, config.redis.host);
 
@@ -37,11 +38,10 @@ redisClient.on("connect", function () {
     , function (error, response) {
       if (error)
       {
-        logger.error('error', 'Error retrieving value from Redis during startup test', error);
+        logger.log('error', 'Error retrieving value from Redis during startup test', error);
       }
     }
   );
-
 });
 
 var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
@@ -87,7 +87,7 @@ var users = [];
 //   serialize users into and deserialize users out of the session.  Typically,
 //   this will be as simple as storing the user ID when serializing, and finding
 //   the user by ID when deserializing.
-
+/*
 passport.serializeUser(function (user, done) {
   done(null, user.username);
 });
@@ -101,6 +101,20 @@ passport.deserializeUser(function (username, done) {
   } else {
     done(null, user);
   }
+});
+*/
+
+passport.serializeUser(function(user, done) {
+  var userId = RegExp('[^/]*$').exec(user.id)||[,null][1];
+  redisClient.set("user:"+userId, JSON.stringify(user));
+  done(null, userId);
+});
+
+passport.deserializeUser(function(id, done) {
+  redisClient.get("user:"+id, function(err, data) {
+    var user = JSON.parse(data);
+    done(null, user);
+  });
 });
 
 // Use the AtlassianCrowdStrategy within Passport.
@@ -138,27 +152,48 @@ passport.use(new AtlassianCrowdStrategy({
 var app = express();
 
 // all environments
+
+var RedisStore = require('connect-redis')(express);
+
+app.locals.logger = logger;
+app.locals.moment = require('moment')
+
 app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.set('puppetdb_uri', 'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3');
-app.locals.moment = require('moment');
+
+app.use(require('connect-requestid'));
+app.use(useragent.express());
 app.use(express.logger({stream: logstream }));
 app.use(express.favicon());
 app.use(reqLogger.create(logger));
-//app.use(express.logger('dev'));
+app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(express.cookieParser(config.cookie.secret));
-app.use(express.session());
-app.use(flash());
-
+app.use(express.session({
+  store: new RedisStore({
+    host: config.redis.host,
+    port: config.redis.port
+  }),
+  secret: config.cookie.secret
+}));
+//app.use(express.session());
 app.use(passport.initialize());
 app.use(passport.session());
+
+
 app.use(rpsMeter);
 app.use(app.router);
+/*app.use(function(err, req, res, next) {
+  if(!err) return next(); // you also need this line
+  logger.log('error', 'Express caught error in request', { error: err, requestID: req.id, sessionID: req.sessionID});
+  res.send(500);
+//  next(err);
+});*/
 app.use(express.static(path.join(__dirname, 'public')));
 
 /*
@@ -169,9 +204,11 @@ app.use(express.static(path.join(__dirname, 'public')));
  */
 function rpsMeter(req, res, next) {
 
-  // Perform some work at the begining of every request
+  // Perform some work at the beginning of every request
 
   rps.mark();
+
+  logger.req = req;
 
   // Save the real end that we will wrap
   // http://stackoverflow.com/questions/8719626/adding-a-hook-to-globally-log-all-node-http-responses-in-node-js-express
@@ -180,7 +217,6 @@ function rpsMeter(req, res, next) {
 
   // To track response time
   req._rlStartTime = new Date();
-
 
   // The following function will be executed when we send our response:
   res.end = function(chunk, encoding) {
@@ -193,7 +229,21 @@ function rpsMeter(req, res, next) {
     // Save a few more variables that we can only get at the end
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
-    
+
+    req.kvLog.originalURL = req.originalURL || req.url;
+    req.kvLog.referer = (req.referer)?req.referer:'none';
+
+    req.kvLog.remoteAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    req.kvLog.userAgent = req.useragent.source;
+    req.kvLog.isBot = req.useragent.isBot;
+    req.kvLog.OS = req.useragent.OS;
+    req.kvLog.Browser = req.useragent.Browser;
+    req.kvLog.Platform = req.useragent.Platform;
+    req.kvLog.isMobile = req.useragent.isMobile;
+    req.kvLog.isDesktop = req.useragent.isDesktop;
+
+    //logger.log('debug', 'useragent debug', req.useragent);
+
     // Send the log off to winston
     var level = req.kvLog._rlLevel;
     delete req.kvLog._rlLevel;
@@ -205,6 +255,8 @@ function rpsMeter(req, res, next) {
         entry[key] = value;
       }
     });
+    //logger.log('debug', 'request debug output', req);
+
     logger.log(level, '', entry);
   };
 
@@ -227,31 +279,50 @@ app.locals.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   } else {
+    logger.log('debug', 'user is not authenticated',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
     res.render('account/login', { user: req.user, message: req.flash('error') });
   }
 }
+
 app.locals.ensureAPIAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   } else {
+    logger.log('debug', 'API client is not authenticated',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
     res.send(403);
   }
 }
+
 app.locals.requireGroup = function (group) {
   return function (req, res, next) {
     if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
       next();
     } else {
-      console.info('User: ' + req.user + ' is not a member of ' + group);
+      if (req.user) {
+        logger.log('debug', req.user + ' is not a member of ' + group,  { username: req.user.username, requestID: req.id, sessionID: req.sessionID });
+      } else {
+        logger.log('debug', 'this request requires authentication',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
+      }
       res.render('account/login', { user: req.user, message: req.flash('error') });
+    /*, function (err, html) {
+        if (err)
+        {
+          logger.log('error', 'error rendering jade template', {error: err, requestID: req.id, sessionID: req.sessionID});
+          res.send(500);
+        } else {
+          res.end(html);
+        }
+      });*/
     }
   }
 };
+
 app.locals.getEventClass = function (eventStatus) {
   var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
   var eventClass = StatusEnum.get(eventStatus);
   return eventClass;
 }
+
 app.locals.getFormattedTimestamp = function (timeStamp, dateString) {
   if (arguments.length == 1) {
     var dateString = 'MMM DD H:mm:ss';
@@ -342,5 +413,5 @@ app.locals.getCombinedDevices = function () {
 require("./routes")(app, config, passport, redisClient);
 
 http.createServer(app).listen(app.get('port'), function () {
-  logger.info('Express server listening on port ' + app.get('port'));
+  logger.log('info', 'Express server listening on port ' + app.get('port'));
 });
