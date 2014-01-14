@@ -3,7 +3,8 @@ block head
 
 block content
     .page-header
-      h1 Device List
+      h1 Device Detail
+      h4 #{uberDevice.dev_desc}.contegix.mgmt
     .container
       .row
         .col-md-14
@@ -52,7 +53,8 @@ block content
                 p Location:
                   span.pull-right #{uberDevice.location}
                 p Company:
-                  span.pull-right #{uberDevice.company}   
+                  span.pull-right
+                    a(href="/ubersmith/clients/list/clientid/#{uberDevice.clientid}") #{uberDevice.company}
                 p Contact Information:
                   ul.list-group
                     li.list-group-item Email:
