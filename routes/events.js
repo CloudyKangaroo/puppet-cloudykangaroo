@@ -13,18 +13,18 @@ module.exports = function (app, config, passport, redisClient) {
       var form = new formidable.IncomingForm;
       var fields = {};
 
-      app.locals.logger.log('debug', 'incoming event', { event: req.params.event, path: req.path })
+      app.locals.logger.log('debug', 'incoming event', { type: 'event', event: req.params.event, path: req.path })
 
       form.parse(req, function(err, fields, files){
         if (err) {
           app.locals.logger.log('error', 'could not process incoming event', { error: err, event: req.params.event, path: req.path });
           res.send(500);
         }
-	      app.locals.logger.log('debug', 'parsing form', { fields: fields, files: files, event: req.params.event });
+	      app.locals.logger.log('debug', 'parsing form', { type: 'event', fields: fields, files: files, event: req.params.event });
       });
 
       form.on('field', function(name, value) {
-        app.locals.logger.log('debug', 'event field received', { field: name, event: req.params.event, value: value });
+        app.locals.logger.log('debug', 'event field received', { type: 'event', field: name, event: req.params.event, value: value });
         fields[name] = value;
       });
 
@@ -38,7 +38,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
 
       form.on('end', function() {
-        app.locals.logger.log('debug', 'event complete', { event: req.params.event, fields: fields});
+        app.locals.logger.log('debug', 'event complete', { type: 'event', event: req.params.event, fields: fields});
 
         if ('user' in fields)
         {
@@ -47,7 +47,7 @@ module.exports = function (app, config, passport, redisClient) {
           var username = 'none';
         }
 
-        app.locals.audit.log('info', req.path, { event: req.params.event, fields: fields, username: username, requestID: req.id, sessionID: req.sessionID })
+        app.locals.audit.log('info', req.path, { type: 'audit', event: req.params.event, fields: fields, username: username, requestID: req.id, sessionID: req.sessionID })
         // 202 Accepted
         res.send(202);
       });
