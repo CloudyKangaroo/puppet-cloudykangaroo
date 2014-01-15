@@ -7,8 +7,9 @@
  */
 module.exports = function (app, config, passport, redisClient) {
   var formidable = require('formidable');
+  var _ = require('underscore');
 
-  app.post('/events/ubersmith/event/:event'
+  app.post('/events/:source/event/:event'
     , function(req, res){
       var form = new formidable.IncomingForm;
       var fields = {};
@@ -35,6 +36,21 @@ module.exports = function (app, config, passport, redisClient) {
       form.on('error', function(err) {
         app.locals.logger.log('error', 'could not process incoming event', { error: err, event: req.params.event, path: req.path });
         res.send(500);
+      });
+
+      form.on('aborted', function() {
+        app.locals.logger.log('debug', 'aborted', { });
+      });
+      form.on('fileBegin', function(name, file) {
+        app.locals.logger.log('debug', 'fileBegin', { name: name, file: file.toJSON() });
+      });
+
+      form.on('file', function(name, file) {
+        var fs = require('fs');
+        app.locals.logger.log('debug', 'file', { name: name, file: file.toJSON() });
+        var filename = file.toJSON().path;
+        var fileJSON = fs.readFileSync(filename,'utf8');
+        _.defaults(fields, JSON.parse(fileJSON));
       });
 
       form.on('end', function() {
