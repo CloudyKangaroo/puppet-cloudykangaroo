@@ -39,7 +39,7 @@ module.exports = function (app, config, passport, redisClient) {
 
       form.on('end', function() {
         app.locals.logger.log('debug', 'event complete', { event: req.params.event, fields: fields});
-        app.locals.auditLog.log('info', req.path, { event: req.params.event, fields: fields})
+        app.locals.audit.log('info', req.path, { event: req.params.event, fields: fields})
         // 202 Accepted
         res.send(202);
       });
