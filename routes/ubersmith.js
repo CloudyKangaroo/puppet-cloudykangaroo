@@ -40,6 +40,7 @@ module.exports = function (app, config, passport, redisClient) {
       }
     });
   app.get('/ubersmith/devices/location/rack/:rack'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -52,6 +53,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/location/facility/:facility'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -64,6 +66,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/location/facility/:facility/zone/:zone'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -76,6 +79,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -88,6 +92,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -100,6 +105,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row/rack/:rack'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -112,6 +118,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row/rack/:rack/pos/:pos'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.location', function (err, reply) {
         console.log(err);
@@ -125,6 +132,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   // Device Browser
   app.get('/ubersmith/devices'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.type_list', function (err, reply) {
         console.log(err);
@@ -139,6 +147,7 @@ module.exports = function (app, config, passport, redisClient) {
 
   // Used to view a single device
   app.get('/ubersmith/devices/deviceid/:deviceid'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list', function (err, reply) {
         if (!reply) {
@@ -180,6 +189,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
   app.get('/ubersmith/devices/hostname/:hostname'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.hostname', function (err, reply) {
         if (!reply) {
@@ -230,6 +240,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.get('/ubersmith/devices/clientid/:clientid'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list', function (err, reply) {
         if (!reply) {
@@ -273,6 +284,7 @@ module.exports = function (app, config, passport, redisClient) {
 
   // Used by device browser, returns table data
   app.get('/ubersmith/devices/list/:devtype_group_id'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       var aReturn = Array();
       var foundSome = false;
@@ -302,6 +314,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.get('/ubersmith/exceptions'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       var aReturn = Array();
       var aSyncRequests = Array();
@@ -365,11 +378,13 @@ module.exports = function (app, config, passport, redisClient) {
 */
   // Ubersmith Customer Browser
   app.get('/ubersmith/clients'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       res.render('ubersmith/clients', { user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
     });
 
   app.get('/ubersmith/clients/clientid/:clientid'
+    , app.locals.requireGroup('users')
     , function (req, res) {
         redisClient.get('client.list', function (err, reply) {
           if (!reply)
@@ -388,6 +403,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.get('/ubersmith/clients/list/company/:company/devices'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.company', function (err, reply) {
         if (!reply)
@@ -404,6 +420,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.get('/ubersmith/clients/list/clientid/:clientid'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('client.list', function (err, reply) {
         if (!reply)
@@ -420,6 +437,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.get('/ubersmith/clients/list/clientid/:clientid/devices'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       redisClient.get('device.list.clientid', function (err, reply) {
         if (!reply)
@@ -437,6 +455,7 @@ module.exports = function (app, config, passport, redisClient) {
 
   // Used by Customer Browser, returns table data
   app.get('/ubersmith/clients/list'
+    , app.locals.requireGroup('users')
     , function (req, res) {
       var aReturn = Array();
       var foundSome = false;
