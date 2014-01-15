@@ -25,7 +25,7 @@ require('enum').register();
  */
 var ctxlog = require('./lib/ctxlog');
 var logger = ctxlog('main', 'info', { level: 'debug'});
-var auditLog = ctxlog('audit', 'info', {level: error}, {level: debug});
+var auditLog = ctxlog('audit', 'info', {level: 'error'}, {level: 'debug'});
 
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
