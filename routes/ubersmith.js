@@ -284,6 +284,13 @@ module.exports = function (app, config, passport, redisClient) {
                                   app.locals.logger.log('debug', 'failed to get data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + uberDevice.dev_desc + '.contegix.mgmt/facts'});
                                   res.send(500);
                                 } else {
+                                  var facts = body;
+                                  puppetInfo.facts = {];}
+                                  for (i=0; i<facts.length(); i++)
+                                  {
+                                    puppetInfo.facts[facts[i].name] = facts[i].value;
+                                  }
+                                  app.locals.logger.log('debug', converted facts', { facts: facts });
                                   puppetInfo.facts = body;
                                   res.render('ubersmith/device', { puppetInfo: puppetInfo, uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                                 }
