@@ -3,28 +3,22 @@ block head
   link(rel='stylesheet', href='/stylesheets/dataTables.bootstrap.css')
 
 block content
- .container.col-xs-12.col-md-8
+ .container.col-xs-16.col-md-12
     .row
       .page-header
-        h1 Current System Info
+        h1 Current Support Info
     .row
-      .col-xs-10.col-md-8
+      .col-xs-12.col-md-8
         .panel.panel-default
           .panel-heading Ubersmith Events
           .panel-body
-            table.table.table-condensed
+            table(id="table_events").table.table-condensed
               thead
                 tr
                   th Time
                   th User
                   th Action
               tbody
-                each event,id in event_list
-                  if event.client_viewable == 1
-                    tr
-                      td #{getFormattedTimestamp(event.time)}
-                      td #{event.user}
-                      td #{event.action}
       .col-xs-6.col-md-4
         .panel.panel-default
           .panel-heading Company Status
@@ -48,3 +42,27 @@ block content
                   span.badge.pull-right 0
 
 block footer
+  script(src='/javascripts/jquery.dataTables.min.js')
+  script(src='/javascripts/dataTables.bootstrap.js')
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_events').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/ubersmith/data/uber.event_list',
+        "iDisplayLength": 5,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "time"
+          }, {
+            "mData": "user"
+          }, {
+            "mData": "action"
+          }],
+        "aaSorting": [[0,'desc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });

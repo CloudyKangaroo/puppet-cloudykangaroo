@@ -3,62 +3,61 @@ block head
 
 block content
   .page-header
-    h1 Device List
+    h1 Customer Detail
+    h4 #{client.company}
   .container
     .row
       .col-md-14
         .panel.panel-default
-          .panel-heading Monitoring Events
+          .panel-heading Device List
           .panel-body
             table.table.table-condensed
               thead
                 tr
+                  th Type
+                  th Hostname
+                  th Description
                   th Status
-                  th Check
-                  th Issued
-                  th Flapping
-                  th Count
-                  th(data-defaultsort='disabled').visible-lg Output
+                  th Location
               tbody
-                each event in sensuEvents
-                  tr(class="#{getEventClass(event.status)}")
-                    td #{getEventClass(event.status)}
-                    td #{event.check}
-                    td #{getFormattedTimestamp(event.issued)}
-                    td #{event.flapping}
-                    td #{event.occurrences}
-                    td.visible-lg #{event.output.slice(0,65)}
+                each device in devices
+                  tr
+                    td #{device.type}
+                    td
+                      a(href="/ubersmith/devices/hostname/#{device.dev_desc}.contegix.mgmt") #{device.dev_desc}
+                    td #{device.label}
+                    td #{device.status}
+                    td #{device.location}
       .row
         .col-md-6
           .panel.panel-default
-            .panel-heading Sensu Information
+            .panel-heading Fill this Section In
             .panel-body
-              p IP Address
-                span.pull-right #{sensuClient.address}
-              p Name
-                span.pull-right #{sensuClient.name}
-              p Subscriptions
-                ul.list-group
-                  each subscription in sensuClient.subscriptions
-                    li.list-group-item #{subscription}
+              p Status
+                span.lavel.label-success.pull-right Active
+              p Things
+                span.pull-right asdf
+              p Contacts
+
         .col-md-6
           .panel.panel-default
-            .panel-heading Ubersmith Information
+            .panel-heading Account Information
             .panel-body
-              p Type:
-                span.pull-right #{uberDevice.devtype_group}/#{uberDevice.type}
-              p Active:
-                span.label.label-success.pull-right #{uberDevice.active}
-              p Location:
-                span.pull-right #{uberDevice.location}
+              p Client ID:
+                span.pull-right #{client.id}
               p Company:
-                span.pull-right
-                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}/devices") #{uberDevice.company}
+                span.label.label-success.pull-right #{client.company}
+              p Address:
+                span.pull-right #{client.address}
+              p Created:
+                span.pull-right #{getFormattedTimestamp(client.created)}
               p Contact Information:
                 ul.list-group
+                  li.list-group-item Name:
+                    span.pull-right #{client.first} #{client.last}
                   li.list-group-item Email:
-                    span.pull-right #{uberDevice.email}
+                    span.pull-right
                   li.list-group-item Phone:
-                    span.pull-right #{uberDevice.phone}
+                    span.pull-right
 
 block footer

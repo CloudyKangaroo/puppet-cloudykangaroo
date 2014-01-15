@@ -1,5 +1,6 @@
 extends ../layout
 block head
+  link(rel='stylesheet', href='/stylesheets/dataTables.bootstrap.css')
 
 block content
     .page-header
@@ -9,7 +10,9 @@ block content
       .row
         .col-md-14
           .panel.panel-default
-            .panel-heading Monitoring Events
+            .panel-heading
+              p Monitoring Events
+                span.label.label-default.pull-right #{sensuClient.name} / #{sensuClient.address}
             .panel-body
               table.table.table-condensed
                 thead
@@ -29,37 +32,68 @@ block content
                       td #{event.flapping}
                       td #{event.occurrences}
                       td.visible-lg #{event.output.slice(0,65)}
-        .row
-          .col-md-6
-            .panel.panel-default
-              .panel-heading Sensu Information
-              .panel-body
-                p IP Address
-                  span.pull-right #{sensuClient.address}
-                p Name
-                  span.pull-right #{sensuClient.name}
-                p Subscriptions
-                   ul.list-group
-                    each subscription in sensuClient.subscriptions
-                      li.list-group-item #{subscription}
-          .col-md-6
-            .panel.panel-default
-              .panel-heading Ubersmith Information
-              .panel-body
-                p Type:
-                  span.pull-right #{uberDevice.devtype_group}/#{uberDevice.type}
-                p Active:
-                  span.label.label-success.pull-right #{uberDevice.active}
-                p Location:
-                  span.pull-right #{uberDevice.location}
-                p Company:
-                  span.pull-right
-                    a(href="/ubersmith/clients/list/clientid/#{uberDevice.clientid}") #{uberDevice.company}
-                p Contact Information:
-                  ul.list-group
-                    li.list-group-item Email:
-                      span.pull-right #{uberDevice.email}   
-                    li.list-group-item Phone:
-                      span.pull-right #{uberDevice.phone}   
+      .row
+        .col-md-6
+          .panel.panel-default
+            .panel-heading Puppet Checkin Time
+            .panel-body
+              p Catalog Timestamp
+                span.pull-right #{getFormattedISO8601(puppetInfo.catalog_timestamp)}
+              p Facts Timestamp
+                span.pull-right #{getFormattedISO8601(puppetInfo.facts_timestamp)}
+              p Report Timestamp
+                span.pull-right #{getFormattedISO8601(puppetInfo.report_timestamp)}
+        .col-md-6
+          .panel.panel-default
+            .panel-heading Ubersmith Information
+            .panel-body
+              p Type:
+                span.pull-right #{uberDevice.devtype_group}/#{uberDevice.type}
+              p Active:
+                span.label.label-success.pull-right #{uberDevice.active}
+              p Location:
+                span.pull-right #{uberDevice.location}
+              p Company:
+                span.pull-right
+                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}") #{uberDevice.company}
+              p Contact Information:
+                ul.list-group
+                  li.list-group-item Email:
+                    span.pull-right #{uberDevice.email}
+                  li.list-group-item Phone:
+                    span.pull-right #{uberDevice.phone}
+      .row
+        .col-md-14
+          .panel.panel-default
+            .panel-heading Puppet Facts
+            .panel-body
+              table(id="table_facts").table.table-condensed
+                thead
+                  tr
+                    th Fact
+                    th Value
+                tbody
 
 block footer
+  script(src='/javascripts/jquery.dataTables.min.js')
+  script(src='/javascripts/dataTables.bootstrap.js')
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_facts').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/puppet/nodes/#{uberDevice.dev_desc}.contegix.mgmt/facts',
+        "iDisplayLength": 10,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "name"
+          }, {
+            "mData": "value",
+          }],
+        "aaSorting": [[1,'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
