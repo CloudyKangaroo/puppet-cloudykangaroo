@@ -46,7 +46,7 @@ module.exports = function (app, config, passport, redisClient) {
       var request = require('request');
       request({ url: app.get('puppetdb_uri') + '/facts/macaddress', json: true}
         , function (error, response, body) {
-          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/facts/macaddress'});
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/facts?query=["~", ["name", ""], "macaddress.*"]'});
           var facts = body;
           for (var i = 0; i<facts.length; i++)
           {
@@ -55,6 +55,7 @@ module.exports = function (app, config, passport, redisClient) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.write(JSON.stringify({ hostname: facts[i].certname }));
                 res.end();
+                return;
               }
           }
         });
