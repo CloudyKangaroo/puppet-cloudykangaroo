@@ -38,7 +38,15 @@ block content
             .panel-heading System Stats
             .panel-body
               p Operating System
-
+                span.pull-right #{puppetInfo.facts.operatingsystem} #{puppetInfo.facts.operatingsystemrelease}
+              p Kernel
+                span.pull-right #{puppetInfo.facts.kernel} #{puppetInfo.facts.kernelrelease}
+              p Uptime
+                span.pull-right #{puppetInfo.facts.uptime}
+              p Manufacturer Information
+                span.pull-right #{puppetInfo.facts.manufacturer} #{puppetInfo.facts.productname} Serial (#{puppetInfo.facts.serialnumber})
+              p Interfaces
+                span.pull-right Management: #{puppetInfo.facts.interface_mgmt} Public: #{puppetInfo.facts.interface_public}
               p Catalog Timestamp
                 span.pull-right #{getFormattedISO8601(puppetInfo.catalog_timestamp)}
               p Facts Timestamp
