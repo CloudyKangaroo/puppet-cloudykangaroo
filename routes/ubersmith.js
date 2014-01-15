@@ -285,13 +285,14 @@ module.exports = function (app, config, passport, redisClient) {
                                   res.send(500);
                                 } else {
                                   var facts = body;
-                                  puppetInfo.facts = {];}
-                                  for (i=0; i<facts.length(); i++)
+                                  //app.locals.logger.log('debug', 'starting facts', { facts: JSON.stringify(facts) });
+                                  puppetInfo.facts = {};
+                                  for (i=0; i<facts.length; i++)
                                   {
                                     puppetInfo.facts[facts[i].name] = facts[i].value;
                                   }
-                                  app.locals.logger.log('debug', converted facts', { facts: facts });
-                                  puppetInfo.facts = body;
+                                  //app.locals.logger.log('debug', 'converted facts', { facts: JSON.stringify(puppetInfo.facts) });
+
                                   res.render('ubersmith/device', { puppetInfo: puppetInfo, uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                                 }
                               });
