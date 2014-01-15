@@ -25,6 +25,7 @@ require('enum').register();
  */
 var ctxlog = require('./lib/ctxlog');
 var logger = ctxlog('main', 'info', { level: 'debug'});
+var auditLog = ctxlog('audit', 'info', {level: error}, {level: debug});
 
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
@@ -133,6 +134,7 @@ var app = express();
 var RedisStore = require('connect-redis')(express);
 
 app.locals.logger = logger;
+app.locals.audit = auditLog;
 app.locals.moment = require('moment')
 app.enable('trust proxy');
 app.set('port', config.http.port || 3000);
