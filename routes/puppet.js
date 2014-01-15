@@ -48,15 +48,17 @@ module.exports = function (app, config, passport, redisClient) {
         , function (error, response, body) {
           app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/facts/macaddress'});
           var facts = body;
+	  var returns = new Array();
           for (var i = 0; i<facts.length; i++)
           {
-              if (facts[i].value = req.params.macaddress)
+              if (facts[i].value == req.params.macaddress)
               {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.write(JSON.stringify({ hostname: facts[i].certname }));
-                res.end();
+		returns.push({ hostname: facts[i].certname });
               }
           }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify(returns));
+          res.end();
         });
     });
 
