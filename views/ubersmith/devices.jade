@@ -21,7 +21,7 @@ block content
                     tr
                       th ID
                       th Type
-                      th Description
+                      th Hostname
                       th Company
                       th Location
                       th Status
@@ -74,9 +74,15 @@ block footer
               }, {
                 "mData": "type"
               }, {
-                "mData": "desc"
+                "mData": "desc",
+                "mRender": function (desc) {
+                  return '<a href="/ubersmith/devices/hostname/' + desc + '.contegix.mgmt">' + desc + '</a>';
+                }
               }, {
-                "mData": "company"
+                "mData": "company",
+                "mRender": function (company, type, row) {
+                  return '<a href="/ubersmith/clients/clientid/'+row['clientid']+'">' + company + '</a>';
+                }
               }, {
                 "mData": "location"
               }, {
