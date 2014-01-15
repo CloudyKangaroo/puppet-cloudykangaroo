@@ -11,6 +11,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/events/ubersmith/event/:event'
     , function(req, res){
       var form = new formidable.IncomingForm;
+      var fields = {};
 
       app.locals.logger.log('debug', 'incoming event', { event: req.params.event, path: req.path })
 
@@ -19,12 +20,12 @@ module.exports = function (app, config, passport, redisClient) {
           app.locals.logger.log('error', 'could not process incoming event', { error: err, event: req.params.event, path: req.path });
           res.send(500);
         }
-	app.locals.logger.log('info', 'parsing form', { fields: fields, files: files, event: req.params.event });
+	      app.locals.logger.log('info', 'parsing form', { fields: fields, files: files, event: req.params.event });
       });
-
 
       form.on('field', function(name, value) {
         app.locals.logger.log('info', 'event field received', { field: name, event: req.params.event, value: value });
+        fields[name] = value;
       });
 
       form.on('progress', function(bytesReceived, bytesExpected) {
@@ -37,6 +38,7 @@ module.exports = function (app, config, passport, redisClient) {
       });
 
       form.on('end', function() {
+        app.locals.logger.log('debug', 'event complete', { event: req.params.event, fields: fields});
         // 202 Accepted
         res.send(202);
       });
