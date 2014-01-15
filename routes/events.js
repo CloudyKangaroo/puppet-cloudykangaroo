@@ -19,11 +19,16 @@ module.exports = function (app, config, passport, redisClient) {
           app.locals.logger.log('error', 'could not process incoming event', { error: err, event: req.params.event, path: req.path });
           res.send(500);
         }
-        console.log(fields);
+	app.locals.logger.log('info', 'parsing form', { fields: fields, files: files, event: req.params.event });
+      });
+
+
+      form.on('field', function(name, value) {
+        app.locals.logger.log('info', 'event field received', { field: name, event: req.params.event, value: value });
       });
 
       form.on('progress', function(bytesReceived, bytesExpected) {
-        //    console.log(bytesReceived + ' ' + bytesExpected);
+        app.locals.logger.log('debug', 'incoming form data', { bytesReceived: bytesReceived, bytesExpected: bytesExpected });
       });
 
       form.on('error', function(err) {
@@ -31,7 +36,9 @@ module.exports = function (app, config, passport, redisClient) {
         res.send(500);
       });
 
-      // 202 Accepted
-      res.send(202);
+      form.on('end', function() {
+        // 202 Accepted
+        res.send(202);
+      });
     });
 }
