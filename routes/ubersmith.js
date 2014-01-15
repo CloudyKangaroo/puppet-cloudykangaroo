@@ -468,26 +468,4 @@ module.exports = function (app, config, passport, redisClient) {
         }
       });
     });
-
-  app.post('/ubersmith/event/*'
-    , function(req, res){
-      var form = new formidable.IncomingForm;
-      console.log(req.path);
-      form.parse(req, function(err, fields, files){
-        if (err) return res.end('You found error');
-        console.log(fields);
-      });
-
-      form.on('progress', function(bytesReceived, bytesExpected) {
-  //    console.log(bytesReceived + ' ' + bytesExpected);
-      });
-
-      form.on('error', function(err) {
-        res.writeHead(200, {'content-type': 'text/plain'});
-        res.end('error:\n\n'+util.inspect(err));
-      });
-
-      res.writeHead(200, {'content-type': 'text/plain'});
-      res.end('complete');
-    });
 }
