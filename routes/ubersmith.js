@@ -502,6 +502,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/clients/clientid/:clientid'
     , app.locals.requireGroup('users')
     , function (req, res) {
+      var _ = require('underscore');
       redisClient.get('client.list', function (err, reply) {
         if (!reply)
         {
@@ -512,10 +513,20 @@ module.exports = function (app, config, passport, redisClient) {
           redisClient.get('device.list.clientid', function(err, reply) {
             var deviceList = JSON.parse(reply);
             var devices = deviceList[req.params.clientid];
-            //res.writeHead(200, { 'Content-Type': 'application/json' });
-            //res.write(JSON.stringify({deviceList: devices, client: client}));
-            //res.end();
-            res.render('ubersmith/client', { devices: devices, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
+            redisClient.get('client.contact_list_' + req.params.clientid, function (err, reply) {
+              client.contacts = new Array();
+              if (reply)
+              {
+                var contacts = JSON.parse(reply);
+                Object.keys(contacts).forEach(function(contactID)
+                {
+                  var contact = contacts[contactID];
+                  var filteredContact = _.pick(contact, 'billing_role', 'sales_role', 'dc_access_role', 'real_name', 'email_name', 'email_domain', 'login', 'phone', 'email');
+                  client.contacts.push(filteredContact);
+                });
+              }
+              res.render('ubersmith/client', { devices: devices, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
+            });
           });
         }
       });
@@ -541,6 +552,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/clients/list/clientid/:clientid'
     , app.locals.requireGroup('users')
     , function (req, res) {
+      var _ = require('underscore');
       redisClient.get('client.list', function (err, reply) {
         if (!reply)
         {
@@ -548,9 +560,27 @@ module.exports = function (app, config, passport, redisClient) {
         } else {
           var clientList = JSON.parse(reply);
           var client = clientList[req.params.clientid];
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify(client));
-          res.end();
+          redisClient.get('client.contact_list_' + req.params.clientid, function (err, reply) {
+            client.contacts = new Array();
+            if (reply)
+            {
+              var contacts = JSON.parse(reply);
+              Object.keys(contacts).forEach(function(contactID)
+              {
+                var contact = contacts[contactID];
+                var filteredContact = _.pick(contact, 'real_name', 'email_name', 'email_domain', 'login', 'phone', 'email');
+                client.contacts.push(filteredContact);
+              });
+            }
+            var filteredClient = _.pick(client, 'clientid', 'full_name', 'company', 'email', 'phone', 'salesperson', 'contacts');
+            if (filteredClient.full_name == '')
+            {
+              filteredClient.full_name = client.first + ' ' + client.last;
+            }
+            res.type('application/json');
+            res.send(JSON.stringify(filteredClient));
+          });
+
         }
       });
     });
@@ -579,30 +609,92 @@ module.exports = function (app, config, passport, redisClient) {
       var aReturn = Array();
       var foundSome = false;
       var filteredDevice = {};
+      var aSyncRequests = new Array();
+      var _ = require('underscore');
 
       redisClient.get('client.list', function (err, reply) {
-
         if (!reply) {
           res.send(500);
         } else {
           var clientList= JSON.parse(reply);
           Object.keys(clientList).forEach(function(clientid) {
-            client = clientList[clientid];
-            if (client.company != 'REMOVED') {
-              var offset = moment(client.created*1000);
-              var created = offset.format('MMM DD H:mm:ss');
-              filteredDevice = Array(client.clientid, client.full_name, client.listed_company, client.salesperson, client.acctmgr, created);
-              aReturn.push(filteredDevice);
-              foundSome = true;
+            if (clientList[clientid].company != 'REMOVED' && clientList[clientid].active == 1) {
+              aSyncRequests.push(
+                function (callback) {
+                  //app.locals.logger.log('debug', 'requesting client id ' + clientid, {});
+                  redisClient.get('client.contact_list_' + clientid
+                    , function (error, response) {
+                      if (error)
+                      {
+                        callback(error, { response: response, type: 'error', clientid: clientid});
+                      } else {
+                        callback(error, { response: JSON.parse(response), type: 'contact_list', clientid: clientid});
+                      }
+                    }
+                  );
+                }
+              );
             }
-          })
+          });
+          async.parallel(aSyncRequests
+            , function(error, results) {
+              if (error) {
+                app.locals.logger.log('error', 'Error executing parallel requests',{error: error});
+                res.send(500);
+              } else {
+                var hosts = {};
+                for (g=0; g<results.length; g++)
+                {
+                  var result = results[g];
+                  if (!result.type)
+                  {
+                    app.locals.logger.log('error', 'Could not parse results' , {error: JSON.stringify(result)});
+                    res.send(500);
+                    return;
+                  }
 
-          if (foundSome) {
-            res.type('application/json');
-            res.send(JSON.stringify({ aaData: aReturn }));
-          } else {
-            res.send(404);
-          }
+                  switch (result.type)
+                  {
+                    case 'error':
+                      app.locals.logger.log('error',  'Could not parse results' , {error: JSON.stringify(result)});
+                      res.send(500);
+                      return;
+                      break;
+                    default:
+                      if (result.clientid in clientList && result.response)
+                      {
+                        //app.locals.logger.log('debug', 'completed for client ' + result.clientid, { result: result });
+                        var contacts = result.response;
+                        clientList[result.clientid].contacts = new Array();
+                        Object.keys(contacts).forEach(function(contactID)
+                        {
+                          var contact = contacts[contactID];
+                          var filteredContact = _.pick(contact, 'real_name', 'email_name', 'email_domain', 'login', 'phone', 'email');
+                          clientList[result.clientid].contacts.push(filteredContact);
+                        });
+                      }
+                  }
+                }
+                Object.keys(clientList).forEach(function(clientid) {
+                  client = clientList[clientid];
+                  if (client.company != 'REMOVED' && client.active == 1) {
+                    filteredClient = _.pick(client, 'clientid', 'full_name', 'company', 'email', 'phone', 'salesperson', 'contacts');
+                    if (filteredClient.full_name == '')
+                    {
+                      filteredClient.full_name = client.first + ' ' + client.last;
+                    }
+                    aReturn.push(filteredClient);
+                    foundSome = true;
+                  }
+                });
+              }
+              if (foundSome) {
+                res.type('application/json');
+                res.send(JSON.stringify({ aaData: aReturn }));
+              } else {
+                res.send(404);
+              }
+            });
         }
       });
     });

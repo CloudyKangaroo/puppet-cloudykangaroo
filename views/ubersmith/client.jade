@@ -11,7 +11,7 @@ block content
         .panel.panel-default
           .panel-heading Device List
           .panel-body
-            table.table.table-condensed
+            table.table.table-condensed.table-striped
               thead
                 tr
                   th Type
@@ -29,17 +29,36 @@ block content
                     td #{device.status}
                     td #{device.location}
       .row
-        .col-md-6
+        .col-md-8
           .panel.panel-default
-            .panel-heading Fill this Section In
+            .panel-heading Contacts List
             .panel-body
-              p Status
-                span.lavel.label-success.pull-right Active
-              p Things
-                span.pull-right asdf
-              p Contacts
+              table(id="table_contacts").table.table-condensed.table-striped
+                thead
+                  tr
+                    th Information
+                    th Roles
+                tbody
+                  each contact in client.contacts
+                    tr
+                      td
+                        ul.list-group
+                          li.list-group-item Name:
+                            span.pull-right #{contact.real_name}
+                          li.list-group-item Email:
+                            span.pull-right  #{contact.email}
+                          li.list-group-item Phone:
+                            span.pull-right  #{contact.phone}
+                      td
+                        ul.list-group
+                          li.list-group-item Sales Role:
+                            span.pull-right #{contact.sales_role}
+                          li.list-group-item Billing Role:
+                            span.pull-right  #{contact.billing_role}
+                          li.list-group-item DC Access Role:
+                            span.pull-right  #{contact.dc_access_role}
 
-        .col-md-6
+        .col-md-4
           .panel.panel-default
             .panel-heading Account Information
             .panel-body
@@ -56,8 +75,8 @@ block content
                   li.list-group-item Name:
                     span.pull-right #{client.first} #{client.last}
                   li.list-group-item Email:
-                    span.pull-right
+                    span.pull-right  #{client.email}
                   li.list-group-item Phone:
-                    span.pull-right
+                    span.pull-right  #{client.phone}
 
 block footer
