@@ -58,9 +58,11 @@ module.exports = function (app, config, passport, redisClient) {
                 returns.push({ hostname: facts[i].certname, interface: facts[i].name.substring(11) });
               }
           }
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify(returns));
+          var resBody = JSON.stringify(returns);
+          res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
+          res.write(resBody);
           res.end();
+
         });
     });
 
