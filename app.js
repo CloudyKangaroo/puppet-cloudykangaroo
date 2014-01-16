@@ -209,7 +209,8 @@ var timer = collection.timer('requestTime');
  */
 setInterval(function() {
   var metricslogger = ctxlog('metrics', 'debug', {level: 'error'});
-  metricslogger.log('debug', 'metrics output', collection.toJSON());
+  var collectionJSON = collection.toJSON();
+  metricslogger.log('debug', 'metrics output', { collection: collectionJSON, type: 'metrics'});
 }, config.metrics.interval || 15000);
 
 function rpsMeter(req, res, next) {

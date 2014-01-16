@@ -9,7 +9,7 @@ config.navLinks = {
   ],
   ubersmith: [
     { label: 'Dashboard', key: 'dashboard', path: '/ubersmith' },
-    { label: 'Customers', key: 'clients', path: '/ubersmith/customers' },
+    { label: 'Customers', key: 'clients', path: '/ubersmith/clients' },
     { label: 'Devices', key: 'devices', path: '/ubersmith/devices' },
     { label: 'Tickets', key: 'tickets', path: '/ubersmith/tickets' }
   ],
