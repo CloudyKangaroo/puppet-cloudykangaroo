@@ -5,6 +5,7 @@ config.navLinks = {
     { label: 'Home', key: 'profile', path: '/account' },
     { label: 'Monitoring', key: 'monitoring', path: '/monitoring' },
     { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' },
+    { label: 'Chat', key: 'chat', path: '/account/chat' },
     { label: 'Logout', key: 'logout', path: '/account/logout' }
   ],
   ubersmith: [

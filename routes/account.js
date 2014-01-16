@@ -13,6 +13,17 @@ module.exports = function (app, config, passport, redisClient) {
       res.render('account/login', { user:req.user, message:req.flash('error'), section: 'logout', navLinks: config.navLinks.account });
     });
 
+  app.get('/account/chat'
+    , function (req, res) {
+      res.render('account/chat', { user:req.user, section: 'chat', navLinks: config.navLinks.account });
+    });
+
+  app.post('/account/chat'
+    , function (req, res) {
+      res.render('account/chat', { user:req.user, section: 'chat', navLinks: config.navLinks.account });
+    });
+
+
   app.post('/account/login'
     , passport.authenticate('atlassian-crowd'
     , { failureRedirect:'/account', failureFlash:"Invalid username or password."})

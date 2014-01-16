@@ -20,6 +20,20 @@ var useragent = require('express-useragent');
 
 require('enum').register();
 
+var nxb = require('node-xmpp-bosh');
+var server = nxb.start_bosh({
+  logging: 'DEBUG',
+  port: 5280,
+  path: /^\/http-bind(\/+)?$/,
+  no_tls_domains: [ 'xmpp.contegix.com', 'xmpp.myogre.com', 'conference.contegix.com', 'conference.xmpp.myogre.com' ],
+  firewall: {
+    //allow: [ 'xmpp.contegix.com', 'xmpp.myogre.com', 'conference.contegix.com', 'conference.xmpp.myogre.com' ],
+    //deny:  [ /* 'gmail.com' */ ]
+  },
+  max_bosh_connections: 15,
+  system_info_password: 'admin2'
+});
+
 /*
   Initialize the Logging Framework
  */
@@ -180,13 +194,13 @@ app.use(app.router);
 
 /*
   Handle Errors
- */
+ */ /*
 app.use(function(err, req, res, next) {
   if(!err) return next(); // you also need this line
   logger.log('error', 'Express caught error in request', { error: err, requestID: req.id, sessionID: req.sessionID});
   res.send(500);
 //  next(err);
-});
+});   */
 
 /*
   Last chance, perhaps it is a static resource, most of this offloaded to Nginx
