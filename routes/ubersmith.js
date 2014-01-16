@@ -474,7 +474,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/clients'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      res.render('ubersmith/clients', { user:req.user, section: 'customers', navLinks: config.navLinks.ubersmith });
+      res.render('ubersmith/clients', { user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
     });
 
   app.get('/ubersmith/clients/copmany/:company'
