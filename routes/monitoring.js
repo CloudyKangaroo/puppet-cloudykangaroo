@@ -102,6 +102,27 @@ module.exports = function (app, config, passport, redisClient) {
       })
     });
 
+  app.get('/monitoring/list/clients'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var _ = require('underscore');
+      request({ url: app.get('sensu_uri') + '/clients', json: true}, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('sensu_uri') + '/clients'});
+          var clients = body;
+          for (i=0; i<clients.length; i++)
+          {
+            clients[i].timestamp = app.locals.getFormattedTimestamp(clients[i].timestamp);
+          }
+          res.type('application/json');
+          res.send(JSON.stringify({ aaData: clients }));
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/clients'})
+          res.send(500);
+        }
+      });
+  });
+
   app.get('/monitoring/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {

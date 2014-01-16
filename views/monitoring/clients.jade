@@ -1,13 +1,13 @@
 extends ../layout
 block head
-  link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+  link(rel='stylesheet', href='/stylesheets/dataTables.bootstrap.css')
 block navbar
 block content
   .container
     .page-header
       h1 Current Client List
     .container
-      table.table.table-condensed.sortable
+      table(id="table_clients").table.table-condensed.sortable
         thead
           tr
             th Name
@@ -15,13 +15,34 @@ block content
             th Timestamp
             th Subscriptions
         tbody
-          each client in clients
-            tr
-              td #{client.name}
-              td #{client.address}
-              td #{getFormattedTimestamp(client.timestamp)}
-              td
-                ul.list-unstyled
-                  each subscription in client.subscriptions
-                    li= subscription
+
 block footer
+  script(src='/javascripts/jquery.dataTables.min.js')
+  script(src='/javascripts/dataTables.bootstrap.js')
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_clients').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/monitoring/list/clients',
+        "iDisplayLength": 20,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "name",
+            "mRender": function (name) {
+              return '<a href="/ubersmith/devices/hostname/'+name+'">' + name + '</a>';
+            }
+          }, {
+            "mData": "address"
+          }, {
+            "mData": "timestamp"
+          }, {
+            "mData": "subscriptions"
+          }],
+        "aaSorting": [[0,'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
