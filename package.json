@@ -34,6 +34,7 @@
     "util": "0.10.x",
     "uuid": "1.4.x",
     "mkdirp": "0.3.5",
+    "node-xmpp-bosh": "0.7.x",
     "connect-requestid": "1.0.x",
     "connect-redis": "1.4.x",
     "express-request-logger": "0.0.x",
