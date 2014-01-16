@@ -73,7 +73,7 @@ module.exports = function (app, config, passport, redisClient) {
       request({ url: app.get('puppetdb_uri') + '/nodes/' + req.params.node + '/facts', json: true}
         , function (error, response, body) {
           app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + req.params.node + '/facts'});
-          var resBody = JSON.stringify(returns);
+          var resBody = JSON.stringify({ aaData: body });
           res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
           res.write(resBody);
           res.end();
