@@ -521,8 +521,11 @@ module.exports = function (app, config, passport, redisClient) {
                 Object.keys(contacts).forEach(function(contactID)
                 {
                   var contact = contacts[contactID];
-                  var filteredContact = _.pick(contact, 'billing_role', 'sales_role', 'dc_access_role', 'real_name', 'email_name', 'email_domain', 'login', 'phone', 'email');
-                  client.contacts.push(filteredContact);
+                  if (contact.active == 1)
+                  {
+                    var filteredContact = _.pick(contact, 'billing_role', 'sales_role', 'dc_access_role', 'real_name', 'email_name', 'email_domain', 'login', 'phone', 'email');
+                    client.contacts.push(filteredContact);
+                  }
                 });
               }
               res.render('ubersmith/client', { devices: devices, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
