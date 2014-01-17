@@ -47,9 +47,11 @@ block footer
             "mData": "listed_company",
             "mRender": function (listed_company, type, row) {
               if (listed_company)
-                return '<a href="/ubersmith/devices/hostname/' + row[ + '.contegix.mgmt">' + listed_company.slice(0,15) + '</a>';
-              else
-                return '-'
+              {
+                return '<a href="/ubersmith/clients/clientid/' + row['client_id'] + '">' + listed_company.slice(0,15) + '</a>';
+              } else {
+                return '-';
+              }
             }
           }, {
             "mData": "admin_username"

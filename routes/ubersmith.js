@@ -528,7 +528,7 @@ module.exports = function (app, config, passport, redisClient) {
                   }
                 });
               }
-              res.render('ubersmith/client', { devices: devices, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
+              res.render('ubersmith/client', { clientid: req.params.clientid, devices: devices, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
             });
           });
         }
@@ -588,6 +588,34 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
 
+  app.get('/ubersmith/tickets/list/clientid/:clientid'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      redisClient.get('support.ticket_list', function (err, reply) {
+        if (!reply) {
+          res.send(500);
+        } else {
+          var tickets = Array();
+          var ticketList = JSON.parse(reply);
+          Object.keys(ticketList).forEach(
+            function (ticketID) {
+              var uberTicket = ticketList[ticketID];
+              if (uberTicket.type.indexOf("Closed") == -1 && uberTicket.client_id == req.params.clientid)
+              {
+                uberTicket.client_activity = app.locals.getFormattedTimestamp(uberTicket.client_activity)
+                uberTicket.timestamp = app.locals.getFormattedTimestamp(uberTicket.timestamp)
+                uberTicket.activity = app.locals.getFormattedTimestamp(uberTicket.activity)
+                uberTicket.admin_initial_response = app.locals.getFormattedTimestamp(uberTicket.admin_initial_response)
+                var filteredTicket = { priority: uberTicket.priority, type: uberTicket.type, timestamp: uberTicket.timestamp, activity: uberTicket.activity, activity_type: uberTicket.activity_type, client_id: uberTicket.client_id, listed_company: uberTicket.listed_company, q_name: uberTicket.q_name, admin_username: uberTicket.admin_username, subject: uberTicket.subject, device_id: uberTicket.device_id }
+                tickets.push(filteredTicket);
+              }
+            });
+          res.type('application/json');
+          res.send({ aaData: tickets });
+        }
+      });
+    });
+
   app.get('/ubersmith/clients/list/clientid/:clientid/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -604,6 +632,9 @@ module.exports = function (app, config, passport, redisClient) {
         }
       })
     });
+
+
+
 
   // Used by Customer Browser, returns table data
   app.get('/ubersmith/clients/list'
