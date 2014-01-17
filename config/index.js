@@ -30,8 +30,9 @@ config.puppetdb = {};
 config.http = {};
 config.cookie = {};
 config.log = {};
-config.metrics = {}
-
+config.metrics = {};
+config.ubersmith = {};
+config.ubersmith.enable = false;
 config.log.access_log = './access.log';
 config.metrics.interval = 15000;
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
