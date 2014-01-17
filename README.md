@@ -3,6 +3,8 @@ cloudykangaroo
 
 Sensu Monitoring Interface
 
+[![Build Status](https://api.travis-ci.org/johann8384/cloudykangaroo.png?branch=master)](https://travis-ci.org/johann8384/cloudykangaroo)
+
 Notes:
 
 Add to .git/config:
