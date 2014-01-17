@@ -19,21 +19,6 @@ var uuid = require('uuid');
 var useragent = require('express-useragent');
 
 require('enum').register();
-
-var nxb = require('node-xmpp-bosh');
-var server = nxb.start_bosh({
-  logging: 'DEBUG',
-  port: 5280,
-  path: /^\/http-bind(\/+)?$/,
-  no_tls_domains: [ 'xmpp.contegix.com', 'xmpp.myogre.com', 'conference.contegix.com', 'conference.xmpp.myogre.com' ],
-  firewall: {
-    //allow: [ 'xmpp.contegix.com', 'xmpp.myogre.com', 'conference.contegix.com', 'conference.xmpp.myogre.com' ],
-    //deny:  [ /* 'gmail.com' */ ]
-  },
-  max_bosh_connections: 15,
-  system_info_password: 'admin2'
-});
-
 /*
   Initialize the Logging Framework
  */
