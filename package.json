@@ -21,7 +21,8 @@
   },
   "scripts": {
     "start": "node ./app.js 2>logs/error.log >logs/output.log",
-    "postdeploy": "mkdir -p ./logs"
+    "postdeploy": "mkdir -p ./logs",
+    "test": "expresso test/*"
   },
   "dependencies": {
     "express": "3.4.x",
