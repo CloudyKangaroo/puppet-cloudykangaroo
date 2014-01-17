@@ -73,7 +73,9 @@ redisClient.on("connect", function () {
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
-var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
+if (config.ubersmith.enable) {
+  var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
+}
 
 /**
  * Authentication System
@@ -430,6 +432,10 @@ app.locals.getCombinedDevices = function () {
 
 require("./routes")(app, config, passport, redisClient);
 
-http.createServer(app).listen(app.get('port'), function () {
-  logger.log('info', 'Express server listening on port ' + app.get('port'), {});
-});
+if (!module.parent) {
+  http.createServer(app).listen(app.get('port'), function () {
+    logger.log('info', 'Express server listening on port ' + app.get('port'), {});
+  });
+}
+
+module.exports = app;
