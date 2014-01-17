@@ -18,10 +18,10 @@ html
         Candy.init('/http-bind/', {
           core: {
             debug: true,
-            autojoin: ['engineers@conference.contegix.com', 'operations@conference.contegix.com']
+            autojoin: ['engineers@conference.xmpp.myogre.com', 'operations@conference.xmpp.myogre.com']
           },
           view: { resources: '/res/' }
         });
-        Candy.Core.connect('#{user.username}@xmpp.contegix.com');
+        Candy.Core.connect('#{user.username}@xmpp.myogre.com');
         //Candy.Core.connect('xmpp.contegix.com:5223', null, 'jonathan.creasy');
       });

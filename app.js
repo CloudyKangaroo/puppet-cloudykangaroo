@@ -19,6 +19,7 @@ var uuid = require('uuid');
 var useragent = require('express-useragent');
 
 require('enum').register();
+
 /*
   Initialize the Logging Framework
  */
