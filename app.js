@@ -2,46 +2,32 @@
  * Application Dependencies
  */
 
+// Site Specific Requirements
 require('./config/system-credentials.js');
-
 var config = require('./config');
-var winston = require('winston');
-var reqLogger = require('express-request-logger');
-var moment = require('moment');
+
+// Generic Requirements
 var redis = require('redis');
 var express = require('express');
 var http = require('http');
 var path = require('path');
 var flash = require('connect-flash');
-var _ = require('underscore');
 var passport = require('passport');
-var uuid = require('uuid');
 var useragent = require('express-useragent');
-
-require('enum').register();
 
 /*
   Initialize the Logging Framework
  */
+
+// Application Logs
 var ctxlog = require('./lib/ctxlog');
 var logger = ctxlog('main', 'info', { level: 'debug'});
 var auditLog = ctxlog('audit', 'info', {level: 'error'}, {level: 'debug'});
 
+// Access Logs
+var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
-
-var util = require('util');
-
-util.inspect.styles =
-{ special: 'cyan',
-  number: 'yellow',
-  boolean: 'yellow',
-  undefined: 'grey',
-  null: 'bold',
-  string: 'green',
-  date: 'magenta',
-  regexp: 'red'
-};
 
 /*
   Connect to Redis
@@ -53,27 +39,28 @@ redisClient.on('error', function (error) {
   logger.log('error', 'Redis Connect Error', { error: error });
 });
 
-redisClient.on("connect", function () {
-  var redisTestUUID = uuid.v4();
-  redisClient.set('test_' + redisTestUUID, redisTestUUID);
-  redisClient.get('test_' + redisTestUUID
-    , function (error, response) {
-        if (error)
-        {
-          logger.log('error', 'Error retrieving value from Redis during startup test', error);
-        } else {
-          if (response != redisTestUUID)
+redisClient.on("connect"
+  , function () {
+    var redisTestUUID = require('uuid').v4();
+    redisClient.set('test_' + redisTestUUID, redisTestUUID);
+    redisClient.get('test_' + redisTestUUID
+      , function (error, response) {
+          if (error)
           {
-            logger.log('error', 'Redis returned the incorrect value for redisTestUUID', { redisTestUUID: redisTestUUID, response: response });
+            logger.log('error', 'Error retrieving value from Redis during startup test', error);
+          } else {
+            if (response != redisTestUUID)
+            {
+              logger.log('error', 'Redis returned the incorrect value for redisTestUUID', { redisTestUUID: redisTestUUID, response: response });
+            }
           }
-        }
-    }
-  );
-});
+        });
+  });
 
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
+
 if (config.ubersmith.enable) {
   var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
 }
@@ -83,9 +70,6 @@ if (config.ubersmith.enable) {
  */
 
 var users = [];
-
-// passport-attlassian-crowd from : https://bitbucket.org/knecht_andreas/passport-atlassian-crowd
-// MIT License
 
 passport.serializeUser(function(user, done) {
   var userId = RegExp('[^/]*$').exec(user.id)||[,null][1];
@@ -100,6 +84,9 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
+// passport-attlassian-crowd from : https://bitbucket.org/knecht_andreas/passport-atlassian-crowd
+// MIT License
+
 var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
 
 passport.use(new AtlassianCrowdStrategy({
@@ -111,7 +98,7 @@ passport.use(new AtlassianCrowdStrategy({
   function (userprofile, done) {
     // asynchronous verification, for effect...
     process.nextTick(function () {
-
+      var _ = require('underscore');
       var exists = _.any(users, function (user) {
         return user.id == userprofile.id;
       });
@@ -137,23 +124,35 @@ var RedisStore = require('connect-redis')(express);
 
 app.locals.logger = logger;
 app.locals.audit = auditLog;
-app.locals.moment = require('moment')
+app.locals.moment = require('moment');
+
 app.enable('trust proxy');
+
+app.set('title', 'Cloudy Kangaroo');
 app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.set('puppetdb_uri', 'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3');
 
-app.use(require('connect-requestid'));
-app.use(useragent.express());
-app.use(express.logger({stream: logstream }));
-app.use(express.favicon());
 app.use(reqLogger.create(logger));
-app.use(flash());
-app.use(express.json());
+app.use(express.logger({stream: logstream }));
+
+// Compress response data with gzip / deflate.
+app.use(express.compress());
+app.use(express.favicon());
+
+// http://www.senchalabs.org/connect/json.html
+// Parse JSON request bodies, providing the parsed object as req.body.
+// MIT https://github.com/senchalabs/connect/blob/master/LICENSE
+app.use(express.json({strict: true}));
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+
+app.use(require('connect-requestid'));
+app.use(useragent.express());
+app.use(flash());
+
 
 /*
  Initialize the session and prepare user authentication
@@ -167,8 +166,10 @@ app.use(express.session({
   }),
   secret: config.cookie.secret
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.csrf())
 
 /*
    Route requests through the metrics and logging processing
@@ -290,10 +291,10 @@ function rpsMeter(req, res, next) {
 /**
  * Development Environment Code
  */
-if ('development' == app.get('env')) {
-  // Use the express errorHandler
+app.configure('development', function(){
   app.use(express.errorHandler());
-}
+})
+
 
 app.locals.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
@@ -339,6 +340,7 @@ app.locals.requireGroup = function (group) {
 
 
 app.locals.getEventClass = function (eventStatus) {
+  require('enum').register();
   var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
   var eventClass = StatusEnum.get(eventStatus);
   return eventClass;
@@ -348,7 +350,7 @@ app.locals.getFormattedTimestamp = function (timeStamp, dateString) {
   if (arguments.length == 1) {
     var dateString = 'MMM DD H:mm:ss';
   }
-  var offset = moment(timeStamp * 1000);
+  var offset = app.locals.moment(timeStamp * 1000);
   return offset.format(dateString);
 }
 
@@ -356,7 +358,7 @@ app.locals.getFormattedISO8601 = function (timeStamp, dateString) {
   if (arguments.length == 1) {
     var dateString = 'MMM DD H:mm:ss';
   }
-  var offset = moment(timeStamp);
+  var offset = app.locals.moment(timeStamp);
   return offset.format(dateString);
 }
 
