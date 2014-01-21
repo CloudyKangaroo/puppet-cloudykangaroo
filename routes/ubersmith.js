@@ -6,25 +6,6 @@ module.exports = function (app, config, passport, redisClient) {
     , app.locals.ensureAuthenticated
     , function (req, res) {
 
-      /*async.parallel([
-        function(callback){
-          redisClient.get('support.ticket_count.low')
-          setTimeout(function(){
-            callback(null, 'one');
-          }, 200);
-        },
-        function(callback){
-          setTimeout(function(){
-            callback(null, 'two');
-          }, 100);
-        }
-      ],
-      // optional callback
-      function(err, results){
-        // the results array will equal ['one','two'] even though
-        // the second function had a shorter timeout.
-      });*/
-
       redisClient.mget(['support.ticket_count.low', 'support.ticket_count.normal', 'support.ticket_count.high', 'support.ticket_count.urgent', 'support.ticket_count.total', 'uber.event_list', 'support.ticket_count'], function(err, reply){
         if (!reply) {
           app.locals.logger.log('error', 'redis mget error', { err: err});
@@ -407,6 +388,26 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
 
+  app.get('/ubersmith/devices/list/deviceid/:device_id/tickets'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      redisClient.smembers('devices:deviceid:' + req.params.device_id + ':tickets', function (err, reply) {
+        if (!reply) {
+          res.send(500);
+        } else {
+          var tickets = parseRedisSet(reply);
+          for (i=0; i<tickets.length; i++)
+          {
+            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify({ aaData: tickets}));
+          res.end();
+        }
+      });
+    });
+
   app.get('/ubersmith/exceptions'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -458,18 +459,7 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
-/*  // Not yet used, returns a specific device
-  app.get('/ubersmith/devices/device/:device_id'
-    , function (req, res) {
-      var deviceList = redisClient.get('device.list');
-      if (!deviceList[req.params.device_id]) {
-        res.send(404);
-      } else {
-        res.type('application/json');
-        res.send(JSON.stringify(deviceList[req.params.device_id]));
-      }
-    });
-*/
+
   // Ubersmith Customer Browser
   app.get('/ubersmith/clients'
     , app.locals.requireGroup('users')
@@ -510,9 +500,20 @@ module.exports = function (app, config, passport, redisClient) {
         } else {
           var clientList = JSON.parse(reply);
           var client = clientList[req.params.clientid];
-          redisClient.get('device.list.clientid', function(err, reply) {
-            var deviceList = JSON.parse(reply);
-            var devices = deviceList[req.params.clientid];
+          redisClient.smembers('devices:clientid:' + req.params.clientid, function (err, reply) {
+            var devices = new Array();
+            for (i=0; i<=reply.length;i++)
+            {
+              if (reply[i] != 'undefined')
+              {
+                try {
+                  var device = reply[i];
+                  devices.push(JSON.parse(reply[i]));
+                } catch (e) {
+                  app.locals.logger.log('debug', 'Tried to parse invalid JSON: "' + e.message + '"', { json: reply[i]});
+                }
+              }
+            }
             redisClient.get('client.contact_list_' + req.params.clientid, function (err, reply) {
               client.contacts = new Array();
               if (reply)
@@ -588,15 +589,23 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
 
-  app.get('/ubersmith/tickets/list/clientid/:clientid'
+  app.get('/ubersmith/clients/list/clientid/:clientid/tickets'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      redisClient.get('support.ticket_list', function (err, reply) {
+      redisClient.smembers('client:' + req.params.clientid + ':tickets', function (err, reply) {
         if (!reply) {
           res.send(500);
         } else {
-          var tickets = Array();
-          var ticketList = JSON.parse(reply);
+          var tickets = parseRedisSet(reply);
+          for (i=0; i<tickets.length; i++)
+          {
+            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify({ aaData: tickets}));
+          res.end();
+          /*var ticketList = JSON.parse(reply);
           Object.keys(ticketList).forEach(
             function (ticketID) {
               var uberTicket = ticketList[ticketID];
@@ -611,7 +620,7 @@ module.exports = function (app, config, passport, redisClient) {
               }
             });
           res.type('application/json');
-          res.send({ aaData: tickets });
+          res.send({ aaData: tickets });*/
         }
       });
     });
@@ -619,22 +628,19 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/clients/list/clientid/:clientid/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      redisClient.get('device.list.clientid', function (err, reply) {
-        if (!reply)
-        {
+      var clientid = req.params.clientid;
+      redisClient.smembers('devices:clientid:' + clientid, function (err, reply) {
+        if (!reply) {
+          app.locals.logger.log('error', 'could not retrieve host: ' + 'devices:hostname:' + hostname, {});
           res.send(500);
         } else {
-          var deviceListByClientID = JSON.parse(reply);
-          var deviceList = deviceListByClientID[req.params.clientid];
+          var devices = parseRedisSet(reply);
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify(deviceList));
+          res.write(JSON.stringify({ aaData: devices}));
           res.end();
         }
-      })
+      });
     });
-
-
-
 
   // Used by Customer Browser, returns table data
   app.get('/ubersmith/clients/list'
@@ -732,4 +738,21 @@ module.exports = function (app, config, passport, redisClient) {
         }
       });
     });
+  function parseRedisSet(reply)
+  {
+    var items = new Array();
+    for (i=0; i<=reply.length;i++)
+    {
+      if (reply[i] != 'undefined')
+      {
+        try {
+          var item = reply[i];
+          items.push(JSON.parse(item));
+        } catch (e) {
+          app.locals.logger.log('debug', 'Tried to parse invalid JSON: "' + e.message + '"', { json: reply[i]});
+        }
+      }
+    }
+    return items;
+  }
 }
