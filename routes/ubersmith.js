@@ -31,7 +31,6 @@ module.exports = function (app, config, passport, redisClient) {
           app.locals.logger.log('error', 'redis mget error', { err: err});
           res.send(500);
         } else {
-          //app.locals.logger.log('debug', 'redis mget reply', { reply: reply });
           var ticketLow = reply[0].replace(/"/g,'');
           var ticketNormal = reply[1].replace(/"/g,'');
           var ticketHigh = reply[2].replace(/"/g,'');
@@ -42,170 +41,6 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
 
-
-  // Ubersmith API Passthru
-  app.get('/ubersmith/data/:key'
-    , function (req, res) {
-      var key = req.params.key;
-      switch(key.toLowerCase())
-      {
-        case 'support.ticket_count.urgent':
-        case 'support.ticket_count.normal':
-        case 'support.ticket_count.low':
-        case 'support.ticket_count.high':
-        case 'support.ticket_count.total':
-        case 'device.type_list':
-        case 'support.ticket_count':
-        case 'client.list':
-        case 'device.list':
-          redisClient.get(key.toLowerCase(), function (err, reply) {
-            if (!reply) {
-              res.send(500);
-            } else {
-              res.type('application/json');
-              res.send(reply);
-            }
-          });
-          break;
-        case 'support.ticket_list':
-          redisClient.get(key.toLowerCase(), function (err, reply) {
-            if (!reply) {
-              res.send(500);
-            } else {
-              var tickets = Array();
-              var ticketList = JSON.parse(reply);
-              Object.keys(ticketList).forEach(
-                function (ticketID) {
-                  var uberTicket = ticketList[ticketID];
-                  if (uberTicket.type.indexOf("Closed") == -1)
-                  {
-                    uberTicket.client_activity = app.locals.getFormattedTimestamp(uberTicket.client_activity)
-                    uberTicket.timestamp = app.locals.getFormattedTimestamp(uberTicket.timestamp)
-                    uberTicket.activity = app.locals.getFormattedTimestamp(uberTicket.activity)
-                    uberTicket.admin_initial_response = app.locals.getFormattedTimestamp(uberTicket.admin_initial_response)
-                    var filteredTicket = { priority: uberTicket.priority, type: uberTicket.type, timestamp: uberTicket.timestamp, activity: uberTicket.activity, activity_type: uberTicket.activity_type, client_id: uberTicket.client_id, listed_company: uberTicket.listed_company, q_name: uberTicket.q_name, admin_username: uberTicket.admin_username, subject: uberTicket.subject, device_id: uberTicket.device_id }
-                    tickets.push(filteredTicket);
-                  }
-                });
-              res.type('application/json');
-              res.send({ aaData: tickets });
-            }
-          });
-          break;
-        case 'uber.event_list':
-          redisClient.get(key.toLowerCase(), function (err, reply) {
-            if (!reply) {
-              res.send(500);
-            } else {
-              var events = Array();
-              var eventList = JSON.parse(reply);
-              Object.keys(eventList).forEach(
-                function (eventID) {
-                  var uberEvent = eventList[eventID];
-                  uberEvent.time = app.locals.getFormattedTimestamp(uberEvent.time)
-                  events.push(uberEvent);
-                });
-              res.type('application/json');
-              res.send({ aaData: events });
-            }
-          });
-          break;
-        default:
-          res.send(400);
-          break;
-      }
-    });
-  app.get('/ubersmith/devices/location/rack/:rack'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation['racks'][req.params.rack]);
-        }
-      });
-    });
-  app.get('/ubersmith/devices/location/facility/:facility'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation[req.params.facility]);
-        }
-      });
-    });
-  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation[req.params.facility][req.params.zone]);
-        }
-      });
-    });
-  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage]);
-        }
-      });
-    });
-  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage][req.params.row]);
-        }
-      });
-    });
-  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row/rack/:rack'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage][req.params.row][req.params.rack]);
-        }
-      });
-    });
-  app.get('/ubersmith/devices/location/facility/:facility/zone/:zone/cage/:cage/row/:row/rack/:rack/pos/:pos'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.location', function (err, reply) {
-        console.log(err);
-        if (!reply) {
-          res.send(500);
-        } else {
-          var deviceListbyLocation = JSON.parse(reply);
-          res.send(deviceListbyLocation[req.params.facility][req.params.zone][req.params.cage][req.params.row][req.params.rack][req.params.pos]);
-        }
-      });
-    });
   // Device Browser
   app.get('/ubersmith/devices'
     , app.locals.requireGroup('users')
@@ -225,93 +60,42 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/devices/deviceid/:deviceid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      redisClient.get('device.list', function (err, reply) {
-        if (!reply) {
-          console.log('Sending 500: ' + err);
-          res.send(500);
-        } else {
-          var deviceList = JSON.parse(reply);
-          var uberDevice = deviceList[req.params.deviceid];
-          request({ url: app.get('sensu_uri') + '/events/' + uberDevice.dev_desc + '.contegix.mgmt', json: true }
-            , function (error, response, body) {
-              if (!error) {
-                if (response.statusCode < 300 && body.length > 0)
-                {
-                  var sensuEvents = body;
-                } else {
-                  var sensuEvents = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
-                }
-                request({url: app.get('sensu_uri')+ '/client/' + uberDevice.dev_desc + '.contegix.mgmt', json: true}
-                  , function (error, response, body) {
-                    if (!error) {
-                      if (response.statusCode < 300)
-                      {
-                        var sensuClient = body;
-                      } else {
-                        var sensuClient = { address: 'unknown', name: uberDevice.dev_desc, safe_mode: 0, subscriptions: [], timestamp: 0 };
-                      }
-                      request({ url: app.get('puppetdb_uri') + '/nodes/' + uberDevice.dev_desc + '.contegix.mgmt', json: true }
-                        , function (error, response, body) {
-                          if (error)
-                          {
-                            app.locals.logger.log('debug', 'failed to get data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + uberDevice.dev_desc + '.contegix.mgmt'});
-                            res.send(500);
-                          } else {
-                            var puppetInfo = body;
-                            request({ url: app.get('puppetdb_uri') + '/nodes/' + uberDevice.dev_desc + '.contegix.mgmt/facts', json: true }
-                              , function (error, response, body) {
-                                if (error)
-                                {
-                                  app.locals.logger.log('debug', 'failed to get data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + uberDevice.dev_desc + '.contegix.mgmt/facts'});
-                                  res.send(500);
-                                } else {
-                                  var facts = body;
-                                  //app.locals.logger.log('debug', 'starting facts', { facts: JSON.stringify(facts) });
-                                  puppetInfo.facts = {};
-                                  for (i=0; i<facts.length; i++)
-                                  {
-                                    puppetInfo.facts[facts[i].name] = facts[i].value;
-                                  }
-                                  //app.locals.logger.log('debug', 'converted facts', { facts: JSON.stringify(puppetInfo.facts) });
-
-                                  res.render('ubersmith/device', { puppetInfo: puppetInfo, uberDevice: uberDevice, sensuClient: sensuClient, sensuEvents: sensuEvents, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
-                                }
-                              });
-                          }
-                        });
-                    } else {
-                      console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
-                      res.send(500);
-                    }
-                  })
-              } else {
-                console.log('Got ' + response.statusCode + ' Sending 500: ' + error);
-                res.send(500);
-              }
-            })
-        }
-      });
-    });
-  app.get('/ubersmith/devices/hostname/:hostname'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      redisClient.get('device.list.hostname', function (err, reply) {
-        if (!reply) {
-          console.log('Sending 500: ' + err);
-          res.send(500);
-        } else {
-          var deviceList = JSON.parse(reply);
-          if (!(req.params.hostname in deviceList))
+      app.locals.ubersmith.getDeviceByID(req.params.deviceid
+        , function (error, uberDevice) {
+          if (error != null)
           {
-            app.locals.logger.log('error', 'invalid hostname', {error: 'hostname ' + req.params.hostname + ' not in device list'});
-            res.send(500);
-            return;
+            app.locals.logger.log('error', 'Failed to retrieve device from Ubersmith', { deviceid: req.params.deviceid });
+            res.send(404);
+          } else {
+            var async = require('async');
+            var hostname =  uberDevice.dev_desc + '.contegix.mgmt';
+            async.parallel([
+              function (asyncCallback) {
+                app.locals.getPuppetDevice(hostname, asyncCallback);
+              },
+              function (asyncCallback) {
+                app.locals.getSensuDevice(hostname, asyncCallback);
+              }
+            ], function(err, results) {
+              if (err)
+              {
+                res.send(500);
+              } else {
+                if (results && results.length==2)
+                {
+                  var puppetDevice = results[1];
+                  var sensuDevice = results[0];
+                  res.render('ubersmith/device', { puppetDevice: puppetDevice, uberDevice: uberDevice, sensuDevice: sensuDevice, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
+                } else {
+                  res.send(500);
+                }
+              }
+            });
           }
-          var uberDevice = deviceList[req.params.hostname][0];
-          res.redirect('/ubersmith/devices/deviceid/' + uberDevice.dev);
         }
-      });
-    });
+      );
+    }
+  );
 
   app.get('/ubersmith/devices/clientid/:clientid'
     , app.locals.requireGroup('users')
@@ -387,6 +171,26 @@ module.exports = function (app, config, passport, redisClient) {
         }
       });
     });
+
+  app.get('/ubersmith/devices/list/deviceid/:device_id/sensuevents'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        request({ url: app.get('sensu_uri') + '/events/' + uberDevice.dev_desc + '.contegix.mgmt', json: true }
+          , function (error, response, body) {
+              if (!error) {
+                if (response.statusCode < 300 && body.length > 0)
+                {
+                  var sensuEvents = body;
+                } else {
+                  var sensuEvents = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
+                }
+                res.type('application/json');
+                res.send(JSON.stringify(sensuEvents));
+              } else {
+                res.send(500);
+              }
+          });
+     });
 
   app.get('/ubersmith/devices/list/deviceid/:device_id/tickets'
     , app.locals.requireGroup('users')

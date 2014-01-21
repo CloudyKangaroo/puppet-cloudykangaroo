@@ -225,7 +225,7 @@ function rpsMeter(req, res, next) {
 
 
   // Generate csrf Token
-  res.locals.token = req.session._csrf;
+  res.locals.token = req.csrfToken();
 
   // To track response time
   req._rlStartTime = new Date();
@@ -433,6 +433,84 @@ app.locals.getCombinedDevices = function () {
         }
     }
   );
+}
+
+app.locals.getPuppetDevice = function(hostname, getDevCallback) {
+  var async = require('async');
+
+  async.parallel([
+    function (asyncCallback) {
+      var request = require('request');
+      request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname, json: true }
+        , function (error, response) {
+            asyncCallback(error, response.body);
+        });
+    },
+    function (asyncCallback) {
+      var request = require('request');
+      request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts', json: true }
+        , function (error, response) {
+            asyncCallback(error, response.body);
+        });
+    }
+  ], function(err, results) {
+      if (err)
+      {
+        getDevCallback(err);
+      } else {
+        if (results && results.length==2)
+        {
+          if (results[0].error)
+          {
+            var puppetDevice = {error: results[0].error, node: {}, facts: {}};
+          } else {
+            var puppetDevice = {node: results[0], facts: results[1]};
+          }
+          getDevCallback(err, puppetDevice);
+        } else {
+          getDevCallback(new Error('could not retrieve host and facts from Puppet'));
+        }
+      }
+    });
+}
+
+app.locals.getSensuDevice = function(hostname, getDevCallback) {
+  var async = require('async');
+  async.parallel([
+    function (asyncCallback) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri')+ '/client/' + hostname, json: true }
+        , function (error, response) {
+          asyncCallback(error, response.body);
+        });
+    },
+    function (asyncCallback) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/events/' + hostname, json: true }
+        , function (error, response) {
+          asyncCallback(error, response.body);
+        });
+    }
+  ], function(err, results) {
+      if (err)
+      {
+        getDevCallback(err);
+      } else {
+        if (results && results.length==2)
+        {
+          if (!results[0])
+          {
+            var sensuDevice = {error: 'No information is known about ' + hostname, events: {}, node: {}};
+          } else {
+            var sensuDevice = {node: results[0], events: results[1]};
+          }
+          getDevCallback(err, sensuDevice);
+        } else {
+          app.locals.logger.log('error', 'could not retrieve events and node from Sensu', { results: JSON.stringify(results) });
+          getDevCallback(new Error('could not retrieve events and node from Sensu'));
+        }
+      }
+    });
 }
 
 require("./routes")(app, config, passport, redisClient);
