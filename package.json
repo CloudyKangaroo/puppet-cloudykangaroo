@@ -40,7 +40,7 @@
     "metrics": "0.1.x",
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
-    "ubersmith": "https://github.com/Contegix/node-ubersmith/tarball/0.1.0",
+    "ubersmith": "https://github.com/Contegix/node-ubersmith/tarball/0.1.1",
     "node-contegix-logger": "https://github.com/Contegix/node-contegix-logger/tarball/0.0.1",
     "passport-atlassian-crowd": "0.0.x",
     "moment" : "2.3.1",
