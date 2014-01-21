@@ -60,10 +60,8 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
-
-if (config.ubersmith.enable) {
-  var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
-}
+var ubersmith = require('ubersmith');
+ubersmith.start({redisPort: config.redis.port, redisHost: config.redis.host, uberAuth: UberAuth});
 
 /**
  * Authentication System
@@ -125,6 +123,7 @@ var RedisStore = require('connect-redis')(express);
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.moment = require('moment');
+app.locals.ubersmith = ubersmith;
 
 app.enable('trust proxy');
 
@@ -224,6 +223,10 @@ function rpsMeter(req, res, next) {
 
   logger.req = req;
 
+
+  // Generate csrf Token
+  res.locals.token = req.session._csrf;
+
   // To track response time
   req._rlStartTime = new Date();
 
@@ -294,7 +297,6 @@ function rpsMeter(req, res, next) {
 app.configure('development', function(){
   app.use(express.errorHandler());
 })
-
 
 app.locals.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
