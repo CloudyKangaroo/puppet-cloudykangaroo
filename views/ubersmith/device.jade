@@ -12,7 +12,7 @@ block content
           .panel.panel-default
             .panel-heading
               p Monitoring Events
-                span.label.label-default.pull-right #{sensuClient.name} / #{sensuClient.address}
+                span.label.label-default.pull-right #{sensuDevice.node.name} / #{sensuDevice.node.address}
             .panel-body
               table.table.table-condensed
                 thead
@@ -24,7 +24,7 @@ block content
                     th Count
                     th(data-defaultsort='disabled').visible-lg Output
                 tbody
-                  each event in sensuEvents
+                  each event in sensuDevice.events
                     tr(class="#{getEventClass(event.status)}")
                       td #{getEventClass(event.status)}
                       td #{event.check}
@@ -53,34 +53,42 @@ block content
             .panel-heading System Stats
             .panel-body
               p Operating System
-                span.pull-right #{puppetInfo.facts.operatingsystem} #{puppetInfo.facts.operatingsystemrelease}
+                span.pull-right #{puppetDevice.facts.operatingsystem} #{puppetDevice.facts.operatingsystemrelease}
               p Kernel
-                span.pull-right #{puppetInfo.facts.kernel} #{puppetInfo.facts.kernelrelease}
+                span.pull-right #{puppetDevice.facts.kernel} #{puppetDevice.facts.kernelrelease}
               p Uptime
-                span.pull-right #{puppetInfo.facts.uptime}
+                span.pull-right #{puppetDevice.facts.uptime}
               p Manufacturer Information
-                span.pull-right #{puppetInfo.facts.manufacturer} #{puppetInfo.facts.productname} Serial (#{puppetInfo.facts.serialnumber})
+                span.pull-right #{puppetDevice.facts.manufacturer} #{puppetDevice.facts.productname} Serial (#{puppetDevice.facts.serialnumber})
+              p RAM
+                span.pull-right #{puppetDevice.facts.memoryfree } free / #{puppetDevice.facts.memorytotal} total
+              p CPU
+                span.pull-right #{puppetDevice.facts.physicalprocessorcount} socket (#{puppetDevice.facts.processorcount} core) x #{puppetDevice.facts.processor0}
               p Interfaces
-                span.pull-right Management: #{puppetInfo.facts.interface_mgmt} Public: #{puppetInfo.facts.interface_public}
+                span.pull-right Management: #{puppetDevice.facts.interface_mgmt} Public: #{puppetDevice.facts.interface_public}
               p Catalog Timestamp
-                span.pull-right #{getFormattedISO8601(puppetInfo.catalog_timestamp)}
+                span.pull-right #{getFormattedISO8601(puppetDevice.catalog_timestamp)}
               p Facts Timestamp
-                span.pull-right #{getFormattedISO8601(puppetInfo.facts_timestamp)}
+                span.pull-right #{getFormattedISO8601(puppetDevice.facts_timestamp)}
               p Report Timestamp
-                span.pull-right #{getFormattedISO8601(puppetInfo.report_timestamp)}
+                span.pull-right #{getFormattedISO8601(puppetDevice.report_timestamp)}
         .col-md-6
           .panel.panel-default
             .panel-heading Ubersmith Information
             .panel-body
               p Type:
-                span.pull-right #{uberDevice.devtype_group}/#{uberDevice.type}
+                span.pull-right #{uberDevice.devtype_group_name}/#{uberDevice.type}
               p Active:
                 span.label.label-success.pull-right #{uberDevice.active}
               p Location:
                 span.pull-right #{uberDevice.location}
+              p Parent:
+                span.pull-right #{uberDevice.parent_desc}
+              p Management:
+                span.pull-right #{uberDevice.metadata.management_level}
               p Company:
                 span.pull-right
-                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}") #{uberDevice.company}
+                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}") #{uberDevice.listed_company}
               p Contact Information:
                 ul.list-group
                   li.list-group-item Email:
@@ -107,7 +115,7 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/ubersmith/devices/list/deviceid/#{uberDevice.dev}/tickets',
+        "sAjaxSource": '/api/v1/ubersmith/devices/deviceid/#{uberDevice.dev}/tickets',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "aoColumns": [
@@ -139,7 +147,7 @@ block footer
       $('#table_facts').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/puppet/nodes/#{uberDevice.dev_desc}.contegix.mgmt/facts',
+        "sAjaxSource": '/api/v1/puppet/devices/hostname/#{uberDevice.dev_desc}.contegix.mgmt/facts',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "aoColumns": [

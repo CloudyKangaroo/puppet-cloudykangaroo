@@ -13,6 +13,21 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/puppet/devices/hostname/:hostname/facts'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var hostname = req.params.hostname;
+      request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts', json: true}
+        , function (error, response, body) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts'});
+          var resBody = JSON.stringify({ aaData: body });
+          res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
+          res.write(resBody);
+          res.end();
+        });
+    });
+
   app.get('/api/v1/sensu/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -27,10 +42,25 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
-  app.get('/api/v1/ubersmith/devices/rack/:rack'
+  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceByRack(req.params.rack
+      app.locals.ubersmith.getTicketsbyDeviceID(req.params.deviceid
+      , function (err, ticketList){
+          if (ticketList == null)
+          {
+             res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify(ticketList));
+          }
+        });
+    });
+
+      app.get('/api/v1/ubersmith/devices/rack/:rack'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDevicesByRack(req.params.rack
         , function (error, device) {
           if (error != null)
           {
