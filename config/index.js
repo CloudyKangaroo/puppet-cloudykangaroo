@@ -32,7 +32,7 @@ config.cookie = {};
 config.log = {};
 config.metrics = {};
 config.ubersmith = {};
-config.ubersmith.enable = false;
+config.ubersmith.warm_cache = false;
 config.log.access_log = './access.log';
 config.metrics.interval = 15000;
 

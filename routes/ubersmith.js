@@ -67,22 +67,46 @@ module.exports = function (app, config, passport, redisClient) {
           } else {
             var async = require('async');
             var hostname =  uberDevice.dev_desc + '.contegix.mgmt';
+
             async.parallel([
               function (asyncCallback) {
-                app.locals.getPuppetDevice(hostname, asyncCallback);
+                app.locals.ubersmith.getDeviceByID(req.params.deviceid, asyncCallback);
+              },
+              function (asyncCallback) {
+                app.locals.getPuppetDevice(hostname, function (error, puppetDevice){
+                     asyncCallback(error, puppetDevice)
+                });
               },
               function (asyncCallback) {
                 app.locals.getSensuDevice(hostname, asyncCallback);
               }
             ], function(err, results) {
-              if (err)
+               if (err)
               {
+                app.locals.logger.log('error', 'could not get all device data ' + err.message, {err: err})
                 res.send(500);
               } else {
                 if (results && results.length==2)
                 {
-                  var puppetDevice = results[0];
-                  var sensuDevice = results[1];
+                  var _ = require('underscore');
+                  var uberDevice = results[0];
+                  var puppetDevice = results[1];
+                  var sensuDevice = results[2];
+
+                  _.defaults(uberDevice, {dev: 0, dev_desc: 'unknown', metadata: {},
+                    devtype_group_name: 'unknown', type: 'unknown', active: 0,
+                    location: 'unknown', parent_desc: 'unknown', clientid: 0,
+                    listed_company: 'none', email: '', phone: ''});
+                  _.defaults(uberDevice.metadata, {management_level: 'unknown'});
+
+                  _.defaults(sensuDevice, {node: {}, events: []});
+                  _.defaults(sensuDevice.node, {name: '', address: ''});
+
+                  _.defaults(puppetDevice, {catalog_timestamp: 0, facts_timestamp: 0, report_timestamp: 0, facts: {}});
+                  _.defaults(puppetDevice.facts, {operatingsystem: '', operatingsystemrelease: '', kernel:  '',
+                    kernelrelease: '', uptime: '', manufacturer: '', productname: '', serialnumber: '', memoryfree: '',
+                    memorytotal: '', physicalprocessorcount: 0, processorcount: 0, processor0: '', interface_mgmt: '', interface_public: ''});
+
                   res.render('ubersmith/device', { puppetDevice: puppetDevice, uberDevice: uberDevice, sensuDevice: sensuDevice, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                 } else {
                   res.send(500);
