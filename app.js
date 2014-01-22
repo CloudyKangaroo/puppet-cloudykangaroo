@@ -513,6 +513,24 @@ app.locals.getSensuDevice = function(hostname, getDevCallback) {
     });
 }
 
+app.locals.parseRedisSet = function (redisSet)
+{
+  var retItems = new Array();
+  for (i=0; i<=redisSet.length;i++)
+  {
+    if (redisSet[i] != 'undefined')
+    {
+      try {
+        var item = redisSet[i];
+        retItems.push(JSON.parse(item));
+      } catch (e) {
+        app.locals.logger.log('debug', 'Tried to parse invalid JSON: "' + e.message + '"', { json: redisSet[i]});
+      }
+    }
+  }
+  return retItems;
+}
+
 require("./routes")(app, config, passport, redisClient);
 
 if (!module.parent) {
