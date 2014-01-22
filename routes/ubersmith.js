@@ -199,7 +199,7 @@ module.exports = function (app, config, passport, redisClient) {
         if (!reply) {
           res.send(500);
         } else {
-          var tickets = parseRedisSet(reply);
+          var tickets = app.locals.parseRedisSet(reply);
           for (i=0; i<tickets.length; i++)
           {
             tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
@@ -400,7 +400,7 @@ module.exports = function (app, config, passport, redisClient) {
         if (!reply) {
           res.send(500);
         } else {
-          var tickets = parseRedisSet(reply);
+          var tickets = app.locals.parseRedisSet(reply);
           for (i=0; i<tickets.length; i++)
           {
             tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
@@ -438,7 +438,7 @@ module.exports = function (app, config, passport, redisClient) {
           app.locals.logger.log('error', 'could not retrieve host: ' + 'devices:hostname:' + hostname, {});
           res.send(500);
         } else {
-          var devices = parseRedisSet(reply);
+          var devices = app.locals.parseRedisSet(reply);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify({ aaData: devices}));
           res.end();
@@ -542,21 +542,4 @@ module.exports = function (app, config, passport, redisClient) {
         }
       });
     });
-  function parseRedisSet(reply)
-  {
-    var items = new Array();
-    for (i=0; i<=reply.length;i++)
-    {
-      if (reply[i] != 'undefined')
-      {
-        try {
-          var item = reply[i];
-          items.push(JSON.parse(item));
-        } catch (e) {
-          app.locals.logger.log('debug', 'Tried to parse invalid JSON: "' + e.message + '"', { json: reply[i]});
-        }
-      }
-    }
-    return items;
-  }
 }
