@@ -21,7 +21,7 @@ var useragent = require('express-useragent');
 
 // Application Logs
 var ctxlog = require('./lib/ctxlog');
-var logger = ctxlog('main', 'info', { level: 'debug'});
+var logger = ctxlog('main', 'info', { level: 'error'});
 var auditLog = ctxlog('audit', 'info', {level: 'error'}, {level: 'debug'});
 
 // Access Logs
