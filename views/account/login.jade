@@ -8,6 +8,7 @@ block content
           p.text-error #{message}
       form(action='/account/login',method='post').form-signin
           h2.form-signin.heading Please sign in
+          input(type="hidden", name='_csrf', value="#{token}")
           .username
               label Username
               input(type='text', name='username').form-control
