@@ -61,7 +61,15 @@ redisClient.on("connect"
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
 var ubersmith = require('ubersmith');
-ubersmith.start({redisPort: config.redis.port, redisHost: config.redis.host, uberAuth: UberAuth});
+
+ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, uberAuth: UberAuth});
+
+ubersmith.on('configure.complete', function() {
+  if (config.ubersmith.warm_cache === true)
+  {
+    ubersmith.start();
+  }
+});
 
 /**
  * Authentication System
@@ -462,9 +470,26 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
         {
           if (results[0].error)
           {
-            var puppetDevice = {error: results[0].error, node: {}, facts: {}};
+            var node = { name: hostname,
+              deactivated: null,
+              catalog_timestamp: '2014-01-22T04:11:05.562Z',
+              facts_timestamp: '2014-01-22T04:10:58.232Z',
+              report_timestamp: '2014-01-22T04:11:04.076Z' };
+            var puppetDevice = {error: results[0].error, node: node, facts: []};
           } else {
-            var puppetDevice = {node: results[0], facts: results[1]};
+            var facts = results[1];
+            var factInfo = {};
+            /*
+             { certname: 'metamarkets14.contegix.mgmt',
+             name: 'virtual',
+             value: 'physical' }
+             */
+            for (i=0; i<facts.length; i++)
+            {
+              var fact = facts[i];
+              factInfo[fact.name] = fact.value;
+            }
+            var puppetDevice = {node: results[0], facts: factInfo};
           }
           getDevCallback(err, puppetDevice);
         } else {
@@ -500,7 +525,9 @@ app.locals.getSensuDevice = function(hostname, getDevCallback) {
         {
           if (!results[0])
           {
-            var sensuDevice = {error: 'No information is known about ' + hostname, events: {}, node: {}};
+            var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
+            var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
+            var sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
           } else {
             var sensuDevice = {node: results[0], events: results[1]};
           }

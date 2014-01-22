@@ -45,12 +45,10 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      redisClient.get('device.type_list', function (err, reply) {
-        console.log(err);
-        if (!reply) {
+      app.locals.ubersmith.getDeviceTypeList(function(err, deviceTypeList) {
+        if (err) {
           res.send(500);
         } else {
-          var deviceTypeList = JSON.parse(reply);
           res.render('ubersmith/devices', { device_types: deviceTypeList, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
         }
       });
@@ -62,9 +60,9 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       app.locals.ubersmith.getDeviceByID(req.params.deviceid
         , function (error, uberDevice) {
-          if (error != null)
+          if (!uberDevice)
           {
-            app.locals.logger.log('error', 'Failed to retrieve device from Ubersmith', { deviceid: req.params.deviceid });
+            app.locals.logger.log('error', 'Failed to retrieve device from Ubersmith', { error: error, deviceid: req.params.deviceid });
             res.send(404);
           } else {
             var async = require('async');
@@ -83,14 +81,31 @@ module.exports = function (app, config, passport, redisClient) {
               } else {
                 if (results && results.length==2)
                 {
-                  var puppetDevice = results[1];
-                  var sensuDevice = results[0];
+                  var puppetDevice = results[0];
+                  var sensuDevice = results[1];
                   res.render('ubersmith/device', { puppetDevice: puppetDevice, uberDevice: uberDevice, sensuDevice: sensuDevice, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                 } else {
                   res.send(500);
                 }
               }
             });
+          }
+        }
+      );
+    }
+  );
+
+  app.get('/ubersmith/devices/hostname/:hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDeviceByHostname(req.params.hostname
+        , function (error, uberDevice) {
+          if (!uberDevice)
+          {
+            app.locals.logger.log('error', 'Failed to retrieve device from Ubersmith', { error: error, deviceid: req.params.deviceid });
+            res.send(404);
+          } else {
+            res.redirect('/ubersmith/devices/deviceid/' + uberDevice.dev);
           }
         }
       );
