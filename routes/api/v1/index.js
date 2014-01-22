@@ -42,6 +42,26 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/ubersmith/devices/devgroupid/:devgroupid'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDevicesbyTypeID(req.params.devgroupid
+        , function (err, deviceList){
+          if (deviceList == null)
+          {
+            res.send(500);
+          } else {
+            var devices = new Array();
+            Object.keys(deviceList).forEach(function(deviceID) {
+              var device = deviceList[deviceID];
+              devices.push(device);
+            })
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: devices}));
+          }
+        });
+    });
+
   app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -51,8 +71,13 @@ module.exports = function (app, config, passport, redisClient) {
           {
              res.send(500);
           } else {
+            var tickets = new Array();
+            Object.keys(ticketList).forEach(function(ticketID) {
+              var ticket = ticketList[ticketID];
+              tickets.push(ticket);
+            })
             res.type('application/json');
-            res.send(JSON.stringify(ticketList));
+            res.send(JSON.stringify({ aaData: tickets}));
           }
         });
     });

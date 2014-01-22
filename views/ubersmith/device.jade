@@ -63,7 +63,7 @@ block content
               p RAM
                 span.pull-right #{puppetDevice.facts.memoryfree } free / #{puppetDevice.facts.memorytotal} total
               p CPU
-                span.pull-right #{puppetDevice.facts.physicalprocessorcount} socket (#{puppetDevice.facts.processorcount} core) x #{puppetDevice.facts.processor0}
+                span.pull-right #{puppetDevice.facts.physicalprocessorcount} socket (#{puppetDevice.facts.processorcount/puppetDevice.facts.physicalprocessorcount} core) x #{puppetDevice.facts.processor0}
               p Interfaces
                 span.pull-right Management: #{puppetDevice.facts.interface_mgmt} Public: #{puppetDevice.facts.interface_public}
               p Catalog Timestamp

@@ -526,7 +526,7 @@ app.locals.getSensuDevice = function(hostname, getDevCallback) {
           if (!results[0])
           {
             var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
-            var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: uberDevice.dev_desc + '.contegix.mgmt', check: 'N/A'}];
+            var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
             var sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
           } else {
             var sensuDevice = {node: results[0], events: results[1]};
