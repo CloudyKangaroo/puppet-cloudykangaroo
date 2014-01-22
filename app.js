@@ -237,7 +237,7 @@ function rpsMeter(req, res, next) {
 
   // Generate csrf Token
 //  res.locals.token = req.csrfToken();
-res.locals.token = require('uuid').v4();
+  res.locals.token = require('uuid').v4();
 
   logger.req = req;
 
