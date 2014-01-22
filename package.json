@@ -20,7 +20,7 @@
       "url": "https://github.com/contegix/cloudykangaroo/blob/master/LICENSE"
   },
   "scripts": {
-    "start": "./node_modules/forever/bin/forever start -a -l c/var/log/cloudykangaroo/forever.log -o /var/log/cloudykangaroo/out.log -e /var/log/cloudykangaroo/err.log app.js",
+    "start": "forever start -a -l c/var/log/cloudykangaroo/forever.log -o /var/log/cloudykangaroo/out.log -e /var/log/cloudykangaroo/err.log app.js",
     "postdeploy": "mkdir -p ./logs",
     "test": "expresso test/*"
   },

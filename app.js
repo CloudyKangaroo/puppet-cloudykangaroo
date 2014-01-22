@@ -222,6 +222,9 @@ function rpsMeter(req, res, next) {
 
   rps.mark();
 
+  // Generate csrf Token
+  res.locals.token = req.csrfToken();
+
   logger.req = req;
 
   // To track response time
