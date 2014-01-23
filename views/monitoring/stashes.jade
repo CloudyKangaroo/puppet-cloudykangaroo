@@ -7,7 +7,23 @@ block content
     .page-header
       h1 Current Stashes
     .container
-      ul.list-unstyled
-        each stash in stashes
-          li= stash
+      .panel.panel-default
+        .panel-heading
+          p Stashes
+        .panel-body
+          table.table.table-condensed
+            thead
+              tr
+                th Path
+                th Content
+                th Expiration
+
+            tbody
+              each stash in stashes
+                tr
+                  td #{stash.path}
+                  td #{JSON.stringify(stash.content)}
+                  td #{stash.expire}
+
+
 block footer
