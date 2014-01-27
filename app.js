@@ -20,7 +20,7 @@ var useragent = require('express-useragent');
  */
 
 // Application Logs
-var ctxlog = require('./lib/ctxlog');
+var ctxlog = require('contegix-logger');
 var logger = ctxlog('main', 'info', { level: 'debug'});
 var auditLog = ctxlog('audit', 'info', {level: 'error'}, {level: 'debug'});
 
@@ -238,10 +238,6 @@ function rpsMeter(req, res, next) {
 res.locals.token = require('uuid').v4();
 
   logger.req = req;
-
-
-  // Generate csrf Token
-  res.locals.token = req.csrfToken();
 
   // To track response time
   req._rlStartTime = new Date();
