@@ -1,6 +1,0 @@
-{ "name" : "ctxlog",
-  "main" : "./lib/ctxlog.js",
-  "dependencies": {
-    "mkdirp": "0.3.x"
-  }
-}

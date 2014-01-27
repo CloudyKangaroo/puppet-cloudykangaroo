@@ -60,10 +60,20 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
+var ubersmith = require('ubersmith');
 
-if (config.ubersmith.enable) {
-  var ud = require('./lib/uberdata')(config.redis.port, config.redis.host, UberAuth);
-}
+ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, uberAuth: UberAuth});
+
+ubersmith.on('configure.complete', function() {
+  if (config.ubersmith.warm_cache === true)
+  {
+    ubersmith.start();
+  }
+});
+
+ubersmith.on('device.list.complete', function (deviceList) {
+   logger.log('info', 'Ubersmith Device List cached');
+});
 
 /**
  * Authentication System
@@ -125,6 +135,7 @@ var RedisStore = require('connect-redis')(express);
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.moment = require('moment');
+app.locals.ubersmith = ubersmith;
 
 app.enable('trust proxy');
 
@@ -145,7 +156,7 @@ app.use(express.favicon());
 // http://www.senchalabs.org/connect/json.html
 // Parse JSON request bodies, providing the parsed object as req.body.
 // MIT https://github.com/senchalabs/connect/blob/master/LICENSE
-app.use(express.json({strict: true}));
+app.use(express.json({strict: false}));
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 
@@ -227,6 +238,10 @@ function rpsMeter(req, res, next) {
 
   logger.req = req;
 
+
+  // Generate csrf Token
+  res.locals.token = req.csrfToken();
+
   // To track response time
   req._rlStartTime = new Date();
 
@@ -297,7 +312,6 @@ function rpsMeter(req, res, next) {
 app.configure('development', function(){
   app.use(express.errorHandler());
 })
-
 
 app.locals.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
@@ -434,6 +448,150 @@ app.locals.getCombinedDevices = function () {
         }
     }
   );
+}
+
+app.locals.getPuppetDevice = function(hostname, getDevCallback) {
+  var async = require('async');
+  redisClient.get('CK:puppet:devices:' + hostname, function (err, reply) {
+    if (!err && reply)
+    {
+      logger.log('debug', 'got device from Redis');
+      getDevCallback(null, JSON.parse(reply));
+    } else {
+      logger.log('debug', 'getting device from puppet');
+      async.parallel([
+        function (asyncCallback) {
+          var request = require('request');
+          request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname, json: true }
+            , function (error, response) {
+              asyncCallback(error, response.body);
+            });
+        },
+        function (asyncCallback) {
+          var request = require('request');
+          request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts', json: true }
+            , function (error, response) {
+              asyncCallback(error, response.body);
+            });
+        }
+      ], function(err, results) {
+        if (err)
+        {
+          getDevCallback(err);
+        } else {
+          if (results && results.length==2)
+          {
+            if (results[0].error)
+            {
+              var node = { name: hostname,
+                deactivated: null,
+                catalog_timestamp: '2014-01-22T04:11:05.562Z',
+                facts_timestamp: '2014-01-22T04:10:58.232Z',
+                report_timestamp: '2014-01-22T04:11:04.076Z' };
+              var puppetDevice = {error: results[0].error, node: node, facts: []};
+            } else {
+              var facts = results[1];
+              var factInfo = {};
+              /*
+               { certname: 'metamarkets14.contegix.mgmt',
+               name: 'virtual',
+               value: 'physical' }
+               */
+              for (i=0; i<facts.length; i++)
+              {
+                var fact = facts[i];
+                factInfo[fact.name] = fact.value;
+              }
+              var puppetDevice = {node: results[0], facts: factInfo, factsArray: facts};
+            }
+            redisClient.set('CK:puppet:devices:' + hostname, JSON.stringify(puppetDevice));
+            redisClient.expire('CK:puppet:devices:' + hostname, 30)
+            getDevCallback(err, puppetDevice);
+          } else {
+            getDevCallback(new Error('could not retrieve host and facts from Puppet'));
+          }
+        }
+      });
+    }
+  });
+}
+
+app.locals.getSensuDevice = function(hostname, getDevCallback) {
+  var async = require('async');
+  redisClient.get('CK:sensu:devices:' + hostname, function (err, reply) {
+    if (!err && reply)
+    {
+      logger.log('debug', 'got device from Redis');
+      getDevCallback(null, JSON.parse(reply));
+    } else {
+      logger.log('debug', 'getting device from sensu');
+      async.parallel([
+        function (asyncCallback) {
+          var request = require('request');
+          request({ url: app.get('sensu_uri')+ '/client/' + hostname, json: true }
+            , function (error, response) {
+              asyncCallback(error, response.body);
+            });
+        },
+        function (asyncCallback) {
+          var request = require('request');
+          request({ url: app.get('sensu_uri') + '/events/' + hostname, json: true }
+            , function (error, response) {
+              asyncCallback(error, response.body);
+            });
+        }
+      ], function(err, results) {
+          if (err)
+          {
+            getDevCallback(err);
+          } else {
+            if (results && results.length==2)
+            {
+              if (!results[0])
+              {
+                var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
+                var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
+                var sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
+              } else {
+                var sensuDevice = {node: results[0], events: results[1]};
+              }
+              redisClient.set('CK:sensu:devices:' + hostname, JSON.stringify(sensuDevice));
+              redisClient.expire('CK:sensu:devices:' + hostname, 5)
+              getDevCallback(err, sensuDevice);
+            } else {
+              app.locals.logger.log('error', 'could not retrieve events and node from Sensu', { results: JSON.stringify(results) });
+              getDevCallback(new Error('could not retrieve events and node from Sensu'));
+            }
+          }
+        });
+    }
+  });
+}
+app.locals.dumpError = function (err, loggerObj)
+{
+  if (typeof err === 'object') {
+    loggerObj.log('error', err.message, { message: JSON.stringify(err.message), stack: JSON.stringify(err.stack)});
+  } else {
+    loggerObj.log('error', 'dumpError :: argument is not an object', {err: JSON.stringify(err)});
+  }
+}
+
+app.locals.parseRedisSet = function (redisSet)
+{
+  var retItems = new Array();
+  for (i=0; i<=redisSet.length;i++)
+  {
+    if (redisSet[i] != 'undefined')
+    {
+      try {
+        var item = redisSet[i];
+        retItems.push(JSON.parse(item));
+      } catch (e) {
+        app.locals.logger.log('debug', 'Tried to parse invalid JSON: "' + e.message + '"', { json: redisSet[i]});
+      }
+    }
+  }
+  return retItems;
 }
 
 require("./routes")(app, config, passport, redisClient);

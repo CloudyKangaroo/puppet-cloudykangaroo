@@ -1,5 +1,6 @@
 extends ../layout
 block head
+  link(rel='stylesheet', href='/stylesheets/dataTables.bootstrap.css')
 
 block content
   .page-header
@@ -11,7 +12,7 @@ block content
         .panel.panel-default
           .panel-heading Device List
           .panel-body
-            table.table.table-condensed.table-striped
+            table(id="table_devices").table.table-condensed.table-striped
               thead
                 tr
                   th Type
@@ -20,14 +21,7 @@ block content
                   th Status
                   th Location
               tbody
-                each device in devices
-                  tr
-                    td #{device.type}
-                    td
-                      a(href="/ubersmith/devices/hostname/#{device.dev_desc}.contegix.mgmt") #{device.dev_desc}
-                    td #{device.label}
-                    td #{device.status}
-                    td #{device.location}
+
       .row
         .col-md-12
           .panel.panel-default
@@ -39,7 +33,7 @@ block content
                     th Created
                     th Priority
                     th Type
-                    th Company
+                    th Device
                     th Assignee
                     th Subject
                     th Touched
@@ -103,7 +97,7 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/ubersmith/tickets/list/clientid/#{clientid}',
+        "sAjaxSource": '/ubersmith/clients/list/clientid/#{clientid}/tickets',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "aoColumns": [
@@ -114,28 +108,53 @@ block footer
           }, {
             "mData": "type"
           }, {
-            "mData": "listed_company",
-            "mRender": function (listed_company, type, row) {
-              if (listed_company)
-              {
-                return '<a href="/ubersmith/clients/clientid/' + row['client_id'] + '">' + listed_company.slice(0,15) + '</a>';
-              } else {
-                return '-';
-              }
+            "mData": "device_id",
+            "mRender": function (device_id, type, row) {
+              return '<a href="/ubersmith/devices/deviceid/' + device_id + '">' + row['dev_desc'] + '</a>';
             }
           }, {
             "mData": "admin_username"
           }, {
             "mData": "subject",
-            "mRender": function (subject) {
-              return subject.slice(0,65);
+            "mRender": function (subject, type, row) {
+              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
             }
           }, {
             "mData": "activity"
           }],
-        "aaSorting": [[0,'desc'],[1, 'desc']],
+        "aaSorting": [[0,'desc'],[1, 'asc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
+
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_devices').dataTable( {
+      "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+      "sPaginationType": "bootstrap",
+      "sAjaxSource": '/ubersmith/clients/list/clientid/#{clientid}/devices',
+      "iDisplayLength": 15,
+      "bSortClasses": false,
+      "aoColumns": [
+        {
+          "mData": "type"
+        }, {
+          "mData": "dev",
+          "mRender": function (dev, type, row) {
+            return '<a href="/ubersmith/devices/deviceid/' + dev + '">' + row['dev_desc'] + '</a>';
+          }
+        }, {
+          "mData": "label"
+        }, {
+          "mData": "active"
+        }, {
+          "mData": "location"
+        }],
+        "aaSorting": [[0,'desc'],[1, 'desc']],
+        "oLanguage": {
+        "sLengthMenu": "_MENU_ records per page"
         }
       });
     });
