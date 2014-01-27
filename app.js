@@ -39,6 +39,8 @@ redisClient.on('error', function (error) {
   logger.log('error', 'Redis Connect Error', { error: error });
 });
 
+redisClient.select(config.redis.db, function(){})
+
 redisClient.on("connect"
   , function () {
     redisClient.select('50', function (err, res) {
@@ -64,7 +66,7 @@ redisClient.on("connect"
  */
 var ubersmith = require('ubersmith');
 
-ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, uberAuth: UberAuth});
+ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth});
 
 ubersmith.on('configure.complete', function() {
   if (config.ubersmith.warm_cache === true)
