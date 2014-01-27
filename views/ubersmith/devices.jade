@@ -24,6 +24,7 @@ block content
                       th Hostname
                       th Company
                       th Location
+                      th Mgmt Level
                       th Status
                   tbody
 
@@ -46,21 +47,21 @@ block footer
             $('#tableid_#{group.devtype_group_id}').dataTable( {
               "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
               "sPaginationType": "bootstrap",
-              "sAjaxSource": '/ubersmith/devices/list/#{group.devtype_group_id}',
+              "sAjaxSource": '/api/v1/ubersmith/devices/devgroupid/#{group.devtype_group_id}',
               "iDisplayLength": 10,
               "bSortClasses": false,
               "aoColumns": [
               {
-                "mData": "device",
-                "mRender": function (device) {
-                            return '<a href="/ubersmith/devices/deviceid/'+device+'">' + device + '</a>';
+                "mData": "dev",
+                "mRender": function (dev) {
+                            return '<a href="/ubersmith/devices/deviceid/'+dev+'">' + dev + '</a>';
                           }
               }, {
                 "mData": "type"
               }, {
-                "mData": "desc",
-                "mRender": function (desc) {
-                  return '<a href="/ubersmith/devices/hostname/' + desc + '.contegix.mgmt">' + desc + '</a>';
+                "mData": "dev_desc",
+                "mRender": function (dev_desc, type, row) {
+                  return '<a href="/ubersmith/devices/deviceid/' + row['dev'] + '">' + dev_desc + '</a>';
                 }
               }, {
                 "mData": "company",
@@ -70,7 +71,9 @@ block footer
               }, {
                 "mData": "location"
               }, {
-                "mData": "status"
+                "mData": "management_level"
+              }, {
+                "mData": "device_status"
               }],
               "aaSorting": [[4,'asc']],
               "oLanguage": {
