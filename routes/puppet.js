@@ -17,6 +17,7 @@ module.exports = function (app, config, passport, redisClient) {
           }
         })
     });
+
   app.get('/puppet/nodes/:node'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -66,6 +67,16 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  /*
+  var request = require('request');
+  request({ url: app.get('puppetdb_uri') + '/nodes/' + device.dev_desc + '.contegix.mgmt/facts', json: true}
+    , function (error, response, body) {
+      logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + req.params.node + '/facts'});
+      console.log(body);
+      saveValue('devices:deviceid:' + device_id + ':facts', body);
+    });
+
+  */
   app.get('/puppet/nodes/:node/facts'
     , app.locals.requireGroup('users')
     , function (req, res) {

@@ -1,52 +1,11 @@
 module.exports = function (app, config, passport, redisClient) {
   require('./ubersmith')(app, config, passport, redisClient);
+  require('./sensu')(app, config, passport, redisClient);
+  require('./puppet')(app, config, passport, redisClient);
   require('./monitoring')(app, config, passport, redisClient);
   require('./account')(app, config, passport, redisClient);
   require('./events')(app, config, passport, redisClient);
-  require('./sensu')(app, config, passport, redisClient);
-  require('./puppet')(app, config, passport, redisClient);
-
-  app.get('/render'
-    , function (req, res) {
-      var phantom = require('phantom');
-      var uuid = require('uuid').v4();
-      var pdffile = '/tmp/'+uuid+'.pdf';
-
-      //https://github.com/bruce/node-temp
-
-      app.render('account', { user:req.user, section: 'profile', navLinks: config.navLinks.account, layout: false}, function(err, html){
-        if (err) {
-          app.locals.logger.log('error', 'error rendering template', { error: err });
-          res.send(500);
-        } else {
-          phantom.create(function(ph) {
-            ph.createPage(function(page) {
-              app.locals.logger.log('debug', 'html content', { html: html });
-              page.set('content', html);
-              page.render(pdffile, function(err){
-                if (err) {
-                  app.locals.logger.log('error', 'error rendering page', { error: err });
-                  res.send(500);
-                } else {
-                  var fileSystem = require('fs');
-                  var stat = fileSystem.statSync(pdffile);
-                  response.writeHead(200, {
-                    'Content-Type': 'application/pdf',
-                    'Content-Disposition': 'attachment; filename=' + uuid +'.pdf',
-                    'Content-Length': stat.size
-                  });
-
-                  var readStream = fileSystem.createReadStream(pdffile);
-                  // We replaced all the event handlers with a simple call to readStream.pipe()
-                  readStream.pipe(response);
-                }
-                ph.exit();
-              });
-            });
-          });
-        }
-      });
-    });
+  require('./api/v1')(app, config, passport, redisClient);
 
   app.get('/'
     , function (req, res) {
