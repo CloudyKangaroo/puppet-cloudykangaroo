@@ -21,7 +21,7 @@ var useragent = require('express-useragent');
 
 // Application Logs
 var ctxlog = require('./lib/ctxlog');
-var logger = ctxlog('main', 'info', { level: 'error'});
+var logger = ctxlog('main', 'info', { level: 'debug'});
 var auditLog = ctxlog('audit', 'info', {level: 'error'}, {level: 'debug'});
 
 // Access Logs
@@ -180,7 +180,7 @@ app.use(express.session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.csrf())
+//app.use(express.csrf())
 
 /*
    Route requests through the metrics and logging processing
@@ -234,7 +234,8 @@ function rpsMeter(req, res, next) {
   rps.mark();
 
   // Generate csrf Token
-  res.locals.token = req.csrfToken();
+//  res.locals.token = req.csrfToken();
+res.locals.token = require('uuid').v4();
 
   logger.req = req;
 
