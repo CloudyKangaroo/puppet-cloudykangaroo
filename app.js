@@ -39,11 +39,9 @@ redisClient.on('error', function (error) {
   logger.log('error', 'Redis Connect Error', { error: error });
 });
 
-redisClient.select(config.redis.db, function(){})
-
 redisClient.on("connect"
   , function () {
-    redisClient.select('50', function (err, res) {
+    redisClient.select('config.redis.db', function (err, res) {
       var redisTestUUID = require('uuid').v4();
       redisClient.set('test_' + redisTestUUID, redisTestUUID);
       redisClient.get('test_' + redisTestUUID
