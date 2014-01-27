@@ -449,7 +449,7 @@ app.locals.getCombinedDevices = function () {
 
 app.locals.getPuppetDevice = function(hostname, getDevCallback) {
   var async = require('async');
-  redisClient.get('puppet:devices:' + hostname, function (err, reply) {
+  redisClient.get('CK:puppet:devices:' + hostname, function (err, reply) {
     if (!err && reply)
     {
       logger.log('debug', 'got device from Redis');
@@ -501,8 +501,8 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
               }
               var puppetDevice = {node: results[0], facts: factInfo, factsArray: facts};
             }
-            redisClient.set('puppet:devices:' + hostname, JSON.stringify(puppetDevice));
-            redisClient.expire('puppet:devices:' + hostname, 30)
+            redisClient.set('CK:puppet:devices:' + hostname, JSON.stringify(puppetDevice));
+            redisClient.expire('CK:puppet:devices:' + hostname, 30)
             getDevCallback(err, puppetDevice);
           } else {
             getDevCallback(new Error('could not retrieve host and facts from Puppet'));
@@ -515,7 +515,7 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
 
 app.locals.getSensuDevice = function(hostname, getDevCallback) {
   var async = require('async');
-  redisClient.get('sensu:devices:' + hostname, function (err, reply) {
+  redisClient.get('CK:sensu:devices:' + hostname, function (err, reply) {
     if (!err && reply)
     {
       logger.log('debug', 'got device from Redis');
@@ -552,8 +552,8 @@ app.locals.getSensuDevice = function(hostname, getDevCallback) {
               } else {
                 var sensuDevice = {node: results[0], events: results[1]};
               }
-              redisClient.set('sensu:devices:' + hostname, JSON.stringify(sensuDevice));
-              redisClient.expire('sensu:devices:' + hostname, 5)
+              redisClient.set('CK:sensu:devices:' + hostname, JSON.stringify(sensuDevice));
+              redisClient.expire('CK:sensu:devices:' + hostname, 5)
               getDevCallback(err, sensuDevice);
             } else {
               app.locals.logger.log('error', 'could not retrieve events and node from Sensu', { results: JSON.stringify(results) });
