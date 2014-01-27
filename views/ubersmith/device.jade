@@ -14,7 +14,7 @@ block content
               p Monitoring Events
                 span.label.label-default.pull-right #{sensuDevice.node.name} / #{sensuDevice.node.address}
             .panel-body
-              table.table.table-condensed
+              table(id="table_events").table.table-condensed
                 thead
                   tr
                     th Status
@@ -32,6 +32,7 @@ block content
                       td #{event.flapping}
                       td #{event.occurrences}
                       td.visible-lg #{event.output.slice(0,65)}
+
       .row
         .col-md-12
           .panel.panel-default
@@ -47,6 +48,7 @@ block content
                     th Subject
                     th Touched
                 tbody
+
       .row
         .col-md-6
           .panel.panel-default

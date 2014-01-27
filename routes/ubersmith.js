@@ -86,7 +86,7 @@ module.exports = function (app, config, passport, redisClient) {
                 app.locals.logger.log('error', 'could not get all device data ' + err.message, {err: err})
                 res.send(500);
               } else {
-                if (results && results.length==2)
+                if (results && results.length==3)
                 {
                   var _ = require('underscore');
                   var uberDevice = results[0];
@@ -100,6 +100,7 @@ module.exports = function (app, config, passport, redisClient) {
                   _.defaults(uberDevice.metadata, {management_level: 'unknown'});
 
                   _.defaults(sensuDevice, {node: {}, events: []});
+                  _.defaults(sensuDevice.events, { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'});
                   _.defaults(sensuDevice.node, {name: '', address: ''});
 
                   _.defaults(puppetDevice, {catalog_timestamp: 0, facts_timestamp: 0, report_timestamp: 0, facts: {}});
@@ -109,6 +110,7 @@ module.exports = function (app, config, passport, redisClient) {
 
                   res.render('ubersmith/device', { puppetDevice: puppetDevice, uberDevice: uberDevice, sensuDevice: sensuDevice, user:req.user, section: 'devices', navLinks: config.navLinks.ubersmith });
                 } else {
+                  app.locals.logger.log('error', 'results were not found, or not enough results returned', {results: JSON.stringify(results)});
                   res.send(500);
                 }
               }

@@ -7,8 +7,9 @@ module.exports = function (app, config, passport, redisClient) {
           if (err) {
             res.send(500);
           } else {
+            var resBody = JSON.stringify({ aaData: device });
             res.type('application/json');
-            res.send(JSON.stringify({ aaData: [device] }));
+            res.send(resBody);
           }
         })
     });
@@ -16,16 +17,23 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/devices/hostname/:hostname/facts'
     , app.locals.requireGroup('users')
     , function (req, res) {
+      var _ = require('underscore');
       var request = require('request');
       var hostname = req.params.hostname;
-      request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts', json: true}
-        , function (error, response, body) {
-          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts'});
-          var resBody = JSON.stringify({ aaData: body });
-          res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
-          res.write(resBody);
-          res.end();
-        });
+      app.locals.getPuppetDevice(hostname
+        , function (err, device) {
+          if (err) {
+            res.send(500);
+          } else {
+            var resBody = JSON.stringify({ aaData: device.factsArray });
+            //console.log(resBody);
+            //res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
+            //res.write(resBody);
+            //res.end();
+            res.type('application/json');
+            res.send(resBody);
+          }
+        })
     });
 
   app.get('/api/v1/sensu/devices/hostname/:hostname'
@@ -42,10 +50,24 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/sensu/devices/hostname/:hostname/events'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.getSensuDevice(req.params.hostname
+        , function (err, device) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: [device.events] }));
+          }
+        })
+    });
+
   app.get('/api/v1/ubersmith/devices/devgroupid/:devgroupid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDevicesbyTypeID(req.params.devgroupid
+      app.locals.ubersmith.getDevicesbyTypeGroupID(req.params.devgroupid
         , function (err, deviceList){
           if (deviceList == null)
           {
