@@ -4,7 +4,7 @@
 
 // Site Specific Requirements
 require('./config/system-credentials.js');
-var config = require('./config');
+config = require('./config');
 
 // Generic Requirements
 var redis = require('redis');
@@ -21,8 +21,8 @@ var useragent = require('express-useragent');
 
 // Application Logs
 var ctxlog = require('contegix-logger');
-var logger = ctxlog('main', 'info', { level: 'debug'});
-var auditLog = ctxlog('audit', 'info', {level: 'error'}, {level: 'debug'});
+var logger = ctxlog('main', 'info', config.log.directory, { level: 'debug'});
+var auditLog = ctxlog('audit', 'info', config.log.directory, {level: 'error'}, {level: 'debug'});
 
 // Access Logs
 var reqLogger = require('express-request-logger');
@@ -224,7 +224,7 @@ var timer = collection.timer('requestTime');
    Periodically output metrics to the log file
  */
 setInterval(function() {
-  var metricslogger = ctxlog('metrics', 'debug', {level: 'error'});
+  var metricslogger = ctxlog('metrics', 'debug', config.log.directory, {level: 'error'});
   var collectionJSON = collection.toJSON();
   metricslogger.log('debug', 'metrics output', { collection: collectionJSON, type: 'metrics'});
 }, config.metrics.interval || 15000);
