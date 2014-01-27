@@ -41,7 +41,7 @@ redisClient.on('error', function (error) {
 
 redisClient.on("connect"
   , function () {
-    redis.select('CK', function (err, res) {
+    redisClient.select('50', function (err, res) {
       var redisTestUUID = require('uuid').v4();
       redisClient.set('test_' + redisTestUUID, redisTestUUID);
       redisClient.get('test_' + redisTestUUID
