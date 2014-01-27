@@ -41,7 +41,7 @@ redisClient.on('error', function (error) {
 
 redisClient.on("connect"
   , function () {
-    redisClient.select('50', function (err, res) {
+    redisClient.select('config.redis.db', function (err, res) {
       var redisTestUUID = require('uuid').v4();
       redisClient.set('test_' + redisTestUUID, redisTestUUID);
       redisClient.get('test_' + redisTestUUID
@@ -64,7 +64,7 @@ redisClient.on("connect"
  */
 var ubersmith = require('ubersmith');
 
-ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, uberAuth: UberAuth});
+ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth});
 
 ubersmith.on('configure.complete', function() {
   if (config.ubersmith.warm_cache === true)
@@ -237,7 +237,7 @@ function rpsMeter(req, res, next) {
 
   // Generate csrf Token
 //  res.locals.token = req.csrfToken();
-res.locals.token = require('uuid').v4();
+  res.locals.token = require('uuid').v4();
 
   logger.req = req;
 
