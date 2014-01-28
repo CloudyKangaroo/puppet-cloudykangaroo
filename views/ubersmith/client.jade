@@ -77,7 +77,9 @@ block content
               p Company:
                 span.label.label-success.pull-right #{client.company}
               p Address:
-                span.pull-right #{client.address}
+                span.pull-right
+                  address
+                    p #{client.address} #{client.city}, #{client.state}. #{client.zip}
               p Created:
                 span.pull-right #{getFormattedTimestamp(client.created)}
               p Contact Information:
@@ -97,7 +99,7 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/ubersmith/clients/list/clientid/#{clientid}/tickets',
+        "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/tickets',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "aoColumns": [
@@ -134,7 +136,7 @@ block footer
       $('#table_devices').dataTable( {
       "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
       "sPaginationType": "bootstrap",
-      "sAjaxSource": '/ubersmith/clients/list/clientid/#{clientid}/devices',
+      "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/devices',
       "iDisplayLength": 15,
       "bSortClasses": false,
       "aoColumns": [
