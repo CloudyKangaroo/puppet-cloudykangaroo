@@ -34,6 +34,7 @@ config.metrics = {};
 config.ubersmith = {};
 config.ubersmith.warm_cache = true;
 config.log.access_log = './access.log';
+config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.metrics.interval = 15000;
 
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
