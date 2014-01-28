@@ -62,9 +62,8 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
-var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
+var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: 'info', logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('ubersmith')(ubersmithConfig);
-
 /**
  * Authentication System
  */
