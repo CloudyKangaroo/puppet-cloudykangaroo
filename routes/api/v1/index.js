@@ -26,14 +26,102 @@ module.exports = function (app, config, passport, redisClient) {
             res.send(500);
           } else {
             var resBody = JSON.stringify({ aaData: device.factsArray });
-            //console.log(resBody);
-            //res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
-            //res.write(resBody);
-            //res.end();
             res.type('application/json');
             res.send(resBody);
           }
         })
+    });
+
+  app.delete('/api/v1/sensu/silence/client/:client'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client;
+      request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.send(204);
+          }
+        });
+    });
+
+  app.get('/api/v1/sensu/silence/client/:client'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client;
+      request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
+
+  app.delete('/api/v1/sensu/silence/client/:client/check/:check'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client + '/' + req.params.check;
+      request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.send(204);
+          }
+        });
+    });
+
+  app.get('/api/v1/sensu/silence/client/:client/check/:check'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client + '/' + req.params.check;
+      request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
+
+  app.get('/api/v1/sensu/silence/:path'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
+
+  app.get('/api/v1/sensu/silence'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/stashes', json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
     });
 
   app.get('/api/v1/sensu/devices/hostname/:hostname'
