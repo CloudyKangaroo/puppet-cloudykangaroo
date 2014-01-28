@@ -4,7 +4,7 @@
 
 // Site Specific Requirements
 require('./config/system-credentials.js');
-config = require('./config');
+var config = require('./config');
 
 // Generic Requirements
 var redis = require('redis');
@@ -64,7 +64,7 @@ redisClient.on("connect"
  */
 var ubersmith = require('ubersmith');
 
-ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth});
+ubersmith.configure({redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logDir: config.log.directory});
 
 ubersmith.on('configure.complete', function() {
   if (config.ubersmith.warm_cache === true)
