@@ -166,7 +166,6 @@ app.use(require('connect-requestid'));
 app.use(useragent.express());
 app.use(flash());
 
-
 /*
  Initialize the session and prepare user authentication
  */

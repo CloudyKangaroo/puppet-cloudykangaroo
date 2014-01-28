@@ -1,0 +1,87 @@
+//
+   Created with JetBrains WebStorm.
+   User: jonathan
+   Date: 27/01/2014
+   Time: 23:19
+   To change this template use File | Settings | File Templates.
+
+extends ../layout
+block head
+  link(rel='stylesheet', href='/stylesheets/dataTables.bootstrap.css')
+
+block content
+  .container.col-xs-16.col-md-12
+    .row
+      .page-header
+        h1 Ticket #{ticket.ticket_id}
+    .row
+      .col-xs-16.col-md-12
+        .panel.panel-default
+          .panel-heading
+            p Ticket Posts
+              span.label.label-primary.pull-right Total: 0
+          .panel-body
+            table(id="table_posts").table.table-condensed
+              thead
+                tr
+                  th Timestamp
+                  th Type
+                  th Visible
+                  th Author
+                  th Subject
+                  th Body
+              tbody
+block footer
+  script(src='/javascripts/jquery.dataTables.min.js')
+  script(src='/javascripts/dataTables.bootstrap.js')
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_posts').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/api/v1/ubersmith/tickets/ticketid/#{ticket.ticket_id}/posts',
+        "iDisplayLength": 10,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "timestamp",
+            "sWidth": "120px"
+          }, {
+            "mData": "type",
+            "sWidth": "90px",
+            "mRender": function(type) {
+              if (type == 23)
+              {
+                return "<span class='pull-right label label-info'>Comment</span>";
+              } else if (type == 21) {
+                return "<span class='pull-right label label-primary'>Follow-Up</span>";
+              } else {
+                return "<span class='pull-right label label-default'>Other</span>";
+              }
+            }
+          }, {
+            "mData": "hidden",
+            "sWidth": "70px",
+            "mRender": function(hidden) {
+              if (hidden != 1)
+              {
+                return "<span class='pull-right label label-warning'>visible</span>";
+              } else {
+                return "<span class='pull-right label label-primary'>hidden</span>";
+              }
+            }
+          }, {
+            "mData": "author",
+            "sWidth": "120px"
+          }, {
+            "mData": "subject",
+            "sWidth": "120px"
+          }, {
+            "mData": "body"
+          }],
+        "aaSorting": [[0,'desc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });

@@ -89,17 +89,19 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       app.locals.ubersmith.getTicketsbyDeviceID(req.params.deviceid
       , function (err, ticketList){
-          if (ticketList == null)
+          if (err)
           {
-             res.send(500);
-          } else {
-            var tickets = new Array();
-            Object.keys(ticketList).forEach(function(ticketID) {
-              var ticket = ticketList[ticketID];
-              tickets.push(ticket);
-            })
+            res.send(500);
+          }  else {
+            var _ = require('underscore');
+            var tickets = _.values(ticketList);
+            for (i=0; i<tickets.length; i++)
+            {
+              tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
+              tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+            }
             res.type('application/json');
-            res.send(JSON.stringify({ aaData: tickets}));
+            res.send(JSON.stringify({aaData: tickets}));
           }
         });
     });
@@ -162,6 +164,104 @@ module.exports = function (app, config, passport, redisClient) {
             }
           }
         })
+    });
+
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getClientByID(req.params.clientid, function(err, client) {
+        res.type('application/json');
+        res.send(JSON.stringify(client));
+      });
+    });
+
+  app.get('/api/v1/ubersmith/tickets'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getTickets(function(err, ticketList) {
+        if (err)
+        {
+          res.send(500);
+        }  else {
+          var _ = require('underscore');
+          var tickets = _.values(ticketList);
+          for (i=0; i<tickets.length; i++)
+          {
+            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+          }
+          res.type('application/json');
+          res.send(JSON.stringify({aaData: tickets}));
+        }
+      });
+    });
+
+  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
+        if (err)
+        {
+          res.send(500);
+        }  else {
+          res.type('application/json');
+          res.send(JSON.stringify(ticket));
+        }
+      });
+    });
+
+  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
+        if (err)
+        {
+          res.send(500);
+        }  else {
+          var _ = require('underscore');
+          var posts = _.values(postsList);
+          for (i=0; i<posts.length; i++)
+          {
+            posts[i].timestamp = app.locals.getFormattedTimestamp(posts[i].timestamp);
+          }
+          res.t
+          res.type('application/json');
+          res.send(JSON.stringify({ aaData: posts }));
+        }
+      });
+    });
+
+
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
+        if (err)
+        {
+          res.send(500);
+        }  else {
+          var _ = require('underscore');
+          var tickets = _.values(ticketList);
+          for (i=0; i<tickets.length; i++)
+          {
+            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+          }
+          res.type('application/json');
+          res.send(JSON.stringify({aaData: tickets}));
+        }
+      });
+    });
+
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
+        var _ = require('underscore');
+        var devices = _.values(devicelist);
+        res.type('application/json');
+        res.send(JSON.stringify({ aaData: devices}));
+      });
     });
 
   app.get('/api/v1/global/devices/deviceid/:deviceid'

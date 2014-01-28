@@ -12,11 +12,12 @@ block content
         .panel.panel-default
           .panel-heading
             p Ubersmith Tickets
-              span.label.label-primary.pull-right Total: #{ticket_count.total}
+              span.label.label-primary.pull-right Total: 0
           .panel-body
             table(id="table_tickets").table.table-condensed
               thead
                 tr
+                  th ID
                   th Created
                   th Priority
                   th Type
@@ -33,11 +34,16 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/ubersmith/data/support.ticket_list',
+        "sAjaxSource": '/api/v1/ubersmith/tickets',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "aoColumns": [
           {
+            "mData": "ticket_id",
+            "mRender": function (ticket_id) {
+              return '<a href="/ubersmith/tickets/ticketid/' + ticket_id + '">' + ticket_id + '</a>';
+            }
+          }, {
             "mData": "timestamp"
           }, {
             "mData": "priority"
@@ -57,13 +63,13 @@ block footer
             "mData": "admin_username"
           }, {
             "mData": "subject",
-            "mRender": function (subject) {
-              return subject.slice(0,65);
+            "mRender": function (subject, type, row) {
+              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
             }
           }, {
             "mData": "activity"
           }],
-        "aaSorting": [[0,'desc'],[1, 'desc']],
+        "aaSorting": [[1,'desc'],[2, 'desc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }
