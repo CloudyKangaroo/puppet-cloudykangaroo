@@ -298,6 +298,26 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
 
+  app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        var ticketID = req.params.ticketid;
+        var subject = req.body.subject;
+        var body = req.body.body;
+        var visible = req.body.comment;
+        var from = req.user.username + '@contegix.com';
+        var time_spent = req.body.time_spent;
+
+        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', {}, form, function (err, response) {
+          if (error)
+          {
+            res.send(500);
+          } else {
+
+          }
+        });
+    });
+
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -312,7 +332,6 @@ module.exports = function (app, config, passport, redisClient) {
           {
             posts[i].timestamp = app.locals.getFormattedTimestamp(posts[i].timestamp);
           }
-          res.t
           res.type('application/json');
           res.send(JSON.stringify({ aaData: posts }));
         }
