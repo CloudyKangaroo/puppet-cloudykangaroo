@@ -509,7 +509,7 @@ app.locals.silenceCheck = function (client, event, silenceCheckCallback) {
     content: { "timestamp": (Math.round(Date.now() / 1000)) },
     expire: -1
   };
-  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes'}, json: reqBody }
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: reqBody }
     , function (error, response) {
       silenceCheckCallback(error, response.body)
     }
@@ -524,7 +524,7 @@ app.locals.silenceClient = function (client, silenceClientCallback) {
     content: { "timestamp": (Math.round(Date.now() / 1000)) },
     expire: -1
   };
-  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes'}, json: reqBody }
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: reqBody }
     , function (error, response) {
       silenceClientCallback(error, response.body)
     }
