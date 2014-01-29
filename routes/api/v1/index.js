@@ -50,31 +50,34 @@ module.exports = function (app, config, passport, redisClient) {
       })
   });
 
-  app.get('/api/v1/sensu/silence/check/:client/:check'
+  app.post('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceCheck(req.params.client, req.params.check
+      console.log(req.body.expires);
+      app.locals.silenceClient(req.params.client, req.body.expires
         , function (err, response) {
           if (err) {
             res.send(500);
           } else {
-            res.send(200);
+            res.send(202);
           }
       })
   });
 
-  app.get('/api/v1/sensu/silence/client/:client'
+  app.post('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceClient(req.params.client
+      console.log(req.body.expires);
+      app.locals.silenceCheck(req.params.client, req.params.check, req.body.expires
         , function (err, response) {
           if (err) {
             res.send(500);
           } else {
-            res.send(200);
+            res.send(202);
           }
       })
   });
+
 
   app.get('/api/v1/sensu/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
