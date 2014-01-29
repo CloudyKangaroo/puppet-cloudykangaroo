@@ -1,8 +1,36 @@
 body {
     padding-top: 40px;
-    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
     color: #00B7FF;
+}
+
+.navbar
+{
+    background-color: #5e00ff;
+}
+
+.navbar-default .navbar-nav>li>a
+{
+  color: #000000;
+}
+
+.navbar-default .navbar-nav>li>a
+{
+  padding-bottom: 12px;
+}
+
+.btn
+{
+  padding-bottom: 11px;
+  padding-top: 11px;
+}
+
+.dataTables_wrapper
+{
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
