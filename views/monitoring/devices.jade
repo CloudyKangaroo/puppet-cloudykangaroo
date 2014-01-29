@@ -1,6 +1,6 @@
 extends ../layout
 block head
-  link(rel='stylesheet', href='/stylesheets/dataTables.bootstrap.css')
+  include ../datatables_css
 block navbar
 block content
   .container
@@ -16,8 +16,7 @@ block content
             th Ubersmith
         tbody
 block footer
-  script(src='/javascripts/jquery.dataTables.min.js')
-  script(src='/javascripts/dataTables.bootstrap.js')
+  include ../datatables_js
   script(type='text/javascript').
     $(document).ready(function() {
       $('tableid').dataTable( {
