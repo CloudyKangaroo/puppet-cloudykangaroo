@@ -26,16 +26,29 @@ module.exports = function (app, config, passport, redisClient) {
             res.send(500);
           } else {
             var resBody = JSON.stringify({ aaData: device.factsArray });
-            //console.log(resBody);
-            //res.writeHead(200, { 'Content-Length': resBody.length, 'Content-Type': 'application/json' });
-            //res.write(resBody);
-            //res.end();
             res.type('application/json');
             res.send(resBody);
           }
         })
     });
 
+  // UNSILENCE an CLIENT
+  app.delete('/api/v1/sensu/silence/client/:client'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client;
+      request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.send(204);
+          }
+        });
+    });
+ 
+  // GET STASHES THAT MATCH ^stash
   app.get('/api/v1/sensu/stashes/:stash'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -51,6 +64,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   app.post('/api/v1/sensu/silence/client/:client'
+  // SILENCE an CLIENT
     , app.locals.requireGroup('users')
     , function (req, res) {
       console.log(req.body.expires);
@@ -65,6 +79,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   app.post('/api/v1/sensu/silence/client/:client/check/:check'
+  // SILENCE a CHECK
     , app.locals.requireGroup('users')
     , function (req, res) {
       console.log(req.body.expires);
@@ -78,6 +93,87 @@ module.exports = function (app, config, passport, redisClient) {
       })
   });
 
+  // GET SILENCED CLIENTS
+  app.get('/api/v1/sensu/silence/client/:client'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client;
+      request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
+
+  // UNSILENCE A CHECK
+  app.delete('/api/v1/sensu/silence/client/:client/check/:check'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client + '/' + req.params.check;
+      request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.send(204);
+          }
+        });
+    });
+
+  // GET SILENCED CHECKS
+  app.get('/api/v1/sensu/silence/client/:client/check/:check'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var path = 'silence/' + req.params.client + '/' + req.params.check;
+      request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
+
+  // GET A STASH
+  app.get('/api/v1/sensu/silence/:path'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
+
+  // GET ALL STASHES
+  app.get('/api/v1/sensu/silence'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/stashes', json: true }
+        , function (error, response) {
+          if(error){
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(JSON.stringify({aaData: response.body}));
+          }
+        });
+    });
 
   app.get('/api/v1/sensu/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
@@ -253,6 +349,26 @@ module.exports = function (app, config, passport, redisClient) {
       });
     });
 
+  app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        var ticketID = req.params.ticketid;
+        var subject = req.body.subject;
+        var body = req.body.body;
+        var visible = req.body.comment;
+        var from = req.user.username + '@contegix.com';
+        var time_spent = req.body.time_spent;
+
+        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', {}, form, function (err, response) {
+          if (error)
+          {
+            res.send(500);
+          } else {
+
+          }
+        });
+    });
+
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -267,7 +383,6 @@ module.exports = function (app, config, passport, redisClient) {
           {
             posts[i].timestamp = app.locals.getFormattedTimestamp(posts[i].timestamp);
           }
-          res.t
           res.type('application/json');
           res.send(JSON.stringify({ aaData: posts }));
         }

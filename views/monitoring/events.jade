@@ -15,17 +15,6 @@ block content
             th(data-defaultsort='disabled') Check
             th(data-defaultsort='disabled').visible-lg Output
         tbody
-//          each event,i in events
-//            if event.status > 0
-//              tr(class="#{getEventClass(event.status)}", id="row-#{i}")
-//                td(data-value="#{event.issued}") #{getFormattedTimestamp(event.issued)}
-//                td #{event.client}
-//                  button(onclick="silenceCheck('#{event.client}', false);").btn.btn-default.btn-xs.pull-left
-//                    span.glyphicon.glyphicon-volume-off
-//                td #{event.check}
-//                  button(onclick="silenceCheck('#{event.client}', '#{event.check}');").btn.btn-default.btn-xs.pull-left
-//                    span.glyphicon.glyphicon-volume-off
-//                td.visible-lg #{event.output.slice(0,65)}
 block footer
   script(src='/javascripts/jquery.dataTables.min.js')
   script(src='/javascripts/dataTables.bootstrap.js')
@@ -38,6 +27,8 @@ block footer
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/sensu/events',
         "iDisplayLength": 10,
+        "bStateSave": true,
+        "bDeferRender": true,
         "bSortClasses": false,
         "aoColumns": [
           {
