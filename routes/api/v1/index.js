@@ -36,6 +36,20 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/sensu/stashes/:stash'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.getSensuStashes(req.params.stash
+        , function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(response);
+          }
+      })
+  });
+
   app.get('/api/v1/sensu/silence/check/:client/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
