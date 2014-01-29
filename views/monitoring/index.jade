@@ -3,12 +3,12 @@ block head
   link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
 block navbar
 block content
-  .container.col-xs-12.col-md-8
+  .container.col-xs-20.col-md-10
     .row
       .page-header
         h1 Current System Info
     .row
-      .col-xs-6.col-md-4
+      .col-xs-6.col-md-6
         .panel.panel-default
           .panel-heading Sensu
           .panel-body
@@ -17,19 +17,19 @@ block content
           .panel-heading Redis
           .panel-body
             p(class=(info.redis.connected === true)? "alert alert-success" : "alert alert-danger") Connected: #{info.redis.connected}
-      .col-xs-6.col-md-4
+      .col-xs-14.col-md-6
         .panel.panel-default
           .panel-heading RabbitMQ
           .panel-body
             p(class=(info.rabbitmq.connected === true)? "alert alert-success" : "alert alert-danger") Connected: #{info.rabbitmq.connected}
             .row
-              .col-xs-7.col-md-5
+              .col-xs-7.col-md-4
                 h4 Results
                 p Messages
                   span.badge.pull-right #{info.rabbitmq.results.messages}
                 p Consumers
                   span.badge.pull-right #{info.rabbitmq.results.consumers}
-              .col-xs-7.col-md-5
+              .col-xs-7.col-md-4
                 h4 KeepAlives
                 p Messages
                   span.badge.pull-right #{info.rabbitmq.keepalives.messages}
