@@ -32,7 +32,6 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
-<<<<<<< HEAD
   // UNSILENCE an CLIENT
   app.delete('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
@@ -48,6 +47,21 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
+ 
+  // GET STASHES THAT MATCH ^stash
+  app.get('/api/v1/sensu/stashes/:stash'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.getSensuStashes(req.params.stash
+        , function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(response);
+          }
+      })
+  });
 
   // SILENCE an CHECK
   app.get('/api/v1/sensu/silence/check/:client/:check'
