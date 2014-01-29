@@ -588,7 +588,7 @@ io.sockets.on('connection', function (socket) {
   var pubsubClient = redis.createClient(config.redis.port, config.redis.host);
   var remoteIP = '';
 
-  remoteIP = client.handshake.headers['x-forwarded-for'] || client.handshake.address.address;
+  //remoteIP = client.handshake.headers['x-forwarded-for'] || client.handshake.address.address;
 
   pubsubClient.on("connect"
     , function () {
