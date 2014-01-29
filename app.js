@@ -614,6 +614,7 @@ io.sockets.on('connection', function (socket) {
     socket.in(channel).emit('popAlert', JSON.stringify(msgObj), function(data) {
      // logger.log('debug', 'handled message', {uuid: data});
     });
+  });
 });
 
 if (!module.parent) {
