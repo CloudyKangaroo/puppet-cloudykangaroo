@@ -526,17 +526,16 @@ app.locals.silenceCheck = function (client, check, expires, silenceCheckCallback
     content: { "timestamp": (Math.round(Date.now() / 1000)) },
     expire: expires
   };
-  logger.log('debug', reqBody);
+  logger.log('info', reqBody);
   request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
     , function (error, msg, response) {
-      logger.log('debug', response);
+      logger.log('info', response);
       silenceCheckCallback(error, response)
     }
   );
 }
 
 app.locals.silenceClient = function (client, expires, silenceClientCallback) {
-  var async = require('async');
   var request = require('request');
   var reqBody = {
     path: "silence/" + client,
