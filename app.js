@@ -507,12 +507,13 @@ app.locals.silenceCheck = function (client, event, silenceCheckCallback) {
   var request = require('request');
   var reqBody = {
     path: "silence/" + client + "/" + event,
-    content: { "timestamp": (Math.round(Date.now() / 1000)) },
-    expire: -1
+    content: { "timestamp": (Math.round(Date.now() / 1000)) }
   };
-  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: reqBody }
-    , function (error, response) {
-      silenceCheckCallback(error, response.body)
+  logger.log('debug', reqBody);
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
+    , function (error, msg, response) {
+      logger.log('debug', response);
+      silenceCheckCallback(error, response)
     }
   );
 }
@@ -525,9 +526,11 @@ app.locals.silenceClient = function (client, silenceClientCallback) {
     content: { "timestamp": (Math.round(Date.now() / 1000)) },
     expire: -1
   };
-  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: reqBody }
-    , function (error, response) {
-      silenceClientCallback(error, response.body)
+  logger.log('debug', reqBody);
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
+    , function (error, msg, response) {
+      logger.log('debug', response);
+      silenceClientCallback(error, response)
     }
   );
 }

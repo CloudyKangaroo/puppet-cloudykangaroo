@@ -32,10 +32,7 @@ block footer
   script(src='/javascripts/sensu-helper.js')
   script(type='text/javascript').
     $(document).ready(function() {
-      var renderButton = function(client, check) {
-        return "<button onclick=\"silenceCheck('"+client+"', '"+check+"');\" class=\"btn btn-default btn-xs pull-left\"><span class=\"glyphicon glyphicon-volume-off\"></span></button>"
-      }
-      $('#table_events').dataTable( {
+      oTable = $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/sensu/events',
@@ -50,7 +47,11 @@ block footer
               return '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>' +renderButton(client, 'false');
             }
           }, {
-            "mData": "check"+renderButton(client, check)
+            "mData": "check",
+            "mData": "client",
+            "mRender": function(client, check) {
+              return check + renderButton(client, check);
+            }
           }, {
             "mData": "output",
             "mRender": function (output) {
