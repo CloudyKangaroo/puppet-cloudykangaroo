@@ -3,7 +3,7 @@ var renderButton = function(client, check) {
 }
 var silenceCheck = function(client, check) {
   bootbox.prompt("Please enter a length of time to silence.\nIn hours, less than 72 hours.", function(result) {
-    if (result != null) {
+    if (result != null && parseInt(result) <= 72) {
       var api_uri = '/api/v1/sensu/silence/';
       var call_uri;
       if (check != 'false') {
@@ -11,13 +11,15 @@ var silenceCheck = function(client, check) {
       } else {
         call_uri = api_uri + 'client/' +  encodeURI(client);
       }
-      params = JSON.stringify({ expires: result*3600})
+      var params = "expires="+result*3600;
       var req = new XMLHttpRequest();
       req.open('post', call_uri, false);
       req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       req.setRequestHeader("Content-length", params.length);
       req.setRequestHeader("Connection", "close");
       req.send(params);
+    } else {
+      bootbox.confirm("Length of time to silence in hours must be an integer <= 72", function(result) {})
     }
   })
 }

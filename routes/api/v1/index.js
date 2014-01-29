@@ -63,12 +63,12 @@ module.exports = function (app, config, passport, redisClient) {
       })
   });
 
+  // SILENCE a CLIENT
   app.post('/api/v1/sensu/silence/client/:client'
-  // SILENCE an CLIENT
     , app.locals.requireGroup('users')
     , function (req, res) {
-      console.log(req.body.expires);
-      app.locals.silenceClient(req.params.client, req.body.expires
+      console.log(req.body);
+      app.locals.silenceClient(req.params.client, parseInt(req.body.expires)
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -78,12 +78,11 @@ module.exports = function (app, config, passport, redisClient) {
       })
   });
 
-  app.post('/api/v1/sensu/silence/client/:client/check/:check'
   // SILENCE a CHECK
+  app.post('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      console.log(req.body.expires);
-      app.locals.silenceCheck(req.params.client, req.params.check, req.body.expires
+      app.locals.silenceCheck(req.params.client, req.params.check, parseInt(req.body.expires)
         , function (err, response) {
           if (err) {
             res.send(500);
