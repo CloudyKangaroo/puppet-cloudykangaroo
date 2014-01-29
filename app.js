@@ -501,6 +501,36 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
   });
 }
 
+app.locals.silenceCheck = function (client, event, silenceCheckCallback) {
+  var async = require('async');
+  var request = require('request');
+  var reqBody = {
+    path: "silence/" + client + "/" + event,
+    content: { "timestamp": (Math.round(Date.now() / 1000)) },
+    expire: -1
+  };
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes'}, json: reqBody }
+    , function (error, response) {
+      silenceCheckCallback(error, response.body)
+    }
+  );
+}
+
+app.locals.silenceClient = function (client, silenceClientCallback) {
+  var async = require('async');
+  var request = require('request');
+  var reqBody = {
+    path: "silence/" + client,
+    content: { "timestamp": (Math.round(Date.now() / 1000)) },
+    expire: -1
+  };
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes'}, json: reqBody }
+    , function (error, response) {
+      silenceClientCallback(error, response.body)
+    }
+  );
+}
+
 app.locals.getSensuDevice = function(hostname, getDevCallback) {
   var async = require('async');
   redisClient.get('sensu:devices:' + hostname, function (err, reply) {
