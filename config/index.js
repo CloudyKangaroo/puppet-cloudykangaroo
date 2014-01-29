@@ -46,7 +46,7 @@ config.puppetdb.port = process.env.PUPPETDB_PORT || 8080;
 config.redis.uri = process.env.REDIS_URI;
 config.redis.host = process.env.REDIS_HOST || 'localhost';
 config.redis.port = process.env.REDIS_PORT || 6379;
-config.redis.db = process.env.REDIS_DB || 15;
+config.redis.db = process.env.REDIS_DB || 1;
 
 config.http.port = process.env.PORT || 3000;
 config.cookie.secret = 'supersecure';
