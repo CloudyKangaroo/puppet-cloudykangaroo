@@ -119,6 +119,8 @@ block footer
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/api/v1/ubersmith/devices/deviceid/#{uberDevice.dev}/tickets',
         "iDisplayLength": 10,
+        "bStateSave": true,
+        "bDeferRender": true,
         "bSortClasses": false,
         "aoColumns": [
           {
@@ -151,6 +153,8 @@ block footer
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/api/v1/puppet/devices/hostname/#{uberDevice.dev_desc}.contegix.mgmt/facts',
         "iDisplayLength": 10,
+        "bStateSave": true,
+        "bDeferRender": true,
         "bSortClasses": false,
         "aoColumns": [
           {

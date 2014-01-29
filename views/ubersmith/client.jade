@@ -101,6 +101,7 @@ block footer
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/tickets',
         "iDisplayLength": 10,
+        "bStateSave": true,
         "bSortClasses": false,
         "aoColumns": [
           {
@@ -138,6 +139,8 @@ block footer
       "sPaginationType": "bootstrap",
       "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/devices',
       "iDisplayLength": 15,
+      "bStateSave": true,
+      "bDeferRender": true,
       "bSortClasses": false,
       "aoColumns": [
         {
