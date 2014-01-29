@@ -41,8 +41,8 @@ block footer
           }, {
             "mData": "check",
             "mData": "client",
-            "mRender": function(client, check) {
-              return check + renderButton(client, check);
+            "mRender": function(client, type, row) {
+              return row['check'] + renderButton(row['client'], row['check']);
             }
           }, {
             "mData": "output",

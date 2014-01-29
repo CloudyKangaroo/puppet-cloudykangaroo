@@ -2,7 +2,7 @@ var renderButton = function(client, check) {
  return "<button onclick=\"silenceCheck('"+client+"', '"+check+"');\" class=\"btn btn-default btn-xs pull-left\"><span class=\"glyphicon glyphicon-volume-off\"></span></button>"
 }
 var silenceCheck = function(client, check) {
-  bootbox.prompt("Please enter a length of time to silence.\nIn hours, less than 72 hours.", function(result) {
+  bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", value: 8, callback: function(result) {
     if (result != null && parseInt(result) <= 72) {
       var api_uri = '/api/v1/sensu/silence/';
       var call_uri;
@@ -21,5 +21,5 @@ var silenceCheck = function(client, check) {
     } else {
       bootbox.confirm("Length of time to silence in hours must be an integer <= 72", function(result) {})
     }
-  })
+  }})
 }
