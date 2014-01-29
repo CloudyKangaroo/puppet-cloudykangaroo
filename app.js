@@ -501,8 +501,23 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
   });
 }
 
+app.locals.getSensuStashes = function (stashes, getStashCallback) {
+  var request = require('request');
+  request({url: app.get('sensu_uri') + '/stashes', json: true}
+    , function (error, msg, response, stashes) {
+      if (error) {
+        getStashCallback(error, response)
+      } else {
+        var re = new RegExp('^/' + stashes)
+        var filtered_response = response.filter(function (element, re) {
+          if (re.exec(element)) { return true };
+        };
+        getStashCallback(error, filtered_response)
+      }
+    })
+}
+
 app.locals.silenceCheck = function (client, event, silenceCheckCallback) {
-  var async = require('async');
   var request = require('request');
   var reqBody = {
     path: "silence/" + client + "/" + event,
