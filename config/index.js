@@ -17,7 +17,7 @@ config.navLinks = {
   monitoring: [
     { label: 'Home', key: 'info', path: '/monitoring' },
     { label: 'Events', key: 'events', path: '/monitoring/events' },
-    { label: 'Clients', key: 'clients', path: '/monitoring/clients' },
+    { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
     { label: 'Failures', key: 'failures', path: '/monitoring/failures' },
     { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
     { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }
@@ -32,7 +32,7 @@ config.cookie = {};
 config.log = {};
 config.metrics = {};
 config.ubersmith = {};
-config.ubersmith.warm_cache = false;
+config.ubersmith.warm_cache = true;
 config.log.access_log = './access.log';
 config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.metrics.interval = 15000;

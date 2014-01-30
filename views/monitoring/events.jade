@@ -1,6 +1,7 @@
 extends ../layout
 block head
   include ../datatables_css
+  link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
 
 block content
   .container
@@ -10,14 +11,17 @@ block content
       table(id='table_events').table.table-condensed.sortable
         thead
           tr
-            th(data-defaultsort='desc') Issued
-            th(data-defaultsort='disabled') Client
-            th(data-defaultsort='disabled') Check
-            th(data-defaultsort='disabled').visible-lg Output
+            th Issued
+            th Client
+            th Check
+            th Flapping
+            th Count
+            th.visible-lg Output
         tbody
 block footer
   include ../datatables_js
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.1.0/bootbox.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
   script(src='/javascripts/sensu-helper.js')
   script(type='text/javascript').
     $(document).ready(function() {
@@ -31,25 +35,37 @@ block footer
         "bSortClasses": false,
         "aoColumns": [
           {
-            "mData": "issued"
+            "mData": "issued",
+            "sWidth": "80px"
           }, {
             "mData": "client",
-            "mRender": function (client) {
-              return '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>' +renderButton(client, 'false');
+            "sWidth": "140px",
+            "mRender": function (client, type, row) {
+              return renderButton(client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
             }
           }, {
             "mData": "check",
             "mData": "client",
+            "sWidth": "220px",
             "mRender": function(client, type, row) {
-              return row['check'] + renderButton(row['client'], row['check']);
-            }
+              return renderButton(row['client'], row['check']) + row['check'];
+            },
+          }, {
+            "mData": "flapping",
+            "sWidth": "40px"
+          }, {
+            "mData": "occurrences",
+            "sWidth": "40px"
           }, {
             "mData": "output",
-            "mRender": function (output) {
-              return output.slice(0,65);
+            "mRender": function (output, type, row) {
+              var dispOutput = output.slice(0,75).replace(/["']/g, "");
+              var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
+              return "<a onclick=\"displayTextAlert('" + txtBoxText + "');\">" + dispOutput + "</a>";
+
             }
           }],
-        "aaSorting": [[1,'asc']],
+        "aaSorting": [[1,'desc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }

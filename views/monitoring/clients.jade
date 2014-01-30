@@ -1,29 +1,41 @@
 extends ../layout
 block head
   include ../datatables_css
+
 block navbar
 block content
   .container
     .page-header
-      h1 Current Client List
+      h1 Monitored Hosts
     .container
       table(id="table_clients").table.table-condensed.sortable
         thead
           tr
             th Name
-            th Address
-            th Timestamp
-            th Subscriptions
+            th IP Address
+            th Location
+            th Last Check-in
+            th Company
+            th Full Name
+            th Email
+
         tbody
 
 block footer
   include ../datatables_js
   script(type='text/javascript').
+    // Activate Google Prettify in this page
+    addEventListener('load', prettyPrint, false);
+    $(document).ready(function(){
+        // Add prettyprint class to pre elements
+        $('pre').addClass('prettyprint');
+    }); // end document.ready
+  script(type='text/javascript').
     $(document).ready(function() {
       $('#table_clients').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/monitoring/list/clients',
+        "sAjaxSource": '/api/v1/sensu/clients',
         "iDisplayLength": 20,
         "bStateSave": true,
         "bDeferRender": true,
@@ -31,15 +43,29 @@ block footer
         "aoColumns": [
           {
             "mData": "name",
+            "sWidth": "120px",
             "mRender": function (name, type, row) {
-              return '<a href="/ubersmith/devices/hostname/'+name+'">' + name + '</a>';
+              return '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + name.replace('.contegix.mgmt', '') + '</a>';
             }
           }, {
-            "mData": "address"
+            "mData": "address",
+            "sWidth": "70px"
           }, {
-            "mData": "timestamp"
+            "mData": "location",
+            "sWidth": "60px"
           }, {
-            "mData": "subscriptions"
+            "mData": "timestamp",
+            "sWidth": "80px"
+          }, {
+            "mData": "company",
+            "mRender": function(company, type, row) {
+              return '<a href="/ubersmith/clients/clientid/' + row['clientid'] + '">' + company + '</a>';
+            }
+          }, {
+            "mData": "full_name"
+          }, {
+            "mData": "email",
+            "sWidth": "220px"
           }],
         "aaSorting": [[0,'asc']],
         "oLanguage": {

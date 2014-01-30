@@ -64,9 +64,7 @@ redisClient.on("connect"
  */
 var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: 'error', logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('ubersmith')(ubersmithConfig);
-           ubersmith.getAdmins(function(err, reply){
-              console.log(reply);
-           });
+
 /**
  * Authentication System
  */
@@ -505,16 +503,30 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
 }
 
 app.locals.getSensuEvents = function ( getEventsCallback ) {
-  request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-      getEventsCallback(null, JSON.stringify(body));
+  var _ = require('underscore');
+  var request = require('request');
+  app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+    if (deviceHostnames == null)
+    {
+      getEventsCallback(new Error, null);
     } else {
-      app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'});
-      getEventsCallback(new Error('Failed to retrieve Sensu events.'), null);
-    }
-  });
-}
+      request({ url: app.get('sensu_uri') + '/events/' + req.params.hostname, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          var events = [];
+          _.each(body, function(event) {
+            _.defaults(event, deviceHostnames[event.client]);
+            event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+            events.push(event);
+          });
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+          getEventsCallback( error, events )
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+          getEventsCallback( error, null )
+        }
+      });
+    }});
+  };
 
 app.locals.getSensuStashes = function (stashes, getStashCallback) {
   var request = require('request');
@@ -523,7 +535,6 @@ app.locals.getSensuStashes = function (stashes, getStashCallback) {
       if (error) {
         getStashCallback(error, response)
       } else {
-        console.log(stashes);
         var re = new RegExp('^' + stashes)
         var filtered_response = response.filter(function (element) {
           if (re.exec(element.path)) { return true }
@@ -684,6 +695,7 @@ io.sockets.on('connection', function (socket) {
 if (!module.parent) {
   server.listen(app.get('port'), function () {
     logger.log('info', 'Express server listening on port ' + app.get('port'), {});
+    logger.log('debug', 'Route Listing', {routes: app.routes});
   });
 };
 
