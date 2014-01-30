@@ -1,6 +1,6 @@
 {
   "name": "cloudy-kangaroo",
-  "description": "Monitoring Interface for the Sensu Monitoring Agent",
+  "description": "Service Provider Management w/Sensu, Puppet and Ubersmith",
   "version": "0.1.5",
   "private": true,
   "homepage": "http://contegix.github.io/cloudykangaroo",
