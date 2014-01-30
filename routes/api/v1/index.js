@@ -37,20 +37,29 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       var _ = require('underscore');
       var request = require('request');
-      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          var events = [];
-          _.each(body, function(event) {
-            event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
-            events.push(event);
-          });
-          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-          res.send(JSON.stringify({ aaData: events }));
-        } else {
-          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+        if (deviceHostnames == null)
+        {
           res.send(500);
+        } else {
+          request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              var events = [];
+              _.each(body, function(event) {
+                _.defaults(event, deviceHostnames[event.client]);
+                event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+                events.push(event);
+              });
+              app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+              res.type('application/json');
+              res.send(JSON.stringify({ aaData: events }));
+            } else {
+              app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+              res.send(500);
+            }
+          });
         }
-      })
+      });
     });
 
   // UNSILENCE an CLIENT
