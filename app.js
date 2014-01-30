@@ -501,6 +501,56 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
   });
 }
 
+app.locals.getSensuStashes = function (stashes, getStashCallback) {
+  var request = require('request');
+  request({url: app.get('sensu_uri') + '/stashes', json: true}
+    , function (error, msg, response) {
+      if (error) {
+        getStashCallback(error, response)
+      } else {
+        console.log(stashes);
+        var re = new RegExp('^' + stashes)
+        var filtered_response = response.filter(function (element) {
+          console.log(element.path);
+          if (re.exec(element.path)) { return true }
+        });
+        getStashCallback(error, filtered_response)
+      }
+    })
+}
+
+app.locals.silenceCheck = function (client, check, expires, silenceCheckCallback) {
+  var request = require('request');
+  var reqBody = {
+    path: "silence/" + client + "/" + check,
+    content: { "timestamp": (Math.round(Date.now() / 1000)) },
+    expire: expires
+  };
+  logger.log('info', reqBody);
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
+    , function (error, msg, response) {
+      logger.log('info', response);
+      silenceCheckCallback(error, response)
+    }
+  );
+}
+
+app.locals.silenceClient = function (client, expires, silenceClientCallback) {
+  var request = require('request');
+  var reqBody = {
+    path: "silence/" + client,
+    content: { "timestamp": (Math.round(Date.now() / 1000)) },
+    expire: expires
+  };
+  logger.log('debug', reqBody);
+  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
+    , function (error, msg, response) {
+      logger.log('debug', response);
+      silenceClientCallback(error, response)
+    }
+  );
+}
+
 app.locals.getSensuDevice = function(hostname, getDevCallback) {
   var async = require('async');
   redisClient.get('sensu:devices:' + hostname, function (err, reply) {

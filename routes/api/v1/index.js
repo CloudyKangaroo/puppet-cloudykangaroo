@@ -32,6 +32,7 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  // UNSILENCE an CLIENT
   app.delete('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -46,7 +47,52 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
+ 
+  // GET STASHES THAT MATCH ^stash
+  app.get('/api/v1/sensu/stashes/:stash'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.getSensuStashes(req.params.stash
+        , function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(response);
+          }
+      })
+  });
 
+  // SILENCE a CLIENT
+  app.post('/api/v1/sensu/silence/client/:client'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      console.log(req.body);
+      app.locals.silenceClient(req.params.client, parseInt(req.body.expires)
+        , function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.send(202);
+          }
+      })
+  });
+
+  // SILENCE a CHECK
+  app.post('/api/v1/sensu/silence/client/:client/check/:check'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.silenceCheck(req.params.client, req.params.check, parseInt(req.body.expires)
+        , function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.send(202);
+          }
+      })
+  });
+
+  // GET SILENCED CLIENTS
   app.get('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -63,6 +109,7 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  // UNSILENCE A CHECK
   app.delete('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -78,6 +125,7 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  // GET SILENCED CHECKS
   app.get('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -94,6 +142,7 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  // GET A STASH
   app.get('/api/v1/sensu/silence/:path'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -109,6 +158,7 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  // GET ALL STASHES
   app.get('/api/v1/sensu/silence'
     , app.locals.requireGroup('users')
     , function (req, res) {
