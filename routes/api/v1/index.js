@@ -62,12 +62,11 @@ module.exports = function (app, config, passport, redisClient) {
           } else {
             var catalog = body.data;
             var resourceList = catalog.resources;
-            console.log(resourceList);
             var checks = [];
             _.each(resourceList, function (resource) {
               if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu_check')
               {
-                checks.push(resource.title);
+                checks.push({title: resource.title, standalone: resource.parameters.standalone, subscribers: resource.parameters.subscribers, handlers: resource.parameters.handlers, interval: resource.parameters.interval, command: resource.parameters.command, parameters: resource.parameters});
               }
             });
             res.type('application/json');

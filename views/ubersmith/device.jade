@@ -94,6 +94,21 @@ block content
       .row
         .col-md-12
           .panel.panel-default
+            .panel-heading Sensu Checks
+            .panel-body
+              table(id="table_checks").table.table-condensed
+                thead
+                  tr
+                    th Title
+                    th Subscribers
+                    th Handlers
+                    th Interval
+                    th Command
+                tbody
+
+      .row
+        .col-md-12
+          .panel.panel-default
             .panel-heading Puppet Facts
             .panel-body
               table(id="table_facts").table.table-condensed
@@ -163,6 +178,40 @@ block footer
         }
       });
     });
+
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_checks').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/api/v1/sensu/checks/hostname/#{uberDevice.dev_desc}.contegix.mgmt',
+        "iDisplayLength": 10,
+        "bStateSave": true,
+        "bDeferRender": true,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "title",
+            "sWidth": "160px"
+          }, {
+            "mData": "subscribers",
+            "sWidth": "80px"
+          }, {
+            "mData": "handlers",
+            "sWidth": "80px"
+          }, {
+            "mData": "interval",
+            "sWidth": "60px"
+          }, {
+            "mData": "command",
+          }],
+        "aaSorting": [[1,'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
+
   script(type='text/javascript').
     $(document).ready(function() {
       oTable = $('#table_events').dataTable( {
