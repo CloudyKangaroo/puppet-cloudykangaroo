@@ -31,18 +31,21 @@ block footer
         "bSortClasses": false,
         "aoColumns": [
           {
-            "mData": "issued"
+            "mData": "issued",
+            "sWidth": "80px"
           }, {
             "mData": "client",
+            "sWidth": "220px",
             "mRender": function (client) {
-              return '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>' +renderButton(client, 'false');
+              return renderButton(client, 'false') + '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>';
             }
           }, {
             "mData": "check",
             "mData": "client",
+            "sWidth": "220px",
             "mRender": function(client, type, row) {
-              return row['check'] + renderButton(row['client'], row['check']);
-            }
+              return renderButton(row['client'], row['check']) + row['check'];
+            },
           }, {
             "mData": "output",
             "mRender": function (output) {
