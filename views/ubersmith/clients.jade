@@ -4,19 +4,17 @@ block head
 
 block content
     .page-header
-      h1 Device List
+      h1 Customer List
     .container
       table(id="table_clients").table.table-condensed.table-striped
         thead
           tr
-            th ID
             th Name
             th Company
             th Email
             th Phone
             th Salespserson
         tbody
-
 
 block footer
   include ../datatables_js
@@ -25,15 +23,13 @@ block footer
       $('#table_clients').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/ubersmith/clients/list',
+        "sAjaxSource": '/api/v1/ubersmith/clients',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
         "bSortClasses": false,
         "aoColumns": [
           {
-            "mData": "clientid"
-          }, {
             "mData": "full_name"
           }, {
             "mData": "company",
@@ -45,7 +41,7 @@ block footer
           }, {
             "mData": "phone",
           }, {
-            "mData": "salesperson",
+            "mData": "salesperson_name",
           }],
         "aaSorting": [[1,'asc']],
         "oLanguage": {

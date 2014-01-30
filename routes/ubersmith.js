@@ -12,12 +12,18 @@ module.exports = function (app, config, passport, redisClient) {
           res.send(500);
         } else {
           //app.locals.logger.log('debug', 'redis mget reply', { reply: reply });
-          var ticketLow = reply[0].replace(/"/g,'');
-          var ticketNormal = reply[1].replace(/"/g,'');
-          var ticketHigh = reply[2].replace(/"/g,'');
-          var ticketUrgent = reply[3].replace(/"/g,'');
-          var ticketTotal = reply[4].replace(/"/g,'');
-          var eventList = reply[5];
+          //var ticketLow = reply[0].replace(/"/g,'');
+          //var ticketNormal = reply[1].replace(/"/g,'');
+          //var ticketHigh = reply[2].replace(/"/g,'');
+          //var ticketUrgent = reply[3].replace(/"/g,'');
+          //var ticketTotal = reply[4].replace(/"/g,'');
+          //var eventList = reply[5];
+          var ticketLow = 0;
+          var ticketNormal = 0;
+          var ticketHigh = 0;
+          var ticketUrgent = 0;
+          var ticketTotal = 0;
+          var eventList = {};
           res.render('ubersmith', {ticket_count: { low: ticketLow, normal: ticketNormal, high: ticketHigh, urgent: ticketUrgent, total: ticketTotal}, event_list: eventList, user: req.user, section: 'dashboard', navLinks: config.navLinks.ubersmith });
         }
       });
@@ -149,12 +155,25 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/clients/clientid/:clientid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      var _ = require('underscore');
-      app.locals.ubersmith.getClientByID(req.params.clientid, function (err, client){
-        app.locals.ubersmith.getContactsbyClientID(req.params.clientid, function (err, contacts) {
-          client.contacts = contacts;
-          res.render('ubersmith/client', { clientid: req.params.clientid, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
-        });
-      });
+        var _ = require('underscore');
+        var async = require('async');
+        async.parallel([
+          function(callback){
+            app.locals.ubersmith.getClientByID(req.params.clientid, callback);
+          },
+          function(callback){
+            app.locals.ubersmith.getContactsbyClientID(req.params.clientid, callback);
+          }
+        ],
+          function(err, results) {
+            if (err)
+            {
+              res.send(500);
+            } else {
+              client = results[0];
+              client.contacts = results[1];
+              res.render('ubersmith/client', { clientid: req.params.clientid, client: client, user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
+            }
+          });
     });
 }
