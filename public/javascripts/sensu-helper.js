@@ -19,6 +19,7 @@ var silenceCheck = function(client, check) {
       req.setRequestHeader("Content-length", params.length);
       req.setRequestHeader("Connection", "close");
       req.send(params);
+      location.reload();
     } else {
       bootbox.confirm("Length of time to silence in hours must be an integer <= 72", function(result) {})
     }
