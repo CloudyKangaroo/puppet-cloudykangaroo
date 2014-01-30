@@ -631,10 +631,47 @@ app.locals.parseRedisSet = function (redisSet)
 
 require("./routes")(app, config, passport, redisClient);
 
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server,{ log: false });
+
+io.sockets.on('connection', function (socket) {
+  var pubsubClient = redis.createClient(config.redis.port, config.redis.host);
+  var remoteIP = '';
+
+  //remoteIP = client.handshake.headers['x-forwarded-for'] || client.handshake.address.address;
+
+  pubsubClient.on("connect"
+    , function () {
+      redisClient.select(config.redis.pubsubdb, function (err, reply) {
+        logger.log('debug', 'pubsubClient Connected to db ' + config.redis.pubsubdb);
+      });
+    });
+
+  socket.on('subscribe'
+    , function(data) {
+        socket.join(data.room);
+        pubsubClient.subscribe(data.room);
+  });
+
+  socket.on('unsubscribe'
+    , function(data) {
+        socket.leave(data.room);
+        pubsubClient.unsubscribe(data.room);
+  });
+  
+  pubsubClient.on("message", function(channel, message) {
+    var msgObj = {channel: channel, text: message, uuid:require('uuid').v4()};
+    socket.in(channel).emit('popAlert', JSON.stringify(msgObj), function(data) {
+     // logger.log('debug', 'handled message', {uuid: data});
+    });
+  });
+});
+
 if (!module.parent) {
-  http.createServer(app).listen(app.get('port'), function () {
+  server.listen(app.get('port'), function () {
     logger.log('info', 'Express server listening on port ' + app.get('port'), {});
   });
-}
+};
+
 
 module.exports = app;
