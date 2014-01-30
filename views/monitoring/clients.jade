@@ -12,6 +12,10 @@ block content
           tr
             th Name
             th Address
+            th Company
+            th Full Name
+            th Email
+            th Location
             th Timestamp
             th Subscriptions
         tbody
@@ -23,7 +27,7 @@ block footer
       $('#table_clients').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/monitoring/list/clients',
+        "sAjaxSource": '/api/v1/sensu/clients',
         "iDisplayLength": 20,
         "bStateSave": true,
         "bDeferRender": true,
@@ -31,15 +35,25 @@ block footer
         "aoColumns": [
           {
             "mData": "name",
+            "sWidth": "220px",
             "mRender": function (name, type, row) {
-              return '<a href="/ubersmith/devices/hostname/'+name+'">' + name + '</a>';
+              return '<a href="/ubersmith/devices/device/deviceid/'+row['dev'] + '">' + name + '</a>';
             }
           }, {
             "mData": "address"
           }, {
+            "mData": "company"
+          }, {
+            "mData": "full_name"
+          }, {
+            "mData": "email"
+          }, {
+            "mData": "location"
+          }, {
             "mData": "timestamp"
           }, {
-            "mData": "subscriptions"
+            "mData": "subscriptions",
+            "sWidth": "120px"
           }],
         "aaSorting": [[0,'asc']],
         "oLanguage": {
