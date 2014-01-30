@@ -78,32 +78,15 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/events'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      var _ = require('underscore');
-      var request = require('request');
-      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
-        if (deviceHostnames == null)
-        {
-          res.send(500);
-        } else {
-          request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-              var events = [];
-              _.each(body, function(event) {
-                _.defaults(event, deviceHostnames[event.client]);
-                event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
-                events.push(event);
-              });
-              app.locals.logger.log('info', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-              res.type('application/json');
-              res.send(JSON.stringify({ aaData: events }));
-            } else {
-              app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
-              res.send(500);
-            }
-          });
-        }
-      });
+    app.locals.getSensuEvents(function(err, events) {
+      if (err) {
+        res.send(500)
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify({ aaData: events}))
+      }
     });
+  });
 
   app.get('/api/v1/sensu/events/hostname/:hostname'
     , app.locals.requireGroup('users')
@@ -133,6 +116,78 @@ module.exports = function (app, config, passport, redisClient) {
           });
         }
       });
+    });
+
+  app.get('/api/v1/sensu/events/filtered'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      async = require('async');
+      var response = async.series({
+        events: function(callback) {
+          setTimeout(function() {
+            app.locals.getSensuEvents(function(err, events) {
+              if (!err) {
+                callback(err, events);
+              } else {
+                callback(err, null);
+              }
+            })
+          }, 60)},
+        silenced: function(callback) {
+          setTimeout(function() {
+            app.locals.getSensuStashes('silence', function (err, stashes) {
+              if (!err) {
+                callback(err, stashes);
+              } else {
+                callback(err, null);
+              }
+            })
+          }, 60)}
+        }, function(err, results) {
+          var silenced = results.silenced;
+          var events = results.events;
+          var silenced_hash = {};
+          for (var i = 0; i < silenced.length; i++) {
+            var split_path = silenced[i].path.split('/');
+            if (!(split_path[1] in silenced_hash)) {
+              silenced_hash[split_path[1]] = [ ];
+            }
+            if (split_path[2] == null) {
+              silenced_hash[split_path[1]] = [ 0 ];
+            } else if (split_path[2] != null && silenced_hash[split_path[1]][0] != 0) {
+              silenced_hash[split_path[1]].push(split_path[2])
+            }
+          }
+          var filtered_events = events.filter(function (element) {
+            if (element['client'] in silenced_hash && (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
+              app.locals.logger.log('debug', 'Filtering out ' + element['client'] + '/' + element['check']);
+            } else {
+              return true
+            }
+          });
+          res.type('application/json');
+          res.send(JSON.stringify({ aaData: filtered_events }));
+        })
+    });
+
+  app.get('/api/v1/sensu/events/device/:device'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      if (req.params.device && req.params.device != '')
+      {
+        var uri = '/events/' + req.params.device;
+      } else {
+        var uri = '/events';
+      }
+      request({ url: app.get('sensu_uri') + uri, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + uri});
+          res.send(JSON.stringify(body));
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + uri})
+          res.send(500);
+        }
+      })
     });
 
   // UNSILENCE an CLIENT
