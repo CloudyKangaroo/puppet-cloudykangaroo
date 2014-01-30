@@ -17,7 +17,7 @@ config.navLinks = {
   monitoring: [
     { label: 'Home', key: 'info', path: '/monitoring' },
     { label: 'Events', key: 'events', path: '/monitoring/events' },
-    { label: 'Clients', key: 'clients', path: '/monitoring/clients' },
+    { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
     { label: 'Failures', key: 'failures', path: '/monitoring/failures' },
     { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
     { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }

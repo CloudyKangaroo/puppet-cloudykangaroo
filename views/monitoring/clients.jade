@@ -1,13 +1,12 @@
 extends ../layout
 block head
   include ../datatables_css
-  link(rel='stylesheet', href='//twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css')
 
 block navbar
 block content
   .container
     .page-header
-      h1 Current Client List
+      h1 Monitored Hosts
     .container
       table(id="table_clients").table.table-condensed.sortable
         thead
@@ -24,7 +23,6 @@ block content
 
 block footer
   include ../datatables_js
-  script(src='//twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.js')
   script(type='text/javascript').
     // Activate Google Prettify in this page
     addEventListener('load', prettyPrint, false);
@@ -45,16 +43,19 @@ block footer
         "aoColumns": [
           {
             "mData": "name",
-            "sWidth": "220px",
+            "sWidth": "120px",
             "mRender": function (name, type, row) {
-              return '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + name + '</a>';
+              return '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + name.replace('.contegix.mgmt', '') + '</a>';
             }
           }, {
-            "mData": "address"
+            "mData": "address",
+            "sWidth": "70px"
           }, {
-            "mData": "location"
+            "mData": "location",
+            "sWidth": "60px"
           }, {
-            "mData": "timestamp"
+            "mData": "timestamp",
+            "sWidth": "80px"
           }, {
             "mData": "company",
             "mRender": function(company, type, row) {

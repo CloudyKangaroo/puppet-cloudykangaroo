@@ -1,6 +1,7 @@
 extends ../layout
 block head
   include ../datatables_css
+  link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
 
 block content
   .container
@@ -20,6 +21,7 @@ block content
 block footer
   include ../datatables_js
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.1.0/bootbox.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
   script(src='/javascripts/sensu-helper.js')
   script(type='text/javascript').
     $(document).ready(function() {
@@ -27,7 +29,7 @@ block footer
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/api/v1/sensu/events',
-        "iDisplayLength": 10,
+        "iDisplayLength": 5,
         "bStateSave": true,
         "bDeferRender": true,
         "bSortClasses": false,
@@ -37,9 +39,9 @@ block footer
             "sWidth": "80px"
           }, {
             "mData": "client",
-            "sWidth": "220px",
-            "mRender": function (client) {
-              return renderButton(client, 'false') + '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>';
+            "sWidth": "140px",
+            "mRender": function (client, type, row) {
+              return renderButton(client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
             }
           }, {
             "mData": "check",
@@ -57,13 +59,13 @@ block footer
           }, {
             "mData": "output",
             "mRender": function (output, type, row) {
-              var dispOutput = output.slice(0,65).replace(/["']/g, "");
+              var dispOutput = output.slice(0,75).replace(/["']/g, "");
               var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
               return "<a onclick=\"displayTextAlert('" + txtBoxText + "');\">" + dispOutput + "</a>";
 
             }
           }],
-        "aaSorting": [[1,'asc']],
+        "aaSorting": [[1,'desc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }
