@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost');
+var socket = io.connect('https://sensu-server01.contegix.com');
 
 socket.emit("subscribe", { room: "global" });
 socket.emit("subscribe", { room: "monitoring" });
