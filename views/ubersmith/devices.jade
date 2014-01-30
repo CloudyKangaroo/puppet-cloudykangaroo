@@ -6,16 +6,15 @@ block content
     .page-header
       h1 Device List
     .container
-      ul(class="nav nav-tabs")
+      ul(class="nav nav-tabs", id="deviceTypeTab")
         each group,group_id in device_types
           if group_id != 0
-            li
+            li(id="li_groupid_#{group.devtype_group_id}")
               a(href="#groupid_#{group.devtype_group_id}", data-toggle="tab") #{group.name}
-
-      .tab-content
+      .tab-content(id="tab-content")
         each group,group_id in device_types
           if group_id != 0
-            .tab-pane(id="groupid_#{group.devtype_group_id}").active
+              .tab-pane(id="groupid_#{group.devtype_group_id}")
                 table(id="tableid_#{group.devtype_group_id}").table.table-condensed.table-striped
                   thead
                     tr
@@ -80,4 +79,4 @@ block footer
             });
           });
   script(type='text/javascript').
-    $('#navTabs a:first').tab('show')
+    $('#deviceTypeTab a:first').tab('show');
