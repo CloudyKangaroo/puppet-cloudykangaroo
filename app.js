@@ -502,6 +502,32 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
   });
 }
 
+app.locals.getSensuEvents = function (getEventsCallback ) {
+  var _ = require('underscore');
+  var request = require('request');
+  app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+    if (deviceHostnames == null)
+    {
+      getEventsCallback(new Error, null);
+    } else {
+      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          var events = [];
+          _.each(body, function(event) {
+            _.defaults(event, deviceHostnames[event.client]);
+            event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+            events.push(event);
+          });
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+          getEventsCallback( error, events )
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+          getEventsCallback( error, null )
+        }
+      });
+    }});
+  };
+
 app.locals.getSensuStashes = function (stashes, getStashCallback) {
   var request = require('request');
   request({url: app.get('sensu_uri') + '/stashes', json: true}
@@ -509,10 +535,8 @@ app.locals.getSensuStashes = function (stashes, getStashCallback) {
       if (error) {
         getStashCallback(error, response)
       } else {
-        console.log(stashes);
         var re = new RegExp('^' + stashes)
         var filtered_response = response.filter(function (element) {
-          console.log(element.path);
           if (re.exec(element.path)) { return true }
         });
         getStashCallback(error, filtered_response)
