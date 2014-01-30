@@ -35,15 +35,15 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/events'
     , app.locals.requireGroup('users')
     , function (req, res) {
-    app.locals.getSensuEvents( function(err, events) {
+    app.locals.getSensuEvents(function(err, events) {
       if (err) {
         res.send(500)
       } else {
         res.type('application/json');
-        res.send(JSON.stringify({ aaData: events}));
+        res.send(JSON.stringify({ aaData: events}))
       }
     });
-});
+  });
 
   app.get('/api/v1/sensu/events/hostname/:hostname'
     , app.locals.requireGroup('users')
@@ -73,6 +73,7 @@ module.exports = function (app, config, passport, redisClient) {
           });
         }
       });
+    });
 
   app.get('/api/v1/sensu/events/filtered'
     , app.locals.requireGroup('users')
@@ -121,7 +122,7 @@ module.exports = function (app, config, passport, redisClient) {
               return true
             }
           });
-          res.type('application/json')
+          res.type('application/json');
           res.send(JSON.stringify({ aaData: filtered_events }));
         })
     });
