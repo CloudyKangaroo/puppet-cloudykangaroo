@@ -32,6 +32,27 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/sensu/events'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var _ = require('underscore');
+      var request = require('request');
+      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          var events = [];
+          _.each(body, function(event) {
+            event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+            events.push(event);
+          });
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+          res.send(JSON.stringify({ aaData: events }));
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+          res.send(500);
+        }
+      })
+    });
+
   // UNSILENCE an CLIENT
   app.delete('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')

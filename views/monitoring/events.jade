@@ -10,10 +10,12 @@ block content
       table(id='table_events').table.table-condensed.sortable
         thead
           tr
-            th(data-defaultsort='desc') Issued
-            th(data-defaultsort='disabled') Client
-            th(data-defaultsort='disabled') Check
-            th(data-defaultsort='disabled').visible-lg Output
+            th Issued
+            th Client
+            th Check
+            th Flapping
+            th Count
+            th.visible-lg Output
         tbody
 block footer
   include ../datatables_js
@@ -24,7 +26,7 @@ block footer
       oTable = $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/sensu/events',
+        "sAjaxSource": '/api/v1/sensu/events',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
@@ -46,6 +48,12 @@ block footer
             "mRender": function(client, type, row) {
               return renderButton(row['client'], row['check']) + row['check'];
             },
+          }, {
+            "mData": "flapping",
+            "sWidth": "40px"
+          }, {
+            "mData": "occurrences",
+            "sWidth": "40px"
           }, {
             "mData": "output",
             "mRender": function (output, type, row) {
