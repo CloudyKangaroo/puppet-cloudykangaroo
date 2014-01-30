@@ -6,7 +6,7 @@ block content
     .page-header
       h1 Device List
     .container
-      #navTabs.ul.nav.nav-tabs
+      ul(class="nav nav-tabs")
         each group,group_id in device_types
           if group_id != 0
             li
@@ -34,12 +34,9 @@ block footer
     if group_id != 0
         script(type='text/javascript').
           $('#groupid_#{group.devtype_group_id} a').click(function (e) {
-            if($(this).parent('li').hasClass('active')){
-              $( $(this).attr('href') ).hide();
-            }
             e.preventDefault()
             $(this).tab('show')
-          })
+          });
 
         script(type='text/javascript').
           $(document).ready(function() {
@@ -81,6 +78,6 @@ block footer
                 "sLengthMenu": "_MENU_ records per page"
               }
             });
-          });       
+          });
   script(type='text/javascript').
     $('#navTabs a:first').tab('show')
