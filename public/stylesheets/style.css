@@ -49,3 +49,13 @@ a {
     border-right-width: 0px;
     height: 26px;
 }
+
+.span-event.silenced
+{
+    color: red;
+}
+
+.span-event.active
+{
+    color: black;
+}
