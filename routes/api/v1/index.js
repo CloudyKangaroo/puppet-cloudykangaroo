@@ -174,6 +174,38 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  app.get('/api/v1/sensu/clients'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+        if (deviceHostnames == null)
+        {
+          res.send(500);
+        } else {
+          var _ = require('underscore');
+          var request = require('request');
+          request({ url: app.get('sensu_uri') + '/clients', json: true }
+            , function (error, response) {
+              if(error){
+                res.send(500);
+              } else {
+                var sensuDeviceList = response.body;
+                var deviceList = [];
+                _.each(sensuDeviceList, function (device)
+                {
+                  _.defaults(device, deviceHostnames[device.name]);
+                  _.defaults(device, {name: '', address: '', company: '', full_name: '', location: ''});
+                  device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
+                  deviceList.push(device);
+                });
+                res.type('application/json');
+                res.send(JSON.stringify({aaData: deviceList}));
+              }
+            });
+        }
+      });
+    });
+
   app.get('/api/v1/sensu/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -221,6 +253,23 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
+
+  app.get('/api/v1/ubersmith/devices/hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+          if (deviceHostnames == null)
+          {
+            res.send(500);
+          } else {
+            var _ = require('underscore');
+            var devices = _.values(deviceHostnames);
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: devices}));
+          }
+        });
+    });
+
 
   app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets'
     , app.locals.requireGroup('users')
