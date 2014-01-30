@@ -167,7 +167,7 @@ block footer
       oTable = $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/sensu/events',
+        "sAjaxSource": '/api/v1/sensu/events/hostname/#{uberDevice.dev_desc}.contegix.mgmt',
         "iDisplayLength": 5,
         "bStateSave": true,
         "bDeferRender": true,
