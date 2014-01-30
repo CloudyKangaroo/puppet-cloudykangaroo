@@ -1,6 +1,8 @@
 extends ../layout
 block head
   include ../datatables_css
+  link(rel='stylesheet', href='//twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css')
+
 block navbar
 block content
   .container
@@ -11,17 +13,25 @@ block content
         thead
           tr
             th Name
-            th Address
+            th IP Address
+            th Location
+            th Last Check-in
             th Company
             th Full Name
             th Email
-            th Location
-            th Timestamp
-            th Subscriptions
+
         tbody
 
 block footer
   include ../datatables_js
+  script(src='//twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.js')
+  script(type='text/javascript').
+    // Activate Google Prettify in this page
+    addEventListener('load', prettyPrint, false);
+    $(document).ready(function(){
+        // Add prettyprint class to pre elements
+        $('pre').addClass('prettyprint');
+    }); // end document.ready
   script(type='text/javascript').
     $(document).ready(function() {
       $('#table_clients').dataTable( {
@@ -42,6 +52,10 @@ block footer
           }, {
             "mData": "address"
           }, {
+            "mData": "location"
+          }, {
+            "mData": "timestamp"
+          }, {
             "mData": "company",
             "mRender": function(company, type, row) {
               return '<a href="/ubersmith/clients/clientid/' + row['clientid'] + '">' + company + '</a>';
@@ -49,14 +63,8 @@ block footer
           }, {
             "mData": "full_name"
           }, {
-            "mData": "email"
-          }, {
-            "mData": "location"
-          }, {
-            "mData": "timestamp"
-          }, {
-            "mData": "subscriptions",
-            "sWidth": "120px"
+            "mData": "email",
+            "sWidth": "220px"
           }],
         "aaSorting": [[0,'asc']],
         "oLanguage": {
