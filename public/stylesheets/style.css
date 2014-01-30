@@ -34,3 +34,18 @@ a {
   padding-left: 12px;
   padding-right: 12px;
 }
+
+.btn-event
+{
+    padding-bottom: 6px;
+    padding-top: 6px;
+    padding-left: 6px;
+    padding-right: 7px;
+    margin-left: 6px;
+    margin-right: 6px;
+    border-top-width:0px;
+    border-bottom-width:0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    height: 26px;
+}
