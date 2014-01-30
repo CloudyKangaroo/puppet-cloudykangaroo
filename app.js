@@ -503,10 +503,11 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
 }
 
 app.locals.getSensuEvents = function ( getEventsCallback ) {
+  request = require('request');
   request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-      getEventsCallback(null, JSON.stringify(body));
+      getEventsCallback(null, body);
     } else {
       app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'});
       getEventsCallback(new Error('Failed to retrieve Sensu events.'), null);
@@ -521,7 +522,6 @@ app.locals.getSensuStashes = function (stashes, getStashCallback) {
       if (error) {
         getStashCallback(error, response)
       } else {
-        console.log(stashes);
         var re = new RegExp('^' + stashes)
         var filtered_response = response.filter(function (element) {
           if (re.exec(element.path)) { return true }
