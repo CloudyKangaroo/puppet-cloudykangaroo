@@ -55,6 +55,11 @@ a {
     color: red;
 }
 
+.span-event.client
+{
+    margin-left: 6px;
+    margin-right: 6px;
+}
 .span-event.active
 {
     color: black;

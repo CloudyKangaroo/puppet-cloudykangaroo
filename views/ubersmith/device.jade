@@ -13,13 +13,14 @@ block content
           .panel.panel-default
             .panel-heading
               p Monitoring Events
-                span.label.label-default.pull-right #{sensuDevice.node.name} / #{sensuDevice.node.address}
+                button(onclick="silenceCheck('" + sensuDevice.node.name + "', 'false');").btn.btn-warn.btn-xs.btn-event.pull-right
+                  span.glyphicon.glyphicon-volume-off.span-event.client
+                  span Silence All Checks
             .panel-body
               table(id='table_events').table.table-condensed.sortable
                 thead
                   tr
                     th Issued
-                    th Client
                     th Check
                     th Flapping
                     th Count
@@ -176,12 +177,6 @@ block footer
           {
             "mData": "issued",
             "sWidth": "80px"
-          }, {
-            "mData": "client",
-            "sWidth": "140px",
-            "mRender": function (client, type, row) {
-              return renderButton(client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
-            }
           }, {
             "mData": "check",
             "mData": "client",

@@ -32,6 +32,50 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/puppet/catalog/hostname/:hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var _ = require('underscore');
+      var request = require('request');
+      var hostname = req.params.hostname;
+      request({ url: app.get('puppetdb_uri') + '/catalogs/' + req.params.hostname, json: true }
+        , function (err, response, body) {
+          if (err) {
+            res.send(500);
+          } else {
+            res.type('application/json');
+            res.send(body);
+          }
+        })
+    });
+
+  app.get('/api/v1/sensu/checks/hostname/:hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var _ = require('underscore');
+      var request = require('request');
+      var hostname = req.params.hostname;
+      request({ url: app.get('puppetdb_uri') + '/catalogs/' + req.params.hostname, json: true }
+        , function (err, response, body) {
+          if (err) {
+            res.send(500);
+          } else {
+            var catalog = body.data;
+            var resourceList = catalog.resources;
+            console.log(resourceList);
+            var checks = [];
+            _.each(resourceList, function (resource) {
+              if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu_check')
+              {
+                checks.push(resource.title);
+              }
+            });
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: checks }));
+          }
+        })
+    });
+
   app.get('/api/v1/sensu/events'
     , app.locals.requireGroup('users')
     , function (req, res) {
