@@ -31,7 +31,7 @@ block footer
         "aoColumns": [
           {
             "mData": "name",
-            "mRender": function (name) {
+            "mRender": function (name, type, row) {
               return '<a href="/ubersmith/devices/hostname/'+name+'">' + name + '</a>';
             }
           }, {
