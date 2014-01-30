@@ -24,7 +24,7 @@ block footer
       oTable = $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/sensu/events',
+        "sAjaxSource": '/api/v1/sensu/events/filtered',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
