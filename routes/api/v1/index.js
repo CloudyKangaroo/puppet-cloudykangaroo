@@ -32,6 +32,82 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/sensu/events'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+          res.send(JSON.stringify(body));
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'});
+          res.send(500);
+        }
+      })
+    });
+
+  app.get('/api/v1/sensu/events/filtered'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var events;
+      var silenced;
+      request({ url: app.get('/api/v1/sensu/events'), json: true}, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          events = body;
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('/api/v1/sensu/events')});
+          res.send(500)
+        }
+      });
+      request({ url: app.get('/api/v1/sensu/stashes/silence'), json: true}, function (error, response, body) {
+        if (!error && response.statsuCode == 200) {
+          silenced = body;
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('/api/v1/sensu/stashes/silence')});
+          res.send(500)
+        }
+      })
+      var silenced_hash;
+      for (var i = 0; i < silenced.length; i++) {
+        var split_path = silenced.path.split('/');
+        if (!(split_path[1] in silenced_hash)) {
+          silenced_hash[split[1]] = [];
+        }
+        if (!(split[2] == null)) {
+          silenced_hash[split_path[1]].push(split_path[2])
+        }
+      }
+      var filtered = events.filter(function (element) {
+        if (element['client'] in silenced_hash && (silenced_hash[element['client']].length == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
+          app.locals.logger.log('debug', 'Filtering out ' + element['client'] + '/' + element['check']);
+          return false
+        } else {
+          return true
+        }
+      });
+      res.send({ aaData: filtered })
+    });
+
+  app.get('/api/v1/sensu/events/device/:device'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      if (req.params.device && req.params.device != '')
+      {
+        var uri = '/events/' + req.params.device;
+      } else {
+        var uri = '/events';
+      }
+      request({ url: app.get('sensu_uri') + uri, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + uri});
+          res.send(JSON.stringify(body));
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + uri})
+          res.send(500);
+        }
+      })
+    });
+
   // UNSILENCE an CLIENT
   app.delete('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')

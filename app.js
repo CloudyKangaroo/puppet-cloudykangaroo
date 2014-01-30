@@ -514,7 +514,6 @@ app.locals.getSensuStashes = function (stashes, getStashCallback) {
         console.log(stashes);
         var re = new RegExp('^' + stashes)
         var filtered_response = response.filter(function (element) {
-          console.log(element.path);
           if (re.exec(element.path)) { return true }
         });
         getStashCallback(error, filtered_response)
