@@ -15,22 +15,13 @@ block content
             th(data-defaultsort='disabled') Check
             th(data-defaultsort='disabled').visible-lg Output
         tbody
-//          each event,i in events
-//            if event.status > 0
-//              tr(class="#{getEventClass(event.status)}", id="row-#{i}")
-//                td(data-value="#{event.issued}") #{getFormattedTimestamp(event.issued)}
-//                td #{event.client}
-//                  button(onclick="silenceChecks('#{event.client}', false);").btn.btn-default.btn-xs.pull-left
-//                    span.glyphicon.glyphicon-volume-off
-//                td #{event.check}
-//                  button(onclick="silenceChecks('#{event.client}', '#{event.check}');").btn.btn-default.btn-xs.pull-left
-//                    span.glyphicon.glyphicon-volume-off
-//                td.visible-lg #{event.output.slice(0,65)}
 block footer
-include ../datatables_js
+  include ../datatables_js
+  script(src='/javascripts/bootbox.min.js')
+  script(src='/javascripts/sensu-helper.js')
   script(type='text/javascript').
     $(document).ready(function() {
-      $('#table_events').dataTable( {
+      oTable = $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/sensu/events',
@@ -44,10 +35,14 @@ include ../datatables_js
           }, {
             "mData": "client",
             "mRender": function (client) {
-              return '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>';
+              return '<a href="/ubersmith/devices/hostname/'+client+'">' + client + '</a>' +renderButton(client, 'false');
             }
           }, {
-            "mData": "check"
+            "mData": "check",
+            "mData": "client",
+            "mRender": function(client, type, row) {
+              return row['check'] + renderButton(row['client'], row['check']);
+            }
           }, {
             "mData": "output",
             "mRender": function (output) {
