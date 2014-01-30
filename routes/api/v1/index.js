@@ -111,7 +111,7 @@ module.exports = function (app, config, passport, redisClient) {
             }
             if (split_path[2] == null) {
               silenced_hash[split_path[1]] = [ 0 ];
-            } else if (split_path[2] != null && silenced_hash[split_path[1]] != 0) {
+            } else if (split_path[2] != null && silenced_hash[split_path[1]][0] != 0) {
               silenced_hash[split_path[1]].push(split_path[2])
             }
           }
