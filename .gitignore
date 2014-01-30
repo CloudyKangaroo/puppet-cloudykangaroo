@@ -17,3 +17,4 @@ config/system-credentials.js.tmp
 npm-debug.log
 node_modules
 dump.rdb
+access.log
