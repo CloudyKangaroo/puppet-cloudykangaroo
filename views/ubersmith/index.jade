@@ -43,27 +43,3 @@ block content
 
 block footer
   include ../datatables_js
-  script(type='text/javascript').
-    $(document).ready(function() {
-      $('#table_events').dataTable( {
-        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-        "sPaginationType": "bootstrap",
-        "sAjaxSource": '/ubersmith/data/uber.event_list',
-        "iDisplayLength": 5,
-        "bStateSave": true,
-        "bDeferRender": true,
-        "bSortClasses": false,
-        "aoColumns": [
-          {
-            "mData": "time"
-          }, {
-            "mData": "user"
-          }, {
-            "mData": "action"
-          }],
-        "aaSorting": [[0,'desc']],
-        "oLanguage": {
-          "sLengthMenu": "_MENU_ records per page"
-        }
-      });
-    });
