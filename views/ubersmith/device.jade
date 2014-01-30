@@ -1,6 +1,7 @@
 extends ../layout
 block head
   include ../datatables_css
+  link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
 
 block content
     .page-header
@@ -14,24 +15,16 @@ block content
               p Monitoring Events
                 span.label.label-default.pull-right #{sensuDevice.node.name} / #{sensuDevice.node.address}
             .panel-body
-              table(id="table_events").table.table-condensed
+              table(id='table_events').table.table-condensed.sortable
                 thead
                   tr
-                    th Status
-                    th Check
                     th Issued
+                    th Client
+                    th Check
                     th Flapping
                     th Count
-                    th(data-defaultsort='disabled').visible-lg Output
+                    th.visible-lg Output
                 tbody
-                  each event in sensuDevice.events
-                    tr(class="#{getEventClass(event.status)}")
-                      td #{getEventClass(event.status)}
-                      td #{event.check}
-                      td #{getFormattedTimestamp(event.issued)}
-                      td #{event.flapping}
-                      td #{event.occurrences}
-                      td.visible-lg #{event.output.slice(0,65)}
 
       .row
         .col-md-12
@@ -90,7 +83,7 @@ block content
                 span.pull-right #{uberDevice.metadata.management_level}
               p Company:
                 span.pull-right
-                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}") #{uberDevice.listed_company}
+                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}") #{uberDevice.company}
               p Contact Information:
                 ul.list-group
                   li.list-group-item Email:
@@ -98,7 +91,7 @@ block content
                   li.list-group-item Phone:
                     span.pull-right #{uberDevice.phone}
       .row
-        .col-md-14
+        .col-md-12
           .panel.panel-default
             .panel-heading Puppet Facts
             .panel-body
@@ -111,6 +104,9 @@ block content
 
 block footer
   include ../datatables_js
+  script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.1.0/bootbox.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
+  script(src='/javascripts/sensu-helper.js')
   script(type='text/javascript').
     $(document).ready(function() {
       $('#table_tickets').dataTable( {
@@ -144,7 +140,6 @@ block footer
         }
       });
     });
-
   script(type='text/javascript').
     $(document).ready(function() {
       $('#table_facts').dataTable( {
@@ -162,6 +157,54 @@ block footer
             "mData": "value",
           }],
         "aaSorting": [[1,'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
+  script(type='text/javascript').
+    $(document).ready(function() {
+      oTable = $('#table_events').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/api/v1/sensu/events/hostname/#{uberDevice.dev_desc}.contegix.mgmt',
+        "iDisplayLength": 5,
+        "bStateSave": true,
+        "bDeferRender": true,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "issued",
+            "sWidth": "80px"
+          }, {
+            "mData": "client",
+            "sWidth": "140px",
+            "mRender": function (client, type, row) {
+              return renderButton(client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
+            }
+          }, {
+            "mData": "check",
+            "mData": "client",
+            "sWidth": "220px",
+            "mRender": function(client, type, row) {
+              return renderButton(row['client'], row['check']) + row['check'];
+            },
+          }, {
+            "mData": "flapping",
+            "sWidth": "40px"
+          }, {
+            "mData": "occurrences",
+            "sWidth": "40px"
+          }, {
+            "mData": "output",
+            "mRender": function (output, type, row) {
+              var dispOutput = output.slice(0,75).replace(/["']/g, "");
+              var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
+              return "<a onclick=\"displayTextAlert('" + txtBoxText + "');\">" + dispOutput + "</a>";
+
+            }
+          }],
+        "aaSorting": [[1,'desc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }

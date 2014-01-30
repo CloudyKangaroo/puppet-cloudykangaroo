@@ -35,56 +35,95 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/events'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.getSensuEvents(function(err, events) {
-        if (!err) {
-          res.send(events);
-        } else {
-          res.send(500);
-        }
-      })
+    app.locals.getSensuEvents( function(err, events) {
+      if (err) {
+        res.send(500)
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify({ aaData: events}));
+      }
     });
+});
+
+  app.get('/api/v1/sensu/events/hostname/:hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var _ = require('underscore');
+      var request = require('request');
+      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+        if (deviceHostnames == null)
+        {
+          res.send(500);
+        } else {
+          request({ url: app.get('sensu_uri') + '/events/' + req.params.hostname, json: true }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              var events = [];
+              _.each(body, function(event) {
+                _.defaults(event, deviceHostnames[event.client]);
+                event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+                events.push(event);
+              });
+              app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+              res.type('application/json');
+              res.send(JSON.stringify({ aaData: events }));
+            } else {
+              app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+              res.send(500);
+            }
+          });
+        }
+      });
 
   app.get('/api/v1/sensu/events/filtered'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      try {
-        var events = app.locals.getSensuEvents(function(err, events) {
-          if (!err) {
-            return events;
-          } else {
-            throw err;
+      async = require('async');
+      var response = async.series({
+        events: function(callback) {
+          setTimeout(function() {
+            app.locals.getSensuEvents(function(err, events) {
+              if (!err) {
+                callback(err, events);
+              } else {
+                callback(err, null);
+              }
+            })
+          }, 60)},
+        silenced: function(callback) {
+          setTimeout(function() {
+            app.locals.getSensuStashes('silence', function (err, stashes) {
+              if (!err) {
+                callback(err, stashes);
+              } else {
+                callback(err, null);
+              }
+            })
+          }, 60)}
+        }, function(err, results) {
+          var silenced = results.silenced;
+          var events = results.events;
+          var silenced_hash = {};
+          for (var i = 0; i < silenced.length; i++) {
+            var split_path = silenced[i].path.split('/');
+            if (!(split_path[1] in silenced_hash)) {
+              silenced_hash[split_path[1]] = [ ];
+            }
+            if (split_path[2] == null) {
+              silenced_hash[split_path[1]] = [ 0 ];
+            } else if (split_path[2] != null && silenced_hash[split_path[1]] != 0) {
+              silenced_hash[split_path[1]].push(split_path[2])
+            }
           }
-        });
-        var silenced = app.locals.getSensuStashes('silence', function (err, stashes) {
-          if (!err) {
-            return stashes;
-          } else {
-            throw err;
-          }
-        });
-        var silenced_hash = {};
-        for (var i = 0; i < silenced.length; i++) {
-          var split_path = silenced.path.split('/');
-          if (!(split_path[1] in silenced_hash)) {
-            silenced_hash[split[1]] = [];
-          }
-          if (!(split[2] == null)) {
-            silenced_hash[split_path[1]].push(split_path[2])
-          }
-        };
-        var filtered = events.filter(function (element) {
-          if (element['client'] in silenced_hash && (silenced_hash[element['client']].length == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
-            app.locals.logger.log('debug', 'Filtering out ' + element['client'] + '/' + element['check']);
-            return false
-          } else {
-            return true
-          }
-        });
-        res.send({ aaData: filtered });
-      } catch(e) {
-        app.locals.logger.log('error', 'Failed to compile filtered events list');
-        res.send(500);
-      }
+          var filtered_events = events.filter(function (element) {
+            if (element['client'] in silenced_hash && (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
+              app.locals.logger.log('debug', 'Filtering out ' + element['client'] + '/' + element['check']);
+            } else {
+              return true
+            }
+          });
+          res.type('application/json')
+          res.send(JSON.stringify({ aaData: filtered_events }));
+        })
     });
 
   app.get('/api/v1/sensu/events/device/:device'
@@ -249,6 +288,38 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  app.get('/api/v1/sensu/clients'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+        if (deviceHostnames == null)
+        {
+          res.send(500);
+        } else {
+          var _ = require('underscore');
+          var request = require('request');
+          request({ url: app.get('sensu_uri') + '/clients', json: true }
+            , function (error, response) {
+              if(error){
+                res.send(500);
+              } else {
+                var sensuDeviceList = response.body;
+                var deviceList = [];
+                _.each(sensuDeviceList, function (device)
+                {
+                  _.defaults(device, deviceHostnames[device.name]);
+                  _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
+                  device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
+                  deviceList.push(device);
+                });
+                res.type('application/json');
+                res.send(JSON.stringify({aaData: deviceList}));
+              }
+            });
+        }
+      });
+    });
+
   app.get('/api/v1/sensu/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -296,6 +367,23 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
+
+  app.get('/api/v1/ubersmith/devices/hostname'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+          if (deviceHostnames == null)
+          {
+            res.send(500);
+          } else {
+            var _ = require('underscore');
+            var devices = _.values(deviceHostnames);
+            res.type('application/json');
+            res.send(JSON.stringify({ aaData: devices}));
+          }
+        });
+    });
+
 
   app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets'
     , app.locals.requireGroup('users')
