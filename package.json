@@ -1,7 +1,7 @@
 {
   "name": "cloudy-kangaroo",
   "description": "Monitoring Interface for the Sensu Monitoring Agent",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "homepage": "http://contegix.github.io/cloudykangaroo",
   "author": {
