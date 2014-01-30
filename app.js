@@ -502,7 +502,7 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
   });
 }
 
-app.locals.getSensuEvents = function ( getEventsCallback ) {
+app.locals.getSensuEvents = function (getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
   app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
@@ -510,7 +510,7 @@ app.locals.getSensuEvents = function ( getEventsCallback ) {
     {
       getEventsCallback(new Error, null);
     } else {
-      request({ url: app.get('sensu_uri') + '/events/' + req.params.hostname, json: true }, function (error, response, body) {
+      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           var events = [];
           _.each(body, function(event) {
