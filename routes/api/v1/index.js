@@ -194,7 +194,7 @@ module.exports = function (app, config, passport, redisClient) {
                 _.each(sensuDeviceList, function (device)
                 {
                   _.defaults(device, deviceHostnames[device.name]);
-                  _.defaults(device, {name: '', address: '', company: '', full_name: '', location: ''});
+                  _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
                   device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
                   deviceList.push(device);
                 });
