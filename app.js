@@ -671,6 +671,7 @@ io.sockets.on('connection', function (socket) {
 if (!module.parent) {
   server.listen(app.get('port'), function () {
     logger.log('info', 'Express server listening on port ' + app.get('port'), {});
+    logger.log('debug', 'Route Listing', {routes: app.routes});
   });
 };
 
