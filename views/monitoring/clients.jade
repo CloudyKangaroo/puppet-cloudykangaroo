@@ -42,7 +42,10 @@ block footer
           }, {
             "mData": "address"
           }, {
-            "mData": "company"
+            "mData": "company",
+            "mRender": function(company, type, row) {
+              return '<a href="/ubersmith/clients/clientid/' + row['clientid'] + '">' + company + '</a>';
+            }
           }, {
             "mData": "full_name"
           }, {
