@@ -544,11 +544,11 @@ app.locals.getSensuStashes = function (stashes, getStashCallback) {
     })
 }
 
-app.locals.silenceCheck = function (client, check, expires, silenceCheckCallback) {
+app.locals.silenceCheck = function (user, client, check, expires, silenceCheckCallback) {
   var request = require('request');
   var reqBody = {
     path: "silence/" + client + "/" + check,
-    content: { "timestamp": (Math.round(Date.now() / 1000)) },
+    content: { "timestamp": (Math.round(Date.now() / 1000)), "user": user },
     expire: expires
   };
   logger.log('info', reqBody);
@@ -560,11 +560,11 @@ app.locals.silenceCheck = function (client, check, expires, silenceCheckCallback
   );
 }
 
-app.locals.silenceClient = function (client, expires, silenceClientCallback) {
+app.locals.silenceClient = function (user, client, expires, silenceClientCallback) {
   var request = require('request');
   var reqBody = {
     path: "silence/" + client,
-    content: { "timestamp": (Math.round(Date.now() / 1000)) },
+    content: { "timestamp": (Math.round(Date.now() / 1000)), "user": user },
     expire: expires
   };
   logger.log('debug', reqBody);
