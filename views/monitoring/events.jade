@@ -78,14 +78,14 @@ block footer
             "mData": "client",
             "sWidth": "140px",
             "mRender": function (client, type, row) {
-              return renderButton(client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
+              return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
             }
           }, {
             "mData": "check",
             "mData": "client",
             "sWidth": "220px",
             "mRender": function(client, type, row) {
-              return renderButton(row['client'], row['check']) + row['check'];
+              return renderButton(row['silenced'], row['silence_stash'], row['client'], row['check']) + row['check'];
             },
           }, {
             "mData": "flapping",
