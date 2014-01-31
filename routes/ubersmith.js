@@ -32,10 +32,17 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/tickets'
     , app.locals.ensureAuthenticated
     , function (req, res) {
-        res.render('ubersmith/tickets',{ user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+        //res.render('ubersmith/tickets',{ user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+        res.redirect('/tickets');
       });
 
-  app.get('/ubersmith/tickets/ticketid/:ticketid'
+  app.get('/tickets'
+    , app.locals.ensureAuthenticated
+    , function (req, res) {
+      res.render('ubersmith/tickets',{ user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+    });
+
+  app.get('/tickets/ticketid/:ticketid'
     , app.locals.ensureAuthenticated
     , function (req, res) {
       app.locals.ubersmith.getTicketbyTicketID(req.params.ticketid, function (err, ticket) {
