@@ -556,21 +556,35 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
-    , app.locals.requireGroup('users')
     , function (req, res) {
         var ticketID = req.params.ticketid;
         var subject = req.body.subject;
-        var body = req.body.body;
         var visible = req.body.comment;
         var from = req.user.username + '@contegix.com';
         var time_spent = req.body.time_spent;
+        var sensuEvent = JSON.parse(decodeURI(req.body.sensuEvent));
+        var documentation = req.body.documentation;
+        console.log(sensuEvent);
+        console.log(req.body.sensuEvent);
+        var msgBody = "Monitoring Event added to Ticket:\n";
+        msgBody += "Output: \n\n" + sensuEvent.output + "\n\n\n";
+        msgBody += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
+        msgBody += "Flapping: " + sensuEvent.flapping + "\n";
+        msgBody += "Location: " + sensuEvent.location + "\n";
+        msgBody += "Device: " + sensuEvent.dev_desc;
+        msgBody += "\n\n\n";
+        msgBody += "Additional Documentation: \n";
+        msgBody += documentation;
+        msgBody = encodeURI(msgBody);
 
-        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', {}, form, function (err, response) {
-          if (error)
+        var form = 'ticket_id=' + ticketID + '&subject=' + encodeURI(subject) + '&body=' + msgBody + '&visible=' + visible + '&from=' + from + '&time_spent=' + time_spent;
+
+        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', '&' + form, form, function (err, response) {
+          if (err)
           {
             res.send(500);
           } else {
-
+            res.send(JSON.stringify(response));
           }
         });
     });
