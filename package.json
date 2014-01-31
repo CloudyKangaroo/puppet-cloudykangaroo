@@ -1,7 +1,7 @@
 {
   "name": "cloudy-kangaroo",
   "description": "Service Provider Management w/Sensu, Puppet and Ubersmith",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "homepage": "http://contegix.github.io/cloudykangaroo",
   "author": {
@@ -40,7 +40,7 @@
     "metrics": "0.1.x",
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
-    "ubersmith": "https://github.com/Contegix/node-ubersmith/tarball/0.1.9",
+    "ubersmith": "https://github.com/Contegix/node-ubersmith/tarball/0.1.10",
     "node-contegix-logger": "https://github.com/Contegix/node-contegix-logger/tarball/0.1.0",
     "passport-atlassian-crowd": "0.0.x",
     "moment" : "2.3.1",
