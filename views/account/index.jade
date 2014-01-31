@@ -4,12 +4,12 @@ block head
 block navbar
     include ../_navbar
 block content
-  .container.col-xs-12.col-md-8
+  .container.col-xs-12.col-md-12
     .row
       .page-header
         h1 My Profile
     .row
-      .col-xs-6.col-md-4
+      .col-xs-6.col-md-6
         .panel.panel-default
           if user.displayname
             .panel-heading #{user.displayname}
@@ -29,13 +29,13 @@ block content
                 for photo in user.photos
                   li
                     img(src="#{photo.value}").img-thumbnail
-      .col-xs-6.col-md-4
+      .col-xs-6.col-md-6
         .panel.panel-default
           .panel-heading Primary Email: #{user.email}
           .panel-body
             ul
               for email in user.emails
-                li #{email.value} (#{email.type})
+                li #{email.value}
               else
                 li No additional Addresses
         .panel.panel-default
