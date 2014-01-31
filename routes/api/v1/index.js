@@ -158,16 +158,31 @@ module.exports = function (app, config, passport, redisClient) {
               silenced_hash[split_path[1]].push(split_path[2])
             }
           }
-          var filtered_events = events.filter(function (element) {
+          var filtered_events = [];
+          for (var i = 0; i < events.length; i++) {
+            var element = events[i];
             if (element['client'] in silenced_hash && (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
-              app.locals.logger.log('debug', 'Filtering out ' + element['client'] + '/' + element['check']);
+              element['silenced'] = 1;
+              var client = silenced_hash[element['client']];
+              var check;
+              if (silenced_hash[element['client']].indexOf(element['check']) != -1) {
+                check = '/' + element['check'];
+              } else {
+                check = '';
+              }
+              element['silence_stash'] = client + check;
             } else {
-              return true
+              element['silenced'] = 0;
+              element['silence_stash'] = '';
             }
-          });
+            filtered_events.push(element)
+          }
           res.type('application/json');
           res.send(JSON.stringify({ aaData: filtered_events }));
-        })
+        });
+        //res.type('application/json');
+        //res.send(JSON.stringify({ aaData: filtered_events }));
+      //})
     });
 
   app.get('/api/v1/sensu/events/device/:device'
