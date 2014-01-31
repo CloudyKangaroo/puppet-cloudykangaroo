@@ -11,6 +11,7 @@ block content
       table(id='table_events').table.table-condensed.sortable
         thead
           tr
+            th Severity
             th Issued
             th Client
             th Check
@@ -26,6 +27,16 @@ block footer
   script(type='text/javascript').
     $(document).ready(function() {
       oTable = $('#table_events').dataTable( {
+        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndedFull ) {
+          switch (aData['status']) {
+            case 2:
+              jQuery('td:eq(0)', nRow).addClass('coral');
+              break;
+            case 1:
+              jQuery('td:eq(0)', nRow).addClass('goldenrod');
+              break;
+          }
+        },
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
         "sAjaxSource": '/api/v1/sensu/events/filtered',
@@ -34,7 +45,22 @@ block footer
         "bDeferRender": true,
         "bSortClasses": false,
         "aoColumns": [
-          {
+          { 
+            "mData": "status", 
+            "mRender": function (status) {
+              switch(status) {
+                case 2:
+                  return "High"
+                  break;
+                case 1:
+                  return "Warning"
+                  break;
+                default: 
+                  return "Low"
+                  break;
+              }
+            },
+          }, {
             "mData": "issued",
             "sWidth": "80px"
           }, {
