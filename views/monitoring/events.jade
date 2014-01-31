@@ -98,7 +98,7 @@ block footer
             "mRender": function (output, type, row) {
               var dispOutput = output.slice(0,75).replace(/["']/g, "");
               var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
-              return "<a onclick=\"displayTextAlert('" + txtBoxText + "');\">" + dispOutput + "</a>";
+              return "<a onclick=\"displayEventDetails('" + txtBoxText + "');\">" + dispOutput + "</a>";
 
             }
           }],
