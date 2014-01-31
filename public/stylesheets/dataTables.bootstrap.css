@@ -45,6 +45,16 @@ table.dataTable th {
 }
 
 
+table.table.table-condensed {
+    border-collapse:collapse;
+
+}
+
+.datatable-row {
+   /*outline: #737373 solid 1px;*/
+    border: none;
+}
+
 table.dataTable {
 	clear: both;
 	margin-top: 6px !important;
@@ -98,30 +108,51 @@ div.dataTables_scrollFoot table {
 	border-top: none;
 }
 
-
-
-
 /*
  * TableTools styles
  */
 .table tbody tr.active td,
 .table tbody tr.active th {
-	background-color: #08C;
-	color: white;
+	/*background-color: #5bc0de;*/
+	/*color: white;*/
 }
 
+.table tbody tr.warning:hover td,
+.table tbody tr.warning:hover th {
+	background-color: #fbb450 !important;
+    color: 333333;
+}
+.table tbody tr.danger:hover td,
+.table tbody tr.danger:hover th {
+    background-color: #bd362f !important;
+    color: white;
+}
+.table tbody tr.info:hover td,
+.table tbody tr.info:hover th {
+    background-color: #0075b0 !important;
+    color: white;
+}
 .table tbody tr.active:hover td,
 .table tbody tr.active:hover th {
-	background-color: #0075b0 !important;
+    background-color: #0075b0 !important;
+    color: white;
 }
 
-.table tbody tr.active a {
-	color: white;
+.table tbody tr.danger:hover a {
+    color: #afe7f7;
+    text-decoration:none;
 }
-
+.table tbody tr.info:hover a {
+    color: #afe7f7;
+    text-decoration:none;
+}
+.table tbody tr.active:hover a {
+    color: #afe7f7;
+    text-decoration:none;
+}
 .table-striped tbody tr.active:nth-child(odd) td,
 .table-striped tbody tr.active:nth-child(odd) th {
-	background-color: #017ebc;
+	/*background-color: #5bc0de;*/
 }
 
 table.DTTT_selectable tbody tr {

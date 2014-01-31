@@ -8,7 +8,7 @@ block content
     .page-header
       h1 Current Event Status
     .container
-      table(id='table_events').table.table-condensed.sortable
+      table(id='table_events').table.table-condensed.table-hover
         thead
           tr
             th Severity
@@ -28,6 +28,7 @@ block footer
     $(document).ready(function() {
       oTable = $('#table_events').dataTable( {
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndedFull ) {
+          jQuery('td:eq(0)', nRow).parent('tr').addClass('datatable-row');
           switch (aData['status']) {
             case 2:
               jQuery('td:eq(0)', nRow).parent('tr').addClass('danger');
