@@ -35,6 +35,12 @@ block footer
             case 1:
               jQuery('td:eq(0)', nRow).parent('tr').addClass('warning');
               break;
+            case 0:
+              jQuery('td:eq(0)', nRow).parent('tr').addClass('success');
+              break;
+            default:
+              jQuery('td:eq(0)', nRow).parent('tr').addClass('active');
+              break;
           }
         },
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -46,17 +52,21 @@ block footer
         "bSortClasses": false,
         "aoColumns": [
           { 
-            "mData": "status", 
+            "mData": "status",
+            "sWidth": "50px",
             "mRender": function (status) {
               switch(status) {
                 case 2:
-                  return "High"
+                  return "Critical"
                   break;
                 case 1:
                   return "Warning"
                   break;
+                case 0:
+                  return "OK"
+                  break;
                 default: 
-                  return "Low"
+                  return "Unknown"
                   break;
               }
             },
