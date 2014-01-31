@@ -163,7 +163,7 @@ module.exports = function (app, config, passport, redisClient) {
             var element = events[i];
             if (element['client'] in silenced_hash && (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
               element['silenced'] = 1;
-              var client = silenced_hash[element['client']];
+              var client = element['client'];
               var check;
               if (silenced_hash[element['client']].indexOf(element['check']) != -1) {
                 check = '/' + element['check'];

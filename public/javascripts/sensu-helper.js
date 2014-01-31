@@ -1,8 +1,27 @@
-var renderButton = function(client, check) {
- return "<button onclick=\"silenceCheck('"+client+"', '"+check+"');\" class=\"btn btn-default btn-xs btn-event\"><span class=\"glyphicon glyphicon-volume-off span-event active\"></span></button>"
+var renderButton = function(silenced, silence_stash, client, check) {
+  if (silenced == 1) {
+    return "<button onclick=\"unsilenceCheck(oTable, '"+silence_stash+"');\" class=\"btn btn-default btn-xs btn-event\"><span class=\"glyphicon glyphicon-volume-up span-event active\"></span></button>"
+  } else {
+    return "<button onclick=\"silenceCheck(oTable, '"+client+"', '"+check+"');\" class=\"btn btn-default btn-xs btn-event\"><span class=\"glyphicon glyphicon-volume-off span-event active\"></span></button>"
+  }
 }
 
-var silenceCheck = function(client, check) {
+var unsilenceCheck = function(oTable, silence_stash) {
+  var api_uri = '/api/v1/sensu/silence/';
+  var call_uri;
+  splitstash = silence_stash.split('/');
+  if (splitstash[1] != undefined) {
+    call_uri = api_uri + 'client/' + encodeURI(splitstash[0]) + '/check/' + encodeURI(splitstash[1]);
+  } else {
+    call_uri = api_uri + 'client/' + encodeURI(splitstash[0])
+  };
+  var req = new XMLHttpRequest();
+  req.open('delete', call_uri, false);
+  req.send();
+  location.reload();
+}
+
+var silenceCheck = function(oTable, client, check) {
   bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", value: 8, callback: function(result) {
     if (result != null && parseInt(result) <= 72) {
       var api_uri = '/api/v1/sensu/silence/';
