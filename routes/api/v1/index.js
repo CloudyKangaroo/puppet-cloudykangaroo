@@ -180,9 +180,6 @@ module.exports = function (app, config, passport, redisClient) {
           res.type('application/json');
           res.send(JSON.stringify({ aaData: filtered_events }));
         });
-        //res.type('application/json');
-        //res.send(JSON.stringify({ aaData: filtered_events }));
-      //})
     });
 
   app.get('/api/v1/sensu/events/device/:device'
