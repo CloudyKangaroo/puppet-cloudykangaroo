@@ -42,6 +42,15 @@ a {
     overflow:hidden;
 }
 
+.small-bootbox {
+    width: 400px;
+    height: 225px;
+    margin-top: 250px;
+    margin-left: auto ;
+    margin-right: auto ;
+    overflow:hidden;
+}
+
 .modal-dialog, .modal-content, .modal-body, .modal-footer {
     width:100%;
 }

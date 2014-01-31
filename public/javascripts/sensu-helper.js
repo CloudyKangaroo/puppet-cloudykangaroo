@@ -28,7 +28,7 @@ var silenceCheck = function(client, check) {
 
 var displayTextAlert = function(text)
 {
-  bootbox.alert('<pre>' + syntaxHighlight(decodeURI(text)) + '</pre>');
+  bootbox.alert('<pre class="prettyprint">' + decodeURI(text) + '</pre>');
 }
 
 var displayEventDetails = function(text)
@@ -39,26 +39,57 @@ var displayEventDetails = function(text)
       return v.toString(16);
     });
 
-  var html = '<container><div class="row"><div class="col-md-6"><pre>' + syntaxHighlight(decodeURI(text)) + '</pre></div><div class="col-md-4"><div class="row">';
+  var html = '<container><div class="row"><div class="col-md-7"><pre>' + prettyPrintOne(decodeURI(text)) + '</pre></div><div class="col-md-4"><div class="row">';
   html +=  '<form role="form" id="' + uuid + '-form">' +
     '<div class="form-group">' +
     '<fieldset><legend>Attach this event to a Ticket</legend>' +
     '<label for="ticketID">Enter an existing Ticket number:</label>' +
-    '<input type="email" class="form-control" id="' + uuid + '-ticketID" placeholder="Enter a valid, existing, Ticket Number">' +
-    '<label>Or:&nbsp;<input id="escalate-' + uuid + '" type="checkbox">&nbsp;Escalate to a NEW ticket</label></div>' +
-    '</fieldset>' +
+    '<input type="number" class="form-control" id="' + uuid + '-ticketID" placeholder="Enter a valid, existing, Ticket Number">' +
+    //'<label>Or:&nbsp;<input id="escalate-' + uuid + '" type="checkbox" disabled>&nbsp;Escalate to a NEW ticket</label>' +
+    '</div></fieldset>' +
     '</div><div class="row"><fieldset><legend>Pass along any relevant documentation: </legend><div class="form-group">' +
-    '<textarea class="form-control" rows="3"></textarea>' +
+    '<textarea class="form-control" type="text" id="documentation" name="documentation" rows="4""></textarea>' +
     '<label for="exampleInputFile">File input</label>' +
     '<input type="file" disabled id="exampleInputFile">' +
     '<p class="help-block">File size limit 10MB.</p>' +
     '</fieldset>' +
     '<input type="hidden" value="' + uuid + '" id="uuid" name="uuid">' +
-    '<button type="submit" class="btn btn-default">Submit Ticket</button>' +
+    '<input type="hidden" value="' + text + '" id="event" name="event">' +
+    '<button type="submit" id="' + uuid + '-submit" class="btn btn-default">Submit Ticket</button>' +
     '</form>' +
-    '<script type="text/javascript">$("#escalate-' + uuid + '").click(function() { $("#' + uuid + '-ticketID").attr("disabled", this.checked); }); $( "#' + uuid + '-form" ).submit(function( event ) { alert( "Handler for .submit() called." ); event.preventDefault(); })</script></div></div></div>';
-  bootbox.alert({"message": html, "className" : "wide-bootbox"});
+    '<script type="text/javascript">$("#escalate-' + uuid + '").click(function() { $("#' + uuid + '-ticketID").attr("disabled", this.checked); }); $( "#' + uuid + '-form" ).submit(handleTicketForm)</script></div></div></div>';
+  bootbox.alert({"message": html, buttons: { ok: { label: "Back", className: "btn-primary"}}, "className" : "wide-bootbox"});
 };
+
+function handleTicketForm(event) {
+  var documentation = event.target[3].value;
+  var ticketID = event.target[1].value;
+  var uuid = event.target[5].defaultValue;
+  var sensuEvent = decodeURI(event.target[6].value);
+
+  var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: sensuEvent, documentation: documentation, visible: 1, time_spent: 1};
+
+  $("#" + uuid + "-submit").attr('disabled','disabled');
+
+  $.ajax({
+    url: '/api/v1/ubersmith/tickets/ticketid/' + ticketID + '/posts',
+    type: 'post',
+    dataType: 'json',
+    data: data,
+    success: function(data) {
+      var response = JSON.parse(data);
+      if (response.status == true)
+      {
+        bootbox.alert({"message": 'Completed!', "className" : "small-bootbox"});
+      } else {
+        bootbox.alert({"message": 'Failed to submit post: ' + response.error_message, "className" : "small-bootbox"});
+        $("#" + uuid + "-submit").removeAttr('disabled')
+      }
+    }
+  });
+
+  event.preventDefault();
+}
 
 function syntaxHighlight(json) {
   if (typeof json != 'string') {
