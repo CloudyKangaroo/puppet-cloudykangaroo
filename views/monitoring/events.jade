@@ -30,10 +30,10 @@ block footer
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndedFull ) {
           switch (aData['status']) {
             case 2:
-              jQuery('td:eq(0)', nRow).addClass('coral');
+              jQuery('td:eq(0)', nRow).parent('tr').addClass('danger');
               break;
             case 1:
-              jQuery('td:eq(0)', nRow).addClass('goldenrod');
+              jQuery('td:eq(0)', nRow).parent('tr').addClass('warning');
               break;
           }
         },
