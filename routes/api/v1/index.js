@@ -226,7 +226,7 @@ module.exports = function (app, config, passport, redisClient) {
     , app.locals.requireGroup('users')
     , function (req, res) {
       console.log(req.body);
-      app.locals.silenceClient(req.params.client, parseInt(req.body.expires)
+      app.locals.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires)
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -240,7 +240,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceCheck(req.params.client, req.params.check, parseInt(req.body.expires)
+      app.locals.silenceCheck(req.user.username, req.params.client, req.params.check, parseInt(req.body.expires)
         , function (err, response) {
           if (err) {
             res.send(500);
