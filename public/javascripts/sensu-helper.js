@@ -23,7 +23,9 @@ var unsilenceCheck = function(oTable, silence_stash) {
 
 var silenceCheck = function(oTable, client, check) {
   bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", value: 8, callback: function(result) {
-    if (result != null && parseInt(result) <= 72) {
+    if (result == undefined) {
+      return;
+    } else if (result != null && parseInt(result) <= 72) {
       var api_uri = '/api/v1/sensu/silence/';
       var call_uri;
       if (check != 'false') {
@@ -40,7 +42,7 @@ var silenceCheck = function(oTable, client, check) {
       req.send(params);
       location.reload();
     } else {
-      bootbox.confirm("Length of time to silence in hours must be an integer <= 72", function(result) {})
+      alert("Length of time to silence in hours must be an integer <= 72")
     }
   }})
 }
