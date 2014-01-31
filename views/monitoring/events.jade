@@ -8,6 +8,17 @@ block content
     .page-header
       h1 Current Event Status
     .container
+      .dropdown 
+        a(href='#silencemenu', id="dLabel", class="dropdown-toggle" data-toggle='dropdown').dropdown-toggle Unsilenced
+         b(class='caret')
+        ul.dropdown-menu(role='menu', aria-labelledby='dropwdownMenu')
+          li
+            a(href='#', tabindex='-1') Silenced
+          li 
+            a(href='#', tabindex='-1') Unsilenced
+          li 
+            a(href='#', tabindex='-1') All
+    .container
       table(id='table_events').table.table-condensed.table-hover
         thead
           tr
@@ -106,5 +117,28 @@ block footer
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }
+      });
+      var show = 'Unsilenced';
+      $.fn.dataTableExt.afnFiltering.push(
+        //Filter by dropdown selection on table draw
+        function( oSettings, aData, iDataIndex) {
+          var row = oSettings.aoData[iDataIndex]._aData
+          , silenced = row.silenced;
+
+          if(show === 'All') {
+            return true;
+          } else if (show === 'Unsilenced') {
+            return (silenced === 0);
+          } else if (show === 'Silenced') {
+            return (silenced === 1);
+          } else {
+            return true;
+          }
+      });
+      $(".dropdown-menu li a").click(function() {
+        //Callback for dropdown, set show variable, change name, and redraw the table.
+        show = $(this).text();
+        $('#dLabel').html(show + '<span class="caret"</span>');
+        oTable.fnDraw();
       });
     });
