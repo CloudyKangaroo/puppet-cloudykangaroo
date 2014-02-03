@@ -66,7 +66,7 @@ var displayEventDetails = function(text)
     '<fieldset><legend>Attach this event to a Ticket</legend>' +
     '<label for="ticketID">Enter an existing Ticket number:</label>' +
     '<input type="number" class="form-control" id="' + uuid + '-ticketID" placeholder="Enter a valid, existing, Ticket Number">' +
-    //'<label>Or:&nbsp;<input id="escalate-' + uuid + '" type="checkbox" disabled>&nbsp;Escalate to a NEW ticket</label>' +
+    '<label>Or:&nbsp;<input id="escalate-' + uuid + '" type="checkbox">&nbsp;Escalate to a NEW ticket</label>' +
     '</div></fieldset>' +
     '</div><div class="row"><fieldset><legend>Pass along any relevant documentation: </legend><div class="form-group">' +
     '<textarea class="form-control" type="text" id="documentation" name="documentation" rows="4""></textarea>' +
