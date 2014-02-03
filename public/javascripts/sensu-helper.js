@@ -18,7 +18,7 @@ var unsilenceCheck = function(oTable, silence_stash) {
   var req = new XMLHttpRequest();
   req.open('delete', call_uri, false);
   req.send();
-  location.reload();
+  bootbox.alert({ message: silence_stash+" unsilenced. Click ok to reload the dashboard.", className: "small-bootbox", callback: function(){ location.reload() }})
 }
 
 var silenceCheck = function(oTable, client, check) {
@@ -40,12 +40,13 @@ var silenceCheck = function(oTable, client, check) {
       req.setRequestHeader("Content-length", params.length);
       req.setRequestHeader("Connection", "close");
       req.send(params);
-      location.reload();
+      bootbox.alert({ "message": client+"/"+check+" silenced. Click ok to reload the dashboard.", "className": "small-bootbox", "callback": function(){ location.reload() }})
     } else {
       bootbox.alert({ "message": "Length of time to silence in hours must be an integer <= 72", "className": "small-bootbox" })
     }
   }})
 }
+
 
 var displayTextAlert = function(text)
 {
