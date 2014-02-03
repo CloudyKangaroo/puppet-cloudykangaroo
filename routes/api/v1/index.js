@@ -344,7 +344,7 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
-  app.get('/api/v1/sensu/clients'
+  app.get('/api/v1/sensu/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
       app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
@@ -354,22 +354,39 @@ module.exports = function (app, config, passport, redisClient) {
         } else {
           var _ = require('underscore');
           var request = require('request');
-          request({ url: app.get('sensu_uri') + '/clients', json: true }
+          request({ url: app.get('sensu_uri')  + '/events', json:true}
             , function (error, response) {
-              if(error){
+              if (error) {
                 res.send(500);
               } else {
-                var sensuDeviceList = response.body;
-                var deviceList = [];
-                _.each(sensuDeviceList, function (device)
-                {
-                  _.defaults(device, deviceHostnames[device.name]);
-                  _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
-                  device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
-                  deviceList.push(device);
-                });
-                res.type('application/json');
-                res.send(JSON.stringify({aaData: deviceList}));
+                var eventList = response.body;
+                request({ url: app.get('sensu_uri') + '/clients', json: true }
+                  , function (error, response) {
+                    if(error){
+                      res.send(500);
+                    } else {
+                      var sensuDeviceList = response.body;
+                      var deviceList = [];
+                      _.each(sensuDeviceList, function (device)
+                      {
+                        _.defaults(device, deviceHostnames[device.name]);
+                        _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
+                        /*var events = [];
+                        device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
+                        _.each(eventList, function (event) {
+                          if (device.name == event.client)
+                          {
+                            events.push(event);
+                          }
+                        });*/
+                        //var events =  _.where(eventList, {client: device.name});
+                        //_.defaults(device, {events: events, event_count: events.length });
+                        deviceList.push(eventList);
+                      });
+                      res.type('application/json');
+                      res.send(JSON.stringify({aaData: deviceList}));
+                    }
+                  });
               }
             });
         }
