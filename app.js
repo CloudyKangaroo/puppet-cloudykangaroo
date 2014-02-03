@@ -341,7 +341,6 @@ app.locals.requireGroup = function (group) {
   }
 };
 
-
 app.locals.getEventClass = function (eventStatus) {
   require('enum').register();
   var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
