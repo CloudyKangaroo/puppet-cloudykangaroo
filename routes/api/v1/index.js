@@ -343,7 +343,7 @@ module.exports = function (app, config, passport, redisClient) {
           }
         });
     });
-
+  // GET ALL DEVICES
   app.get('/api/v1/sensu/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
