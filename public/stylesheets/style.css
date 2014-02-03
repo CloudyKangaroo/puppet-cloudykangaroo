@@ -39,7 +39,7 @@ a {
     width:70%;
     margin-left: auto ;
     margin-right: auto ;
-    overflow:hidden;
+    /*overflow:hidden;*/
 }
 
 .small-bootbox {
