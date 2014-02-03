@@ -568,6 +568,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
 
   app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
+    , app.locals.requireGroup('users')
     , function (req, res) {
         var ticketID = req.params.ticketid;
         var subject = req.body.subject;
@@ -576,8 +577,7 @@ module.exports = function (app, config, passport, redisClient) {
         var time_spent = req.body.time_spent;
         var sensuEvent = JSON.parse(decodeURI(req.body.sensuEvent));
         var documentation = req.body.documentation;
-        console.log(sensuEvent);
-        console.log(req.body.sensuEvent);
+
         var msgBody = "Monitoring Event added to Ticket:\n";
         msgBody += "Output: \n\n" + sensuEvent.output + "\n\n\n";
         msgBody += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
@@ -599,6 +599,39 @@ module.exports = function (app, config, passport, redisClient) {
             res.send(JSON.stringify(response));
           }
         });
+    });
+
+  app.post('/api/v1/ubersmith/tickets/ticket'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var subject = req.body.subject;
+      var msgBody = req.body.msgBody;
+      var recipient = req.body.recipient;
+      var author = req.user.username + '@contegix.com';
+      var priority = req.body.priority;
+      var client_id = req.body.clientID;
+      var device_id = req.body.deviceID;
+      var timestamp = Date.now();
+
+      msgBody += "\n";
+      msgBody += "Contegix | Technical Support\n";
+      msgBody += "(314) 622-6200 ext. 3\n";
+      msgBody += "https://portal.contegix.com\n";
+      msgBody += "http://status.contegix.com\n";
+      msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
+      msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
+
+      var form = 'subject=' + encodeURI(subject) + '&body=' + encodeURI(msgBody) + '&author=' + author + '&priority=' + priority
+        form += '&recipient=' + recipient + '&client_id=' + client_id + '&device_id=' + '&timestamp=' + timestamp;
+
+      app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', '&' + form, form, function (err, response) {
+        if (err)
+        {
+          res.send(500);
+        } else {
+          res.send(JSON.stringify(response));
+        }
+      });
     });
 
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
