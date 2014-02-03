@@ -381,7 +381,7 @@ module.exports = function (app, config, passport, redisClient) {
                         });*/
                         //var events =  _.where(eventList, {client: device.name});
                         //_.defaults(device, {events: events, event_count: events.length });
-                        deviceList.push(eventList);
+                        deviceList.push(device);
                       });
                       res.type('application/json');
                       res.send(JSON.stringify({aaData: deviceList}));

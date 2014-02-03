@@ -41,7 +41,7 @@
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
     "cloudy-ubersmith": "0.1.x",
-    "node-contegix-logger": "https://github.com/Contegix/node-contegix-logger/tarball/0.1.0",
+    "contegix-logger": "0.1.x",
     "passport-atlassian-crowd": "0.0.x",
     "moment" : "2.3.1",
     "formidable": "1.0.x",
