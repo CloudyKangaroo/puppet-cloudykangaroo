@@ -12,10 +12,14 @@ block content
         .col-md-12
           .panel.panel-default
             .panel-heading
-              p Monitoring Events
-                button(onclick="silenceCheck('" + sensuDevice.node.name + "', 'false');").btn.btn-warn.btn-xs.btn-event.pull-right
-                  span.glyphicon.glyphicon-volume-off.span-event.client
-                  span Silence All Checks
+              .navbar
+                .navbar-header.pull-left
+                  p.navbar-brand Monitoring Events
+                .navbar-header.pull-right
+                  button(onclick="silenceCheck('" + sensuDevice.node.name + "', 'false');").btn.btn-sm.btn-primary.pull-right
+                    span.glyphicon.glyphicon-volume-off.span-event.client
+                    span Silence All Checks
+
             .panel-body
               table(id='table_events').table.table-condensed.sortable
                 thead
@@ -204,8 +208,11 @@ block footer
             "sWidth": "60px"
           }, {
             "mData": "command",
+            "mRender": function(command) {
+              return command.replace("/opt/contegix/sensu/etc/sensu/plugins/", "");
+            }
           }],
-        "aaSorting": [[1,'asc']],
+        "aaSorting": [[1,'desc']],
         "oLanguage": {
           "sLengthMenu": "_MENU_ records per page"
         }

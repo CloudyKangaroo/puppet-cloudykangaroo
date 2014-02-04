@@ -84,11 +84,11 @@ var displayEventDetails = function(text)
 };
 
 function handleTicketForm(event) {
-  var documentation = event.target[3].value;
+  var documentation = event.target[4].value;
   var ticketID = event.target[1].value;
-  var uuid = event.target[5].defaultValue;
-  var sensuEvent = decodeURI(event.target[6].value);
-
+  var uuid = event.target[6].defaultValue;
+  var sensuEvent = decodeURI(event.target[7].value);
+                  console.log(event);
   var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: sensuEvent, documentation: documentation, visible: 1, time_spent: 1};
 
   $("#" + uuid + "-submit").attr('disabled','disabled');
