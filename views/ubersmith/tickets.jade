@@ -14,8 +14,12 @@ block content
       .col-xs-16.col-md-12
         .panel.panel-default
           .panel-heading
-            p Ubersmith Tickets
-              span.label.label-primary.pull-right Total: 0
+            .navbar
+              .navbar-header.pull-left
+                p.navbar-brand Ubersmith Tickets
+              .navbar-header.pull-right
+                button(type="button").btn.btn-sm.btn-primary New Ticket
+
           .panel-body
             table(id="table_tickets").table.table-condensed
               thead
