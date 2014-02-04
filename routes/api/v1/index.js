@@ -592,6 +592,7 @@ module.exports = function (app, config, passport, redisClient) {
         var visible = req.body.comment;
         var from = req.user.username + '@contegix.com';
         var time_spent = req.body.time_spent;
+      console.log(req.body.sensuEvent);
         var sensuEvent = JSON.parse(decodeURI(req.body.sensuEvent));
         var documentation = req.body.documentation;
 
