@@ -8,7 +8,7 @@ a {
 
 .navbar
 {
-    background-color: #5e00ff;
+   /* background-color: #5e00ff;*/
 }
 
 .navbar-default .navbar-nav>li>a
@@ -21,12 +21,30 @@ a {
   padding-bottom: 12px;
 }
 
-.btn
+.nav-button
 {
   padding-bottom: 11px;
   padding-top: 11px;
 }
 
+.panel-heading
+{
+    padding-bottom: 0px;
+    padding-top: 0px;
+    border-bottom-width: 0px;
+}
+.panel-heading>.navbar
+{
+    margin-bottom: 0px;
+}
+
+.navbar>.navbar-header>.btn
+{
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin-bo
+    margin-top: 4px;
+}
 .dataTables_wrapper
 {
   padding-top: 10px;

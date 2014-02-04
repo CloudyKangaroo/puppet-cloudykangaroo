@@ -49,7 +49,7 @@
     "request": "2.27.x",
     "socket.io": "0.9.x",
     "underscore":"1.4.x",
-    "jade": "*"
+    "jade": "1.1.x"
   },
   "engines": {
     "node": ">=0.10"
