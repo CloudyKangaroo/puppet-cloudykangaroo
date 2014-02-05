@@ -16,6 +16,12 @@ a {
   color: #000000;
 }
 
+#numNodes, #numResources, #resourceDupes, #resourcesPerNode, #successGauge, #failuresGauge, #noopsGauge, #skipsGauge, #totalGauge {
+    width:100px; height:80px;
+    display: inline-block;
+    margin: 1em;
+}
+
 .navbar-default .navbar-nav>li>a
 {
   padding-bottom: 12px;

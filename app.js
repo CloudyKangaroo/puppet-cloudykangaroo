@@ -21,8 +21,8 @@ var useragent = require('express-useragent');
 
 // Application Logs
 var ctxlog = require('contegix-logger');
-var logger = ctxlog('main', 'info', config.log.directory, { level: 'info'});
-var auditLog = ctxlog('audit', 'info', config.log.directory, {level: 'info'}, {level: 'debug'});
+var logger = ctxlog('main', 'debug', config.log.directory, { level: 'debug'}, {level: 'debug'});
+var auditLog = ctxlog('audit', 'info', config.log.directory, {level: 'debug'}, {level: 'debug'});
 
 // Access Logs
 var reqLogger = require('express-request-logger');
@@ -219,7 +219,7 @@ var timer = collection.timer('requestTime');
 setInterval(function() {
   var metricslogger = ctxlog('metrics', 'debug', config.log.directory, {level: 'error'});
   var collectionJSON = collection.toJSON();
-  metricslogger.log('debug', 'metrics output', { collection: collectionJSON, type: 'metrics'});
+  metricslogger.log('data', 'metrics output', { collection: collectionJSON, type: 'metrics'});
 }, config.metrics.interval || 15000);
 
 function rpsMeter(req, res, next) {
@@ -578,7 +578,7 @@ app.locals.silenceClient = function (user, client, expires, silenceClientCallbac
     content: { "timestamp": (Math.round(Date.now() / 1000)), "user": user },
     expire: expires
   };
-  logger.log('debug', reqBody);
+  logger.log('silly', reqBody);
   request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
     , function (error, msg, response) {
       logger.log('debug', response);
@@ -712,7 +712,7 @@ io.sockets.on('connection', function (socket) {
 if (!module.parent) {
   server.listen(app.get('port'), function () {
     logger.log('info', 'Express server listening on port ' + app.get('port'), {});
-    logger.log('debug', 'Route Listing', {routes: app.routes});
+    logger.log('silly', 'Route Listing', {routes: app.routes});
   });
 };
 
