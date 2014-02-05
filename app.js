@@ -472,7 +472,7 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
           request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts', json: true }
             , function (error, response) {
               asyncCallback(error, response.body);
-            });git
+            });
         }
       ], function(err, results) {
         if (err)
