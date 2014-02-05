@@ -17,6 +17,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/metrics/population'
     , app.locals.requireGroup('users')
     , function (req, res) {
+
       var request = require('request');
       var async = require('async');
 
@@ -84,6 +85,9 @@ module.exports = function (app, config, passport, redisClient) {
           res.send(response);
         }
       });
+
+     // res.type('application/json');
+     // res.send({numNodes: 657, numResources: 50673, resourceDupes: 100, resourcesPerNode: 77.12785388127854});
     });
 
   app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours'
@@ -110,6 +114,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours'
     , app.locals.requireGroup('users')
     , function (req, res) {
+
       var hoursAgo = req.params.hours;
       var request = require('request');
       var queryString = '?query=["and", ["~", "certname", ".*"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
@@ -126,6 +131,15 @@ module.exports = function (app, config, passport, redisClient) {
           res.send(500);
         }
       })
+
+      /*res.type('application/json');
+      res.send({
+        "successes" : 695,
+        "failures" : 577,
+        "noops" : 0,
+        "skips" : 194,
+        "total" : 695
+      });*/
     });
 
   app.get('/api/v1/puppet/failures/hours/:hours'
