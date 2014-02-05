@@ -105,7 +105,8 @@ var refreshGauges = function()
       }
     });
   });
-  $.getJSON('/api/v1/puppet/aggregate_event_counts/hours/24', function (data) {
+
+  $.getJSON('/api/v1/puppet/aggregate_event_counts/hours/4', function (data) {
     $.each(data, function(key, val) {
       switch (key.toLowerCase()) {
         case 'successes':
