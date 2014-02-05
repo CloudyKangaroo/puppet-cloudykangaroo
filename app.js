@@ -79,7 +79,13 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(id, done) {
   redisClient.get("user:"+id, function(err, data) {
-    var user = JSON.parse(data);
+   try {
+    var parsedJSON = JSON.parse(data);
+   }
+   catch (e) {
+       app.locals.logger.log('error', 'uncaught exception');
+   }
+    var user = parsedJSON;
     done(null, user);
   });
 });
@@ -441,7 +447,13 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
     if (!err && reply)
     {
       logger.log('debug', 'got device from Redis');
-      getDevCallback(null, JSON.parse(reply));
+      try {
+       var parsedJSON = JSON.parse(reply)
+      }
+      catch (e) {
+          logger.log('error', 'uncaught exception', { err: e});
+      }
+      getDevCallback(null, parsedJSON);
     } else {
       logger.log('debug', 'getting device from puppet');
       async.parallel([
@@ -581,7 +593,13 @@ app.locals.getSensuDevice = function(hostname, getDevCallback) {
     if (!err && reply)
     {
       logger.log('debug', 'got device from Redis');
-      getDevCallback(null, JSON.parse(reply));
+       try {
+        var parsedJSON = JSON.parse(reply);
+       }
+       catch (e) {
+           logger.log('error','uncaught exception');
+       }
+      getDevCallback(null, parsedJSON);
     } else {
       logger.log('debug', 'getting device from sensu');
       async.parallel([
