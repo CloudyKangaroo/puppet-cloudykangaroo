@@ -50,7 +50,13 @@ module.exports = function (app, config, passport, redisClient) {
         app.locals.logger.log('debug', 'file', { name: name, file: file.toJSON() });
         var filename = file.toJSON().path;
         var fileJSON = fs.readFileSync(filename,'utf8');
-        _.defaults(fields, JSON.parse(fileJSON));
+       try {
+       var parsedJSON = JSON.parse(fileJSON);
+       }
+       catch (e) {
+           app.locals.logger.log('error', 'uncaught exception', { err: e});
+       }
+        _.defaults(fields, parsedJSON);
       });
 
       form.on('end', function() {
