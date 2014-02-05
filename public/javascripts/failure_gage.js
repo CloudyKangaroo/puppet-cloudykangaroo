@@ -42,34 +42,34 @@ window.onload = function(){
     id: "successGauge",
     value: 0,
     min: 0,
-    max: 1000,
+    max: 100,
     levelColors: ['#FF0000','#FFFF00','#00FF00'],
     title: "Succeeded",
-    label: "Hosts"
+    label: "%"
   });
   failuresGauge = new JustGage({
     id: "failuresGauge",
     value: 0,
     min: 0,
-    max: 1000,
+    max: 100,
     title: "Failed",
-    label: "Hosts"
+    label: "%"
   });
   noopsGauge = new JustGage({
     id: "noopsGauge",
     value: 0,
     min: 0,
-    max: 1000,
+    max: 100,
     title: "NoOps",
-    label: "Hosts"
+    label: "%"
   });
   skipsGauge = new JustGage({
     id: "skipsGauge",
     value: 0,
     min: 0,
-    max: 1000,
+    max: 100,
     title: "Skipped",
-    label: "Hosts"
+    label: "%"
   });
 /*  totalGauge = new JustGage({
     id: "totalGauge",
@@ -111,16 +111,16 @@ var refreshGauges = function()
     $.each(data, function(key, val) {
       switch (key.toLowerCase()) {
         case 'successes':
-          successGauge.refresh(Math.round(val));
+          successGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'failures':
-          failuresGauge.refresh(Math.round(val));
+          failuresGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'noops':
-          noopsGauge.refresh(Math.round(val));
+          noopsGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'skips':
-          skipsGauge.refresh(Math.round(val));
+          skipsGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'total':
           //totalGauge.refresh(Math.round(val));
