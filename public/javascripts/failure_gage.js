@@ -18,7 +18,7 @@ window.onload = function(){
     max: 100,
     levelColors: ['#00FF00','#00FF00','#00FF00'],
     title: "Resources",
-    label: "#/k"
+    label: "#k"
   });
   resourceDupes = new JustGage({
     id: "resourceDupes",
