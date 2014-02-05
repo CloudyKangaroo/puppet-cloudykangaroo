@@ -75,17 +75,8 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/monitoring/failures'
     , app.locals.requireGroup('users')
     , function (req, res) {
-        var hoursAgo = 10;
-        var URL = app.get('puppetdb_uri') + '/events?query=["and", ["=", "status", "failure"],["=", "resource-type", "Service"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]]&limit=1000';
-        request({ url: URL, json: true }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: URL});
-          res.render('monitoring/failures', {hoursAgo: hoursAgo, failures: body, user:req.user, section: 'failures', navLinks: config.navLinks.monitoring });
-        } else {
-          app.locals.logger.log('error', 'Error processing request', { error: error, uri: URL})
-          res.send(500);
-        }
-      })
+      var hoursAgo = 10;
+      res.render('monitoring/failures', {hoursAgo: hoursAgo, user:req.user, section: 'failures', navLinks: config.navLinks.monitoring });
     });
 
   app.get('/monitoring/clients'
