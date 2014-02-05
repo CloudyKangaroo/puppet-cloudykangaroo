@@ -40,7 +40,13 @@ module.exports = function (app, config, passport, redisClient) {
               {
                 callback(error, { response: response, type: 'error'});
               } else {
-                callback(error, { response: JSON.parse(response), type: 'ubersmith'});
+                  try {
+                    var parsedResponse = JSON.parse(response);
+                  }
+                  catch (e) {
+                    app.locals.logger.log('error', 'uncaught exception', {err: e});
+                  }
+                 callback(error, { response: parsedResponse, type: 'ubersmith'});
               }
             }
           );
