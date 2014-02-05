@@ -98,7 +98,7 @@ var refreshGauges = function()
           numResources.refresh(Math.round(val/1000));
           break;
         case 'resourcedupes':
-          resourceDupes.refresh(Math.round(val)*100);
+          resourceDupes.refresh(Math.round(val*100));
           break;
         case 'resourcespernode':
           resourcesPerNode.refresh(Math.round(val));
