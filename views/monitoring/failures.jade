@@ -3,22 +3,57 @@ block head
   include ../datatables_css
 block navbar
 block content
-  .container
-    .page-header
-      h1 Puppet Catalog Failure List (Last #{hoursAgo} hours)
-    .container
-      table(id="table_failures").table.table-condensed
-        thead
-          tr
-            th Hostname
-            th Type
-            th Timestamp
-            th Message
-        tbody
+  .container.col-xs-16.col-md-12
+    .row
+      .page-header
+        h1 Puppet Catalog Stats
+        .alert.alert-warning(style="color: black")
+          p This page is still under development.
+    .row
+      .col-md-6
+        .panel.panel-default
+          .panel-heading
+            p Node Population
+          .panel-body
+            #numNodes
+            #numResources
+            #resourceDupes
+            #resourcesPerNode
+      .col-md-6
+        .panel.panel-default
+          .panel-heading
+            p # Hosts with Resources that
+          .panel-body
+            #successGauge
+            #failuresGauge
+            #noopsGauge
+            #skipsGauge
+            #totalGauge
+    .row
+      .col-xs-16.col-md-12
+        .panel.panel-default
+          .panel-heading
+            .navbar
+              .navbar-header.pull-left
+                p.navbar-brand Failure List
+              .navbar-header.pull-right
+                span (Last #{hoursAgo} hours)
+          .panel-body
+            table(id="table_failures").table.table-condensed
+              thead
+                tr
+                  th Hostname
+                  th Type
+                  th Timestamp
+                  th Message
+              tbody
 
 block footer
   include ../datatables_js
   script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js")
+  script(src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js")
+  script(src="/javascripts/justgage.1.0.1.min.js")
+  script(src="/javascripts/failure_gage.js")
   script(type='text/javascript').
     $(document).ready(function() {
       $('#table_failures').dataTable( {

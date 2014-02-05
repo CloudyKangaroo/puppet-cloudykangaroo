@@ -14,6 +14,119 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/puppet/metrics/population'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var request = require('request');
+      var async = require('async');
+
+      var getNumNodes = function(callback)
+      {
+        var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dnum-nodes';
+        request({ url: URL, json: true }, function (error, response, body) {
+          if (error || !body.Value)
+          {
+            callback(error, 0);
+          } else {
+            callback(error, body.Value);
+          }
+        });
+      };
+      var getNumResources = function(callback)
+      {
+        var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dnum-resources';
+        request({ url: URL, json: true }, function (error, response, body) {
+          if (error || !body.Value)
+          {
+            callback(error, 0);
+          } else {
+            callback(error, body.Value);
+          }
+        });
+      };
+      var getResourceDupes = function(callback)
+      {
+        var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dpct-resource-dupes';
+        request({ url: URL, json: true }, function (error, response, body) {
+          if (error || !body.Value)
+          {
+            callback(error, 0);
+          } else {
+            callback(error, body.Value);
+          }
+        });
+      };
+      var getResourcesPerNode = function(callback)
+      {
+        var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Davg-resources-per-node';
+        request({ url: URL, json: true }, function (error, response, body) {
+          if (error || !body.Value)
+          {
+            callback(error, 0);
+          } else {
+            callback(error, body.Value);
+          }
+        });
+      };
+
+      async.parallel([
+        getNumNodes,
+        getNumResources,
+        getResourceDupes,
+        getResourcesPerNode
+      ], function(error, results) {
+        if (error)
+        {
+          res.send(500);
+        } else {
+          var response = {numNodes: results[0], numResources: results[1], resourceDupes: results[2], resourcesPerNode: results[3]};
+          res.type('application/json');
+          res.send(response);
+        }
+      });
+    });
+
+  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var hoursAgo = req.params.hours;
+      var request = require('request');
+      var queryString = '?query=[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]';
+      queryString += '&summarize-by=certname';
+      var URL = app.get('puppetdb_uri') + '/aggregate-event-counts' + queryString;
+
+      request({ url: URL, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: URL});
+          res.type('application/json');
+          res.send(body);
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: URL})
+          res.send(500);
+        }
+      })
+    });
+
+  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var hoursAgo = req.params.hours;
+      var request = require('request');
+      var queryString = '?query=["and", ["~", "certname", ".*"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
+      queryString += '&summarize-by=certname';
+      var URL = app.get('puppetdb_uri') + '/aggregate-event-counts' + queryString;
+
+      request({ url: URL, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: URL});
+          res.type('application/json');
+          res.send(body);
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: URL})
+          res.send(500);
+        }
+      })
+    });
 
   app.get('/api/v1/puppet/failures/hours/:hours'
     , app.locals.requireGroup('users')
