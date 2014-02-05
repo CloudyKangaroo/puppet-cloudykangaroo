@@ -14,6 +14,28 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+
+  app.get('/api/v1/puppet/failures/hours/:hours'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var hoursAgo = req.params.hours;
+      var request = require('request');
+      var queryString = '?query=["and", ["=", "status", "failure"], ["~", "certname", "contegix.mgmt$"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
+      var URL = app.get('puppetdb_uri') + '/events' + queryString;
+
+      request({ url: URL, json: true }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: URL});
+          res.type('application/json');
+          res.send({ aaData: body});
+        } else {
+          app.locals.logger.log('error', 'Error processing request', { error: error, uri: URL})
+          res.send(500);
+        }
+      })
+    });
+
+
   app.get('/api/v1/puppet/devices/hostname/:hostname/facts'
     , app.locals.requireGroup('users')
     , function (req, res) {

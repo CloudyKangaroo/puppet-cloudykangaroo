@@ -1,24 +1,53 @@
 extends ../layout
 block head
-  link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+  include ../datatables_css
 block navbar
 block content
   .container
     .page-header
-      h1 Service Failure List (Last #{hoursAgo} hours)
+      h1 Puppet Catalog Failure List (Last #{hoursAgo} hours)
     .container
-      table.table.table-condensed.sortable
+      table(id="table_failures").table.table-condensed
         thead
           tr
             th Hostname
+            th Type
             th Timestamp
-            th Status
             th Message
         tbody
-          each failure in failures
-            tr
-              td #{failure.certname}
-              td #{getFormattedISO8601(failure.timestamp)}
-              td #{failure.status}
-              td #{failure.message}
+
 block footer
+  include ../datatables_js
+  script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js")
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_failures').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/api/v1/puppet/failures/hours/#{hoursAgo}',
+        "iDisplayLength": 20,
+        "bStateSave": true,
+        "bDeferRender": true,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "certname",
+            "sWidth": "220px"
+          }, {
+            "mData": "resource-type",
+            "sWidth": "50px"
+          }, {
+            "mData": "timestamp",
+            "mRender": function(timestamp) {
+              return moment(timestamp).format('MMM DD H:mm:ss');
+            },
+            "sWidth": "60px"
+          }, {
+            "mData": "message"
+          }],
+        "aaSorting": [[2,'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
