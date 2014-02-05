@@ -7,6 +7,7 @@ window.onload = function(){
     value: 0,
     min: 0,
     max: 1000,
+    levelColors: ['#00FF00','#00FF00','#00FF00'],
     title: "Nodes",
     label: "#"
   });
@@ -15,6 +16,7 @@ window.onload = function(){
     value: 0,
     min: 0,
     max: 100,
+    levelColors: ['#00FF00','#00FF00','#00FF00'],
     title: "Resources",
     label: "#/k"
   });
@@ -23,6 +25,7 @@ window.onload = function(){
     value: 0,
     min: 0,
     max: 100,
+    levelColors: ['#FF0000','#FFFF00','#00FF00'],
     title: "Duplicate Resources",
     label: "%"
   });
@@ -31,6 +34,7 @@ window.onload = function(){
     value: 0,
     min: 0,
     max: 100,
+    levelColors: ['#00FF00','#00FF00','#00FF00'],
     title: "Resources Per Node",
     label: "Avg"
   });
@@ -39,6 +43,7 @@ window.onload = function(){
     value: 0,
     min: 0,
     max: 1000,
+    levelColors: ['#FF0000','#FFFF00','#00FF00'],
     title: "Succeeded",
     label: "Hosts"
   });
