@@ -38,7 +38,7 @@ window.onload = function(){
     id: "successGauge",
     value: 0,
     min: 0,
-    max: 100,
+    max: 1000,
     title: "Succeeded",
     label: "Hosts"
   });
@@ -46,7 +46,7 @@ window.onload = function(){
     id: "failuresGauge",
     value: 0,
     min: 0,
-    max: 100,
+    max: 1000,
     title: "Failed",
     label: "Hosts"
   });
@@ -54,7 +54,7 @@ window.onload = function(){
     id: "noopsGauge",
     value: 0,
     min: 0,
-    max: 100,
+    max: 1000,
     title: "NoOps",
     label: "Hosts"
   });
@@ -62,18 +62,18 @@ window.onload = function(){
     id: "skipsGauge",
     value: 0,
     min: 0,
-    max: 100,
+    max: 1000,
     title: "Skipped",
     label: "Hosts"
   });
-  totalGauge = new JustGage({
+/*  totalGauge = new JustGage({
     id: "totalGauge",
     value: 0,
     min: 0,
-    max: 100,
+    max: 1000,
     title: "Total",
     label: "Hosts"
-  });
+  });*/
   refreshGauges();
   setInterval(function() {
     refreshGauges();
@@ -118,7 +118,7 @@ var refreshGauges = function()
           skipsGauge.refresh(Math.round(val));
           break;
         case 'total':
-          totalGauge.refresh(Math.round(val));
+          //totalGauge.refresh(Math.round(val));
           break;
       }
     });
