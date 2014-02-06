@@ -761,7 +761,7 @@ module.exports = function (app, config, passport, redisClient) {
         var visible = req.body.comment;
         var from = req.user.username + '@contegix.com';
         var time_spent = req.body.time_spent;
-      console.log(req.body.sensuEvent);
+
         var sensuEvent = JSON.parse(decodeURI(req.body.sensuEvent));
         var documentation = req.body.documentation;
 
@@ -776,12 +776,18 @@ module.exports = function (app, config, passport, redisClient) {
         msgBody += documentation;
         msgBody = encodeURI(msgBody);
 
-        var form = 'ticket_id=' + ticketID + '&subject=' + encodeURI(subject) + '&body=' + msgBody + '&visible=' + visible + '&from=' + from + '&time_spent=' + time_spent;
+        //var form = 'ticket_id=' + ticketID + '&subject=' + encodeURI(subject) + '&body=' + msgBody + '&visible=' + visible + '&from=' + from + '&time_spent=' + time_spent;
+        var postData = {ticket_id: ticketID, subject: subject, body: msgBody, visible: visible, from: from, time_spent: time_spent};
 
-        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', '&' + form, form, function (err, response) {
+        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', postData, function (err, response) {
           if (err)
           {
-            res.send(500);
+            if (err.code == 'ETIMEDOUT')
+            {
+              res.send(504);
+            } else {
+              res.send(500);
+            }
           } else {
             res.send(JSON.stringify(response));
           }
@@ -799,8 +805,11 @@ module.exports = function (app, config, passport, redisClient) {
       var client_id = req.body.clientID;
       var device_id = req.body.deviceID;
       var timestamp = Date.now();
+      var sensuEvent = req.body.sensuEvent || '';
 
-      msgBody += "\n";
+      msgBody += "\n\n";
+      msgBody += sensuEvent;
+      msgBody += "\n\n";
       msgBody += "Contegix | Technical Support\n";
       msgBody += "(314) 622-6200 ext. 3\n";
       msgBody += "https://portal.contegix.com\n";
@@ -808,13 +817,17 @@ module.exports = function (app, config, passport, redisClient) {
       msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
       msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
 
-      var form = 'subject=' + encodeURI(subject) + '&body=' + encodeURI(msgBody) + '&author=' + author + '&priority=' + priority
-        form += '&recipient=' + recipient + '&client_id=' + client_id + '&device_id=' + '&timestamp=' + timestamp;
+      var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id, timestamp: timestamp};
 
-      app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', '&' + form, form, function (err, response) {
+      app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
         if (err)
         {
-          res.send(500);
+          if (err.code == 'ETIMEDOUT')
+          {
+            res.send(504);
+          } else {
+            res.send(500);
+          }
         } else {
           res.send(JSON.stringify(response));
         }
