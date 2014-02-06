@@ -16,9 +16,9 @@ config.navLinks = {
   ],
   monitoring: [
     { label: 'Home', key: 'info', path: '/monitoring' },
+    { label: 'Puppet', key: 'puppet', path: '/monitoring/puppet' },
     { label: 'Events', key: 'events', path: '/monitoring/events' },
     { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
-    { label: 'Failures', key: 'failures', path: '/monitoring/failures' },
     { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
     { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }
   ] 
