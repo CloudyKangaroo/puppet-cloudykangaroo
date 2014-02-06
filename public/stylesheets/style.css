@@ -26,7 +26,10 @@ a {
 {
   padding-bottom: 12px;
 }
-
+.alert-success, .alert-danger, .alert-warning, .alert-info
+{
+    background-image: none;
+}
 .nav-button
 {
   padding-bottom: 11px;
@@ -48,7 +51,6 @@ a {
 {
     display: inline-block !important;
     vertical-align: middle !important;
-    margin-bo
     margin-top: 4px;
 }
 .dataTables_wrapper
@@ -132,7 +134,7 @@ a {
     border: none;
     border-radius: 15px;
     box-sizing: border-box;
-    color: #ffffff;
+    /*color: #ffffff;*/
     cursor: pointer;
     display: block;
     float: left;
@@ -144,6 +146,9 @@ a {
     opacity: 0.800000011920929;
     text-align: center;
     width: 100px;
+}
+.panelGauge.danger {
+    background-color:
 }
 .panelGauge-heading {
     margin-top: -14px;
@@ -163,7 +168,7 @@ a {
 }
 .panelGauge-text {
     box-sizing: border-box;
-    color: #3071A9;
+    /*color: #3071A9;*/
     cursor: pointer;
     display: block;
     font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -172,7 +177,7 @@ a {
     height: 35px;
     line-height: 35.20000076293945px;
     margin-bottom: 10.5px;
-    margin-top: 8px;
+    margin-top: 14px;
     text-align: center;
     width: 100px;
 }

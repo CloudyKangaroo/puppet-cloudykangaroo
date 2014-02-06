@@ -3,12 +3,43 @@ block head
   link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
 block navbar
 block content
-  .container.col-xs-20.col-md-10
+  .container.col-xs-20.col-md-12
     .row
       .page-header
         h1 Current System Info
     .row
-      .col-xs-6.col-md-6
+      .col-md-5
+        .panel.panel-default
+          .panel-heading Monitoring Stats
+          .panel-body
+            #daysSinceIncident.panelGauge.text-info
+              .panelGauge-heading Days Since<br/>Last Incident
+              h2.panelGauge-text #{sinceLastIncident}
+            #sensuCheckCount.panelGauge.text-info
+              .panelGauge-heading Active Checks
+              h2.panelGauge-text 7435
+            #sensuHostCount.panelGauge.text-info
+              .panelGauge-heading Active Clients
+              h2.panelGauge-text 735
+      .col-md-7
+        .panel.panel-default
+          .panel-heading Check Stats
+          .panel-body
+            #sensuHostCount.panelGauge.text-danger
+              .panelGauge-heading Checks CRITICAL
+              h2.panelGauge-text 171
+            #sensuHostCount.panelGauge.text-warning
+              .panelGauge-heading Checks WARNING
+              h2.panelGauge-text 101
+            #sensuHostCount.panelGauge.text-success
+              .panelGauge-heading Checks OK
+              h2.panelGauge-text 7162
+            #sensuHostCount.panelGauge.text-primary
+              .panelGauge-heading Checks UNKNOWN
+              h2.panelGauge-text 1
+
+    .row
+      .col-md-5
         .panel.panel-default
           .panel-heading Sensu
           .panel-body
@@ -17,7 +48,7 @@ block content
           .panel-heading Redis
           .panel-body
             p(class=(info.redis.connected === true)? "alert alert-success" : "alert alert-danger") Connected: #{info.redis.connected}
-      .col-xs-14.col-md-6
+      .col-md-7
         .panel.panel-default
           .panel-heading RabbitMQ
           .panel-body

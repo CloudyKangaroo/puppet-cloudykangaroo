@@ -6,9 +6,13 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
         request({ url: app.get('sensu_uri') + '/info', json: true }
         , function (error, response, body) {
+          var moment = require('moment');
           if (!error && response.statusCode == 200) {
             app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/info'});
-            res.render('monitoring', {info: body, user:req.user, section: 'info', navLinks: config.navLinks.monitoring });
+            var lastIncident = moment('Jan 01, 2014');
+            //var sinceLastIncident = lastIncident.diff(moment()).format('d');
+            var sinceLastIncident = moment().diff(moment('01/01/2014 00:00:00',"DD/MM/YYYY HH:mm:ss"), 'days');
+            res.render('monitoring', {sinceLastIncident:  sinceLastIncident, info: body, user:req.user, section: 'info', navLinks: config.navLinks.monitoring });
           } else {
             app.locals.logger.log('error', 'error processing request', { error: error, uri: app.get('sensu_uri') + '/info'})
             res.send(500);
