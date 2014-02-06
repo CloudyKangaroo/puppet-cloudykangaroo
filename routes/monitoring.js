@@ -68,11 +68,11 @@ module.exports = function (app, config, passport, redisClient) {
       })
     });
 
-  app.get('/monitoring/failures'
+  app.get('/monitoring/puppet'
     , app.locals.requireGroup('users')
     , function (req, res) {
       var hoursAgo = 10;
-      res.render('monitoring/failures', {hoursAgo: hoursAgo, user:req.user, section: 'failures', navLinks: config.navLinks.monitoring });
+      res.render('monitoring/puppet', {hoursAgo: hoursAgo, user:req.user, section: 'puppet', navLinks: config.navLinks.monitoring });
     });
 
   app.get('/monitoring/clients'
