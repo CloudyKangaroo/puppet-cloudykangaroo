@@ -1,6 +1,6 @@
 extends ../layout
 block head
-  link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+  include ../datatables_css
 block navbar
 block content
   .container
@@ -11,7 +11,7 @@ block content
         .panel-heading
           p Stashes
         .panel-body
-          table.table.table-condensed
+          table(id="table_stashes").table.table-condensed
             thead
               tr
                 th Path
@@ -19,11 +19,39 @@ block content
                 th Expiration
 
             tbody
-              each stash in stashes
-                tr
-                  td #{stash.path}
-                  td #{JSON.stringify(stash.content)}
-                  td #{stash.expire}
-
 
 block footer
+  include ../datatables_js
+  script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js")
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_stashes').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/api/v1/sensu/stashes',
+        "iDisplayLength": 25,
+        "bStateSave": true,
+        "bDeferRender": true,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "path",
+            "sWidth": "420px",
+            "mRender" : function(path) {
+              return path.replace('silence/', '');
+            }
+          }, {
+            "mData": "content"
+          }, {
+            "mData": "expire",
+            "sWidth": "110px",
+            "mRender": function(expire) {
+              return moment().add('s', expire).format('DD/MMM/YY H:mm:ss');
+            }
+          }],
+        "aaSorting": [[2,'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });

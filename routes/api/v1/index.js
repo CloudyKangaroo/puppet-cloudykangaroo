@@ -382,6 +382,26 @@ module.exports = function (app, config, passport, redisClient) {
       })
   });
 
+  app.get('/api/v1/sensu/stashes'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      var _ = require('underscore');
+      app.locals.getSensuStashes('.*'
+        , function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            var retStashes = [];
+            var stashList = response;
+            _.each(stashList, function(stash) {
+              retStashes.push({path: stash.path, content: JSON.stringify(stash.content), expire: stash.expire});
+            });
+            res.type('application/json');
+            res.send({aaData: retStashes});
+          }
+        })
+    });
+
   // SILENCE a CLIENT
   app.post('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')

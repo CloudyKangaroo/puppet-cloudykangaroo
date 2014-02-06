@@ -51,15 +51,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/monitoring/stashes'
     , app.locals.requireGroup('users')
     , function (req, res) {
-        request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/stashes'});
-          res.render('monitoring/stashes', {stashes: body, user:req.user, section: 'stashes', navLinks: config.navLinks.monitoring });
-        } else {
-          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/stashes'})
-          res.send(500);
-        }
-      })
+        res.render('monitoring/stashes', {user:req.user, section: 'stashes', navLinks: config.navLinks.monitoring });
     });
 
   app.get('/monitoring/checks'

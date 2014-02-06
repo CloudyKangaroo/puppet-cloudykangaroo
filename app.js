@@ -542,12 +542,12 @@ app.locals.getSensuEvents = function (getEventsCallback ) {
 app.locals.getSensuStashes = function (stashes, getStashCallback) {
   var request = require('request');
   request({url: app.get('sensu_uri') + '/stashes', json: true}
-    , function (error, msg, response) {
+    , function (error, response, body) {
       if (error) {
-        getStashCallback(error, response)
+        getStashCallback(error, body)
       } else {
         var re = new RegExp('^' + stashes)
-        var filtered_response = response.filter(function (element) {
+        var filtered_response = body.filter(function (element) {
           if (re.exec(element.path)) { return true }
         });
         getStashCallback(error, filtered_response)
