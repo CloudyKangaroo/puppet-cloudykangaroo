@@ -55,14 +55,14 @@ window.onload = function(){
     title: "Failed",
     label: "%"
   });
-  noopsGauge = new JustGage({
+  /*noopsGauge = new JustGage({
     id: "noopsGauge",
     value: 0,
     min: 0,
     max: 100,
     title: "NoOps",
     label: "%"
-  });
+  });*/
   skipsGauge = new JustGage({
     id: "skipsGauge",
     value: 0,
@@ -71,14 +71,14 @@ window.onload = function(){
     title: "Skipped",
     label: "%"
   });
-/*  totalGauge = new JustGage({
+  /*totalGauge = new JustGage({
     id: "totalGauge",
     value: 0,
     min: 0,
     max: 1000,
     title: "Total",
-    label: "Hosts"
-  });*/
+    label: "Reports"
+  }); */
   refreshGauges();
   setInterval(function() {
     refreshGauges();
@@ -116,13 +116,14 @@ var refreshGauges = function()
           failuresGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'noops':
-          noopsGauge.refresh(Math.round((val/data.total)*100));
+          //noopsGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'skips':
           skipsGauge.refresh(Math.round((val/data.total)*100));
           break;
         case 'total':
           //totalGauge.refresh(Math.round(val));
+          $('#totalGauge').children('h2').text(val);
           break;
       }
     });

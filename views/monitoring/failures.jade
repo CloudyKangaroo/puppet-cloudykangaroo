@@ -22,13 +22,16 @@ block content
       .col-md-6
         .panel.panel-default
           .panel-heading
-            p Hosts with Resources that
+            p Reported Resource Stats
               span.pull-right (Last 4 hours)
           .panel-body
             #successGauge
             #failuresGauge
-            #noopsGauge
+            //#noopsGauge
             #skipsGauge
+            #totalGauge.panelGauge
+              .panelGauge-heading Total Reports
+              h2.panelGauge-text 0
     .row
       .col-xs-16.col-md-12
         .panel.panel-default
