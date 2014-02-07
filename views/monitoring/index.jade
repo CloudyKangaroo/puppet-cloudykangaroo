@@ -12,31 +12,31 @@ block content
         .panel.panel-default
           .panel-heading Monitoring Stats
           .panel-body
-            #daysSinceIncident.panelGauge.text-info
-              .panelGauge-heading Days Since<br/>Last Incident
-              h2.panelGauge-text #{sinceLastIncident}
-            #sensuCheckCount.panelGauge.text-info
-              .panelGauge-heading Active Checks
-              h2.panelGauge-text 7435
-            #sensuHostCount.panelGauge.text-info
-              .panelGauge-heading Active Clients
-              h2.panelGauge-text 735
+            #daysSinceIncident.tile.short.text-info
+              .tile-heading.short Days Since<br/>Last Incident
+              .tile-text #{sinceLastIncident}
+            #sensuCheckCount.tile.short.text-info
+              .tile-heading.short Active Checks
+              .tile-text 7435
+            #sensuHostCount.tile.short.text-info
+              .tile-heading.short Active Clients
+              .tile-text 735
       .col-md-7
         .panel.panel-default
           .panel-heading Check Stats
           .panel-body
-            #sensuHostCount.panelGauge.text-danger
-              .panelGauge-heading Checks CRITICAL
-              h2.panelGauge-text 171
-            #sensuHostCount.panelGauge.text-warning
-              .panelGauge-heading Checks WARNING
-              h2.panelGauge-text 101
-            #sensuHostCount.panelGauge.text-success
-              .panelGauge-heading Checks OK
-              h2.panelGauge-text 7162
-            #sensuHostCount.panelGauge.text-primary
-              .panelGauge-heading Checks UNKNOWN
-              h2.panelGauge-text 1
+            #sensuHostCount.tile.short
+              .tile-heading.short Checks CRITICAL
+              .tile-text.short.text-danger 171
+            #sensuHostCount.tile.short
+              .tile-heading.short Checks WARNING
+              .tile-text.short.text-warning 101
+            #sensuHostCount.tile.short
+              .tile-heading.short Checks OK
+              .tile-text.text-success.short 7162
+            #sensuHostCount.tile.short
+              .tile-heading.short Checks UNKNOWN
+              .tile-text.text-primary.short 1
 
     .row
       .col-md-5

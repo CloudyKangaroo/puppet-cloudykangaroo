@@ -15,23 +15,23 @@ block content
           .panel-heading
             p Node Population
           .panel-body
-            #numNodes
-            #numResources
-            #resourceDupes
-            #resourcesPerNode
+            #numNodes.gauge
+            #numResources.gauge
+            #resourceDupes.gauge
+            #resourcesPerNode.gauge
       .col-md-6
         .panel.panel-default
           .panel-heading
             p Reported Resource Stats
               span.pull-right (Last 4 hours)
           .panel-body
-            #successGauge
-            #failuresGauge
-            //#noopsGauge
-            #skipsGauge
-            #totalGauge.panelGauge
-              .panelGauge-heading Total Reports
-              h2.panelGauge-text 0
+            #successGauge.gauge
+            #failuresGauge.gauge
+            //#noopsGauge.gauge
+            #skipsGauge.gauge
+            .tile(style="margin-top: -56px")
+              .tile-heading Total Reports
+              .tile-text 0
     .row
       .col-xs-16.col-md-12
         .panel.panel-default
