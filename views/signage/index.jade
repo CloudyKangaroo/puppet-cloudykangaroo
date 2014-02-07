@@ -1,0 +1,92 @@
+extends layout
+block head
+  link(rel='stylesheet', href='/stylesheets/bootstrap-tile.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+block content
+    .row
+      .col-md-12
+        .panel.panel-default
+          .panel-heading Medium Tiles
+          .panel-body.text-center
+            #standard1.tile.tile-info
+              .tile-heading Standard<br/>Info
+              .tile-text 145
+            #short6.tile.short
+              .tile-heading.short Short Primary<br/>Two Lines
+              .tile-text.tile-primary.short 145
+            #standard2.tile.tile-danger
+              .tile-heading Standard<br/>Danger
+              .tile-text 10.5
+            #standard5.tile
+              .tile-heading Standard
+              .tile-text 153
+            #short5.tile
+              .tile-heading Short Warning
+              .tile-text.tile-warning.short 153
+            #standard3.tile.tile-default
+              .tile-heading Standard<br/>Default
+              .tile-text 153
+            #standard4.tile.tile
+              .tile-heading Standard<br/>Text Danger
+              .tile-text.text-danger 10.5
+            #standard4.tile.tile-success
+              .tile-heading Standard<br/>Success
+              .tile-text 10.5
+            #standard4.tile
+              .tile-heading.text-danger Heading Danger<br/>Text Primary
+              .tile-text.text-primary 10.5
+    .row
+      .col-md-6
+        .panel.panel-default
+          .panel-heading Gauges
+          .panel-body.text-center
+            #gauge4.gauge
+            #gauge3.gauge.xl
+            #gauge2.gauge
+      .col-md-6
+        .panel.panel-default
+          .panel-heading Gauges
+          .panel-body.text-center
+            #gauge8.gauge
+            #gauge7.gauge
+            #gauge6.gauge
+            #gauge5.gauge
+            #gauge9.gauge.xl
+            #gauge1.gauge.xl
+    .row
+      .col-md-12
+        .panel.panel-default
+          .panel-heading XL Tiles
+          .panel-body.text-center
+            #standard1.tile.xl.tile-info
+              .tile-heading.xl Standard<br/>Info
+              .tile-text.xl 145
+            #short6.tile.xl.short
+              .tile-heading.xl.short Short Primary<br/>Two Lines
+              .tile-text.xl.tile-primary.short 145
+            #standard2.tile.xl.tile-danger
+              .tile-heading.xl Standard<br/>Danger
+              .tile-text.xl 10.5
+            #standard5.tile.xl
+              .tile-heading.xl Standard
+              .tile-text.xl 153
+            #short5.tile.xl
+              .tile-heading.xl Short Warning
+              .tile-text.tile-warning.short.xl 153
+            #standard3.tile.xl.tile-default
+              .tile-heading.xl Standard<br/>Default
+              .tile-text.xl 153
+            #standard4.tile.xl.tile
+              .tile-heading.xl Standard<br/>Text Danger
+              .tile-text.xl.text-danger 10.5
+            #standard4.tile.xl.tile-success
+              .tile-heading.xl Standard<br/>Success
+              .tile-text.xl 10.5
+            #standard4.tile.xl
+              .tile-heading.xl.text-danger Heading Danger<br/>Text Primary
+              .tile-text.xl.text-primary 10.5
+
+block footer
+  script(src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js")
+  script(src="/javascripts/justgage.1.0.1.min.js")
+  script(src="/javascripts/demo_gauge.js")

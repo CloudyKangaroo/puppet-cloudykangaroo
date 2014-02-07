@@ -12,7 +12,8 @@ config.navLinks = {
     { label: 'Dashboard', key: 'dashboard', path: '/ubersmith' },
     { label: 'Customers', key: 'clients', path: '/ubersmith/clients' },
     { label: 'Devices', key: 'devices', path: '/ubersmith/devices' },
-    { label: 'Tickets', key: 'tickets', path: '/ubersmith/tickets' }
+    { label: 'Tickets', key: 'tickets', path: '/ubersmith/tickets' },
+    { label: 'Monitoring', key: 'monitoring', path: '/monitoring' },
   ],
   monitoring: [
     { label: 'Home', key: 'info', path: '/monitoring' },
@@ -20,8 +21,9 @@ config.navLinks = {
     { label: 'Events', key: 'events', path: '/monitoring/events' },
     { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
     { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
-    { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }
-  ] 
+    { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
+    { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' },
+  ]
 }
 
 config.sensu = {};

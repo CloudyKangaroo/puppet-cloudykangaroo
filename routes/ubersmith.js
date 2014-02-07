@@ -36,26 +36,6 @@ module.exports = function (app, config, passport, redisClient) {
         res.redirect('/tickets');
       });
 
-  app.get('/tickets'
-    , app.locals.ensureAuthenticated
-    , function (req, res) {
-      res.render('ubersmith/tickets',{ user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
-    });
-
-  app.get('/tickets/ticketid/:ticketid'
-    , app.locals.ensureAuthenticated
-    , function (req, res) {
-      app.locals.ubersmith.getTicketbyTicketID(req.params.ticketid, function (err, ticket) {
-        if (err)
-        {
-          res.send(500);
-        } else {
-          res.render('ubersmith/ticket',{ ticket: ticket, user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
-        }
-      });
-    });
-
-
   // Device Browser
   app.get('/ubersmith/devices'
     , app.locals.requireGroup('users')

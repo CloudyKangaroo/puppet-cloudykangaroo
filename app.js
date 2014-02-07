@@ -118,6 +118,24 @@ passport.use(new AtlassianCrowdStrategy({
   }
 ));
 
+/*
+Metrics
+ */
+var metrics = require('measured');
+var collection = new metrics.Collection('http');
+var rps = collection.meter('requestsPerSecond');
+var timer = collection.timer('requestTime');
+
+/*
+ Periodically output metrics to the log file
+ */
+setInterval(function() {
+  var metricslogger = ctxlog('metrics', 'debug', config.log.directory, {level: 'error'});
+  var collectionJSON = collection.toJSON();
+  metricslogger.log('data', 'metrics output', { collection: collectionJSON, type: 'metrics'});
+}, config.metrics.interval || 15000);
+
+
 /**
  * The Start of the Application Logic
  */
@@ -127,12 +145,15 @@ var app = express();
 // all environments
 
 var RedisStore = require('connect-redis')(express);
+app.locals.collection = collection;
+app.locals.rps = rps;
+app.locals.timer = timer;
 
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.moment = require('moment');
 app.locals.ubersmith = ubersmith;
-
+app.locals.title = 'Cloudy Kangaroo';
 app.enable('trust proxy');
 
 app.set('title', 'Cloudy Kangaroo');
@@ -208,19 +229,6 @@ app.use(express.static(path.join(__dirname, 'public')));
  *  This adds the RPS metric, we are using this
  *  middleware so that every request is counted.
  */
-var metrics = require('measured');
-var collection = new metrics.Collection('http');
-var rps = collection.meter('requestsPerSecond');
-var timer = collection.timer('requestTime');
-
-/*
-   Periodically output metrics to the log file
- */
-setInterval(function() {
-  var metricslogger = ctxlog('metrics', 'debug', config.log.directory, {level: 'error'});
-  var collectionJSON = collection.toJSON();
-  metricslogger.log('data', 'metrics output', { collection: collectionJSON, type: 'metrics'});
-}, config.metrics.interval || 15000);
 
 function rpsMeter(req, res, next) {
 
