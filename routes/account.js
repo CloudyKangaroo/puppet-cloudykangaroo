@@ -25,8 +25,7 @@ module.exports = function (app, config, passport, redisClient) {
 
 
   app.post('/account/login'
-    , passport.authenticate('atlassian-crowd'
-    , { failureRedirect:'/account', failureFlash:"Invalid username or password."})
+    , passport.authenticate(app.locals.authenticationStrategy, { failureRedirect:'/account', failureFlash:"Invalid username or password."})
     , function (req, res) {
        app.locals.logger.log('debug', 'User Login:' + req.user.username, { username: req.user.username, requestID: req.id, sessionID: req.sessionID });
         backURL=req.header('Referer') || '/account';
