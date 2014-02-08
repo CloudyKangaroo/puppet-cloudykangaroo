@@ -2,8 +2,20 @@
  * Application Dependencies
  */
 
-// Site Specific Requirements
-require('./config/system-credentials.js');
+if (process.env.NODE_ENV == 'development')
+{
+  CrowdAuth = new Array();
+  CrowdAuth['server'] = '';
+  CrowdAuth['application'] = '';
+  CrowdAuth['password'] = '';
+  UberAuth = new Array();
+  UberAuth['username'] = '';
+  UberAuth['password'] = '';
+  UberAuth['url'] = ''
+} else {
+  require('./config/system-credentials.js');
+}
+
 var config = require('./config');
 
 // Generic Requirements
@@ -61,6 +73,7 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
+
 var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
 
@@ -95,7 +108,11 @@ var RedisStore = require('connect-redis')(express);
 app.locals.collection = collection;
 app.locals.rps = rps;
 app.locals.timer = timer;
+<<<<<<< HEAD
 app.locals.config = config;
+=======
+app.locals.authenticationStrategy = authenticationStrategy;
+>>>>>>> Allow dev to work with no ubersmith and local auth
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.redisClient = redisClient;
@@ -124,7 +141,6 @@ app.use(express.favicon());
 app.use(express.json({strict: false}));
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-
 app.use(require('connect-requestid'));
 app.use(useragent.express());
 
@@ -258,8 +274,7 @@ function reqWrapper(req, res, next) {
  */
 app.configure('development', function(){
   app.use(express.errorHandler());
-})
-
+});
 
 app.locals.getEventClass = function (eventStatus) {
   require('enum').register();
