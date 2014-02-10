@@ -27,6 +27,7 @@
   "dependencies": {
     "express": "3.4.x",
     "redis": "0.9.x",
+    "nock": "0.27.x",
     "connect-redis": "1.4.x",
     "async": "0.2.x",
     "colors": "0.6.x",
