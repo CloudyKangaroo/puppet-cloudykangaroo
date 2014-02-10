@@ -39,8 +39,6 @@ var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
 
-//require('./nockUps');
-
 /*
   Connect to Redis
  */
@@ -109,11 +107,7 @@ var RedisStore = require('connect-redis')(express);
 app.locals.collection = collection;
 app.locals.rps = rps;
 app.locals.timer = timer;
-<<<<<<< HEAD
 app.locals.config = config;
-=======
-app.locals.authenticationStrategy = authenticationStrategy;
->>>>>>> Allow dev to work with no ubersmith and local auth
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.redisClient = redisClient;
@@ -166,11 +160,7 @@ app.use(authenticator.passport.session());
 /*
    Route requests through the metrics and logging processing
  */
-<<<<<<< HEAD
 app.use(reqWrapper);
-=======
-app.use(rpsMeter);
->>>>>>> started nocking up interfaces
 
 /*
   Pass the requests through the routes
