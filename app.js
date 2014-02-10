@@ -1,7 +1,6 @@
 /**
  * Application Dependencies
  */
-
 if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
@@ -27,7 +26,7 @@ var flash = require('connect-flash');
 var useragent = require('express-useragent');
 
 /*
-  Initialize the Logging Framework
+ Initialize the Logging Framework
  */
 
 // Application Logs
@@ -39,6 +38,8 @@ var auditLog = ctxlog('audit', config.log.level, config.log.directory, {level: c
 var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
+
+//require('./nockUps');
 
 /*
   Connect to Redis
@@ -165,7 +166,11 @@ app.use(authenticator.passport.session());
 /*
    Route requests through the metrics and logging processing
  */
+<<<<<<< HEAD
 app.use(reqWrapper);
+=======
+app.use(rpsMeter);
+>>>>>>> started nocking up interfaces
 
 /*
   Pass the requests through the routes
@@ -232,7 +237,7 @@ function reqWrapper(req, res, next) {
     // Do the work expected
     res.end = rEnd;
     res.end(chunk, encoding);
-  
+
     // And do the work we want now (logging!)
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
