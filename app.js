@@ -1,9 +1,20 @@
 /**
  * Application Dependencies
  */
+if (process.env.NODE_ENV == 'development')
+{
+  CrowdAuth = new Array();
+  CrowdAuth['server'] = '';
+  CrowdAuth['application'] = '';
+  CrowdAuth['password'] = '';
+  UberAuth = new Array();
+  UberAuth['username'] = '';
+  UberAuth['password'] = '';
+  UberAuth['url'] = ''
+} else {
+  require('./config/system-credentials.js');
+}
 
-// Site Specific Requirements
-require('./config/system-credentials.js');
 var config = require('./config');
 
 // Generic Requirements
@@ -16,18 +27,20 @@ var passport = require('passport');
 var useragent = require('express-useragent');
 
 /*
-  Initialize the Logging Framework
+ Initialize the Logging Framework
  */
 
 // Application Logs
 var ctxlog = require('contegix-logger');
-var logger = ctxlog('main', 'debug', config.log.directory, { level: 'debug'}, {level: 'debug'});
+var logger = ctxlog('main', 'verbose', config.log.directory, { level: 'debug'}, {level: 'debug'});
 var auditLog = ctxlog('audit', 'info', config.log.directory, {level: 'debug'}, {level: 'debug'});
 
 // Access Logs
 var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
+
+//require('./nockUps');
 
 /*
   Connect to Redis
@@ -62,61 +75,125 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
-var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: 'error', logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
-var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+try {
+  var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: 'error', logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
+  var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+} catch(e) {
+  logger.log('error', 'Could not Initialize Ubersmith', { error: JSON.stringify(e)});
+}
 
 /**
  * Authentication System
  */
 
-var users = [];
+if (process.env.NODE_ENV == 'development') {
+  var LocalStrategy = require('passport-local').Strategy;
+  var authenticationStrategy = 'local';
+  var users = [
+    { id: 1, username: 'bob', password: 'secret', groups: ['admin', 'users', 'engineers'] }
+    , { id: 2, username: 'joe', password: 'birthday'}
+  ];
 
-passport.serializeUser(function(user, done) {
-  var userId = RegExp('[^/]*$').exec(user.id)||[,null][1];
-  redisClient.set("user:"+userId, JSON.stringify(user));
-  done(null, userId);
-});
+  var defaultUser = { id: '0', displayname: 'Development User', username: 'development.user', emails: [{name: 'primary', value: 'development.user@contegix.com'}], groups: ['users']};
 
-passport.deserializeUser(function(id, done) {
-  redisClient.get("user:"+id, function(err, data) {
-   try {
-    var parsedJSON = JSON.parse(data);
-   }
-   catch (e) {
-       app.locals.logger.log('error', 'uncaught exception');
-   }
-    var user = parsedJSON;
-    done(null, user);
+  var findById = function(id, fn) {
+    var _ = require('underscore');
+    var idx = id - 1;
+    if (users[idx]) {
+      fn(null, _.defaults(users[idx], defaultUser));
+    } else {
+      fn(new Error('User ' + id + ' does not exist'));
+    }
+  }
+
+  var findByUsername = function(username, fn) {
+    var _ = require('underscore');
+    for (var i = 0, len = users.length; i < len; i++) {
+      var user = users[i];
+      if (user.username === username) {
+        return fn(null, _.defaults(user, defaultUser));
+      }
+    }
+    return fn(null, null);
+  }
+
+  passport.serializeUser(function(user, done) {
+    done(null, user.id);
   });
-});
+
+  passport.deserializeUser(function(id, done) {
+    findById(id, function (err, user) {
+      done(err, user);
+    });
+  });
+
+  passport.use(new LocalStrategy(
+    function(username, password, done) {
+      // asynchronous verification, for effect...
+      process.nextTick(function () {
+
+        // Find the user by username.  If there is no user with the given
+        // username, or the password is not correct, set the user to `false` to
+        // indicate failure and set a flash message.  Otherwise, return the
+        // authenticated `user`.
+        findByUsername(username, function(err, user) {
+          if (err) { return done(err); }
+          if (!user) { return done(null, false, { message: 'Unknown user ' + username }); }
+          if (user.password != password) { return done(null, false, { message: 'Invalid password' }); }
+          return done(null, user);
+        })
+      });
+    }
+  ));
+} else if (process.env.NODE_ENV == 'production') {
+  var users = [];
+
+  passport.serializeUser(function(user, done) {
+    var userId = RegExp('[^/]*$').exec(user.id)||[,null][1];
+    redisClient.set("user:"+userId, JSON.stringify(user));
+    done(null, userId);
+  });
+
+  passport.deserializeUser(function(id, done) {
+    redisClient.get("user:"+id, function(err, data) {
+      try {
+        var parsedJSON = JSON.parse(data);
+      }
+      catch (e) {
+        app.locals.logger.log('error', 'uncaught exception');
+      }
+      var user = parsedJSON;
+      done(null, user);
+    });
+  });
 
 // passport-attlassian-crowd from : https://bitbucket.org/knecht_andreas/passport-atlassian-crowd
 // MIT License
+  var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
+  var authenticationStrategy = 'atlassian-crowd';
+  passport.use(new AtlassianCrowdStrategy({
+      crowdServer: CrowdAuth['server'],
+      crowdApplication: CrowdAuth['application'],
+      crowdApplicationPassword: CrowdAuth['password'],
+      retrieveGroupMemberships: true
+    },
+    function (userprofile, done) {
+      // asynchronous verification, for effect...
+      process.nextTick(function () {
+        var _ = require('underscore');
+        var exists = _.any(users, function (user) {
+          return user.id == userprofile.id;
+        });
 
-var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
+        if (!exists) {
+          users.push(userprofile);
+        }
 
-passport.use(new AtlassianCrowdStrategy({
-    crowdServer: CrowdAuth['server'],
-    crowdApplication: CrowdAuth['application'],
-    crowdApplicationPassword: CrowdAuth['password'],
-    retrieveGroupMemberships: true
-  },
-  function (userprofile, done) {
-    // asynchronous verification, for effect...
-    process.nextTick(function () {
-      var _ = require('underscore');
-      var exists = _.any(users, function (user) {
-        return user.id == userprofile.id;
+        return done(null, userprofile);
       });
-
-      if (!exists) {
-        users.push(userprofile);
-      }
-
-      return done(null, userprofile);
-    });
-  }
-));
+    }
+  ));
+}
 
 /*
 Metrics
@@ -129,12 +206,13 @@ var timer = collection.timer('requestTime');
 /*
  Periodically output metrics to the log file
  */
+/*
 setInterval(function() {
   var metricslogger = ctxlog('metrics', 'debug', config.log.directory, {level: 'error'});
   var collectionJSON = collection.toJSON();
   metricslogger.log('data', 'metrics output', { collection: collectionJSON, type: 'metrics'});
 }, config.metrics.interval || 15000);
-
+*/
 
 /**
  * The Start of the Application Logic
@@ -148,7 +226,7 @@ var RedisStore = require('connect-redis')(express);
 app.locals.collection = collection;
 app.locals.rps = rps;
 app.locals.timer = timer;
-
+app.locals.authenticationStrategy = authenticationStrategy;
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.moment = require('moment');
@@ -176,7 +254,6 @@ app.use(express.favicon());
 app.use(express.json({strict: false}));
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-
 app.use(require('connect-requestid'));
 app.use(useragent.express());
 app.use(flash());
@@ -267,7 +344,7 @@ function rpsMeter(req, res, next) {
     // Do the work expected
     res.end = rEnd;
     res.end(chunk, encoding);
-  
+
     // And do the work we want now (logging!)
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
@@ -311,7 +388,7 @@ function rpsMeter(req, res, next) {
  */
 app.configure('development', function(){
   app.use(express.errorHandler());
-})
+});
 
 app.locals.ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
@@ -320,7 +397,7 @@ app.locals.ensureAuthenticated = function (req, res, next) {
     logger.log('debug', 'user is not authenticated',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
     res.render('account/login', { user: req.user, message: req.flash('error') });
   }
-}
+};
 
 app.locals.ensureAPIAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
@@ -342,15 +419,6 @@ app.locals.requireGroup = function (group) {
         logger.log('debug', 'this request requires authentication',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
       }
       res.render('account/login', { user: req.user, message: req.flash('error') });
-      /*, function (err, html) {
-       if (err)
-       {
-       logger.log('error', 'error rendering jade template', {error: err, requestID: req.id, sessionID: req.sessionID});
-       res.send(500);
-       } else {
-       res.end(html);
-       }
-       });*/
     }
   }
 };
@@ -708,7 +776,7 @@ io.sockets.on('connection', function (socket) {
         socket.leave(data.room);
         pubsubClient.unsubscribe(data.room);
   });
-  
+
   pubsubClient.on("message", function(channel, message) {
     var msgObj = {channel: channel, text: message, uuid:require('uuid').v4()};
     socket.in(channel).emit('popAlert', JSON.stringify(msgObj), function(data) {

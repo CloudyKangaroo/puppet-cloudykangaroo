@@ -34,12 +34,12 @@ config.cookie = {};
 config.log = {};
 config.metrics = {};
 config.ubersmith = {};
-config.ubersmith.warm_cache = false;
+config.ubersmith.warm_cache = true;
 config.log.access_log = './access.log';
 config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.metrics.interval = 15000;
 
-config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
+config.sensu.host = process.env.SENSU_HOST || 'sensu-server.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 
 config.puppetdb.host = process.env.PUPPETDB_HOST || 'puppet-db01.contegix.com';
@@ -51,6 +51,6 @@ config.redis.port = process.env.REDIS_PORT || 6379;
 config.redis.db = process.env.REDIS_DB || 1;
 
 config.http.port = process.env.PORT || 3000;
-config.cookie.secret = 'supersecure';
+config.cookie.secret = 'securit3333!!';
 
 module.exports = config;
