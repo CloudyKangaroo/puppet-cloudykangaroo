@@ -1,7 +1,6 @@
 /**
  * Application Dependencies
  */
-
 if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
@@ -28,18 +27,20 @@ var passport = require('passport');
 var useragent = require('express-useragent');
 
 /*
-  Initialize the Logging Framework
+ Initialize the Logging Framework
  */
 
 // Application Logs
 var ctxlog = require('contegix-logger');
-var logger = ctxlog('main', 'debug', config.log.directory, { level: 'debug'}, {level: 'debug'});
+var logger = ctxlog('main', 'verbose', config.log.directory, { level: 'debug'}, {level: 'debug'});
 var auditLog = ctxlog('audit', 'info', config.log.directory, {level: 'debug'}, {level: 'debug'});
 
 // Access Logs
 var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.access_log, {flags: 'a'});
+
+//require('./nockUps');
 
 /*
   Connect to Redis
@@ -277,10 +278,7 @@ app.use(passport.session());
 /*
    Route requests through the metrics and logging processing
  */
-if (process.env.NODE_ENV == 'production')
-{
-  app.use(rpsMeter);
-}
+app.use(rpsMeter);
 
 /*
   Pass the requests through the routes
@@ -346,7 +344,7 @@ function rpsMeter(req, res, next) {
     // Do the work expected
     res.end = rEnd;
     res.end(chunk, encoding);
-  
+
     // And do the work we want now (logging!)
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
@@ -778,7 +776,7 @@ io.sockets.on('connection', function (socket) {
         socket.leave(data.room);
         pubsubClient.unsubscribe(data.room);
   });
-  
+
   pubsubClient.on("message", function(channel, message) {
     var msgObj = {channel: channel, text: message, uuid:require('uuid').v4()};
     socket.in(channel).emit('popAlert', JSON.stringify(msgObj), function(data) {
