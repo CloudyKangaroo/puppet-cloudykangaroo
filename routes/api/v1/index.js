@@ -773,16 +773,23 @@ module.exports = function (app, config, passport, redisClient) {
         var sensuEvent = JSON.parse(eventJSON);
         var documentation = req.body.documentation;
 
-        var msgBody = "Monitoring Event added to Ticket:\n";
-        msgBody += "Output: \n\n" + sensuEvent.output + "\n\n\n";
+        var msgBody = "Created Ticket from Monitoring Event:\n";
+        msgBody += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
         msgBody += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
         msgBody += "Flapping: " + sensuEvent.flapping + "\n";
         msgBody += "Location: " + sensuEvent.location + "\n";
         msgBody += "Device: " + sensuEvent.dev_desc;
-        msgBody += "\n\n\n";
+        msgBody += "\n\n";
         msgBody += "Additional Documentation: \n";
         msgBody += documentation;
-        msgBody = encodeURI(msgBody);
+        msgBody += "\n\n";
+        msgBody += "Contegix | Technical Support\n";
+        msgBody += "(314) 622-6200 ext. 3\n";
+        msgBody += "https://portal.contegix.com\n";
+        msgBody += "http://status.contegix.com\n";
+        msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
+        msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
+
 
         //var form = 'ticket_id=' + ticketID + '&subject=' + encodeURI(subject) + '&body=' + msgBody + '&visible=' + visible + '&from=' + from + '&time_spent=' + time_spent;
         var postData = {ticket_id: ticketID, subject: subject, body: msgBody, visible: visible, from: from, time_spent: time_spent};
@@ -805,41 +812,52 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/ubersmith/tickets/ticket'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      var subject = req.body.subject;
-      var msgBody = req.body.msgBody;
-      var recipient = req.body.recipient;
-      var author = req.user.username + '@contegix.com';
-      var priority = req.body.priority;
-      var client_id = req.body.clientID;
-      var device_id = req.body.deviceID;
-      var timestamp = Date.now();
-      var sensuEvent = req.body.sensuEvent || '';
+        var subject = req.body.subject;
+        var msgBody = req.body.msgBody;
+        var recipient = req.body.recipient;
+        var author = req.user.username + '@contegix.com';
+        var priority = req.body.priority;
+        var client_id = req.body.clientID;
+        var device_id = req.body.deviceID;
+        var timestamp = Date.now();
+        var sensuEventData = req.body.sensuEvent || '';
 
-      msgBody += "\n\n";
-      msgBody += sensuEvent;
-      msgBody += "\n\n";
-      msgBody += "Contegix | Technical Support\n";
-      msgBody += "(314) 622-6200 ext. 3\n";
-      msgBody += "https://portal.contegix.com\n";
-      msgBody += "http://status.contegix.com\n";
-      msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
-      msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
+        var eventJSON = decodeURI(sensuEventData);
+        var sensuEvent = JSON.parse(eventJSON);
+        var documentation = req.body.documentation;
 
-      var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id, timestamp: timestamp};
+        var msgBody = "Created Ticket from Monitoring Event:\n";
+        msgBody += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
+        msgBody += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
+        msgBody += "Flapping: " + sensuEvent.flapping + "\n";
+        msgBody += "Location: " + sensuEvent.location + "\n";
+        msgBody += "Device: " + sensuEvent.dev_desc;
+        msgBody += "\n\n";
+        msgBody += "Additional Documentation: \n";
+        msgBody += documentation;
+        msgBody += "\n\n";
+        msgBody += "Contegix | Technical Support\n";
+        msgBody += "(314) 622-6200 ext. 3\n";
+        msgBody += "https://portal.contegix.com\n";
+        msgBody += "http://status.contegix.com\n";
+        msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
+        msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
 
-      app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
-        if (err)
-        {
-          if (err.code == 'ETIMEDOUT')
+        var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id, timestamp: timestamp};
+
+        app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
+          if (err)
           {
-            res.send(504);
+            if (err.code == 'ETIMEDOUT')
+            {
+              res.send(504);
+            } else {
+              res.send(500);
+            }
           } else {
-            res.send(500);
+            res.send(JSON.stringify(response));
           }
-        } else {
-          res.send(JSON.stringify(response));
-        }
-      });
+        });
     });
 
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
