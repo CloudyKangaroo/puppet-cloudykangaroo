@@ -282,6 +282,9 @@ function rpsMeter(req, res, next) {
     req.kvLog.isMobile = req.useragent.isMobile;
     req.kvLog.isDesktop = req.useragent.isDesktop;
 
+    var level = req.kvLog._rlLevel;
+    delete req.kvLog._rlLevel;
+
     var entry = {};
     Object.keys(req.kvLog).forEach(function(key) {
       value = req.kvLog[key];
@@ -565,7 +568,7 @@ app.locals.silenceCheck = function (user, client, check, expires, silenceCheckCa
     content: { "timestamp": (Math.round(Date.now() / 1000)), "user": user },
     expire: expires
   };
-  logger.log('info', reqBody);
+  logger.log('silly', reqBody);
   request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
     , function (error, msg, response) {
       logger.log('info', response);
