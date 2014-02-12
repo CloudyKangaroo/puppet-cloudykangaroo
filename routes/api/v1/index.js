@@ -171,7 +171,6 @@ module.exports = function (app, config, passport, redisClient) {
       var hostname = req.params.hostname;
       app.locals.getPuppetDevice(hostname
         , function (err, device) {
-          console.log(device);
           if (err) {
             res.send(500);
           } else {
@@ -415,7 +414,6 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      console.log(req.body);
       app.locals.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires)
         , function (err, response) {
           if (err) {
@@ -771,7 +769,8 @@ module.exports = function (app, config, passport, redisClient) {
         var from = req.user.username + '@contegix.com';
         var time_spent = req.body.time_spent;
 
-        var sensuEvent = JSON.parse(decodeURI(req.body.sensuEvent));
+        var eventJSON = decodeURI(req.body.sensuEvent);
+        var sensuEvent = JSON.parse(eventJSON);
         var documentation = req.body.documentation;
 
         var msgBody = "Monitoring Event added to Ticket:\n";
