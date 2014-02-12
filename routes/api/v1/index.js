@@ -171,6 +171,7 @@ module.exports = function (app, config, passport, redisClient) {
       var hostname = req.params.hostname;
       app.locals.getPuppetDevice(hostname
         , function (err, device) {
+          console.log(device);
           if (err) {
             res.send(500);
           } else {
@@ -187,6 +188,7 @@ module.exports = function (app, config, passport, redisClient) {
       var _ = require('underscore');
       var request = require('request');
       var hostname = req.params.hostname;
+      app.locals.logger.log('debug', 'Requesting data from Puppet', {url: url})
       request({ url: app.get('puppetdb_uri') + '/catalogs/' + req.params.hostname, json: true }
         , function (err, response, body) {
           if (err) {
@@ -204,22 +206,29 @@ module.exports = function (app, config, passport, redisClient) {
       var _ = require('underscore');
       var request = require('request');
       var hostname = req.params.hostname;
-      request({ url: app.get('puppetdb_uri') + '/catalogs/' + req.params.hostname, json: true }
+      var url = app.get('puppetdb_uri') + '/catalogs/' + hostname;
+      app.locals.logger.log('debug', 'Requesting data from Puppet', {url: url});
+      request({ url: url, json: true }
         , function (err, response, body) {
           if (err) {
             res.send(500);
           } else {
-            var catalog = body.data;
-            var resourceList = catalog.resources;
-            var checks = [];
-            _.each(resourceList, function (resource) {
-              if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu_check')
-              {
-                checks.push({title: resource.title, standalone: resource.parameters.standalone, subscribers: resource.parameters.subscribers, handlers: resource.parameters.handlers, interval: resource.parameters.interval, command: resource.parameters.command, parameters: resource.parameters});
-              }
-            });
-            res.type('application/json');
-            res.send(JSON.stringify({ aaData: checks }));
+            if (body.data) {
+              var catalog = body.data;
+              var resourceList = catalog.resources;
+              var checks = [];
+              _.each(resourceList, function (resource) {
+                if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu_check')
+                {
+                  checks.push({title: resource.title, standalone: resource.parameters.standalone, subscribers: resource.parameters.subscribers, handlers: resource.parameters.handlers, interval: resource.parameters.interval, command: resource.parameters.command, parameters: resource.parameters});
+                }
+              });
+              res.type('application/json');
+              res.send(JSON.stringify({ aaData: checks }));
+            } else {
+              res.type('applicaiton/json');
+              res.send(JSON.stringify({ aaData: []}));
+            }
           }
         })
     });
