@@ -40,7 +40,7 @@
     "metrics": "0.1.x",
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
-    "cloudy-ubersmith": "0.2.6",
+    "cloudy-ubersmith": "0.2.7",
     "contegix-logger": "0.1.x",
     "passport-atlassian-crowd": "0.0.x",
     "moment" : "2.3.1",
