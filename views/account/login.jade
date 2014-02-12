@@ -6,14 +6,14 @@ block content
     #message
       if message
           p.text-error #{message}
-      form(action='/account/login',method='post').form-signin
-          h2.form-signin.heading Please sign in
-          input(type="hidden", name='_csrf', value="#{token}")
-          .username
-              label Username
-              input(type='text', name='username').form-control
-          .password
-              label Password
-              input(type='password', name='password').form-control
-          .submit
-              input(type='submit', name='submit').btn.btn-lg.btn-primary.btn-block
+    form(action='/account/login',method='post').form-signin
+        h2.form-signin.heading Please sign in
+        input(type="hidden", name='_csrf', value="#{token}")
+        .username
+            label Username
+            input(type='text', name='username').form-control
+        .password
+            label Password
+            input(type='password', name='password').form-control
+        .submit
+            input(type='submit', name='submit').btn.btn-lg.btn-primary.btn-block
