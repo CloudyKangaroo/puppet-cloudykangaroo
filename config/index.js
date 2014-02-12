@@ -35,6 +35,7 @@ config.log = {};
 config.metrics = {};
 config.ubersmith = {};
 config.ubersmith.warm_cache = true;
+config.mgmtDomain = '.contegix.mgmt';
 config.log.access_log = './access.log';
 config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.metrics.interval = 15000;
