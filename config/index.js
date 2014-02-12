@@ -1,4 +1,4 @@
-var config = {}
+var config = {};
 
 config.navLinks = {
   account: [
@@ -13,7 +13,7 @@ config.navLinks = {
     { label: 'Customers', key: 'clients', path: '/ubersmith/clients' },
     { label: 'Devices', key: 'devices', path: '/ubersmith/devices' },
     { label: 'Tickets', key: 'tickets', path: '/ubersmith/tickets' },
-    { label: 'Monitoring', key: 'monitoring', path: '/monitoring' },
+    { label: 'Monitoring', key: 'monitoring', path: '/monitoring' }
   ],
   monitoring: [
     { label: 'Home', key: 'info', path: '/monitoring' },
@@ -22,9 +22,9 @@ config.navLinks = {
     { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
     { label: 'Checks', key: 'checks', path: '/monitoring/checks' },
     { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
-    { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' },
+    { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' }
   ]
-}
+};
 
 config.sensu = {};
 config.redis = {};
@@ -34,11 +34,11 @@ config.cookie = {};
 config.log = {};
 config.metrics = {};
 config.ubersmith = {};
-config.ubersmith.warm_cache = false;
+config.ubersmith.warm_cache = true;
 config.log.access_log = './access.log';
 config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.metrics.interval = 15000;
-
+config.log.level = 'info';
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 

@@ -21,8 +21,8 @@ var useragent = require('express-useragent');
 
 // Application Logs
 var ctxlog = require('contegix-logger');
-var logger = ctxlog('main', 'debug', config.log.directory, { level: 'debug'}, {level: 'debug'});
-var auditLog = ctxlog('audit', 'info', config.log.directory, {level: 'debug'}, {level: 'debug'});
+var logger = ctxlog('main', config.log.level, config.log.directory, { level: config.log.level}, {level: 'error'});
+var auditLog = ctxlog('audit', config.log.level, config.log.directory, {level: config.log.level}, {level: 'error'});
 
 // Access Logs
 var reqLogger = require('express-request-logger');
@@ -62,7 +62,7 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
-var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: 'error', logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
+var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
 
 /**
@@ -148,7 +148,7 @@ var RedisStore = require('connect-redis')(express);
 app.locals.collection = collection;
 app.locals.rps = rps;
 app.locals.timer = timer;
-
+app.locals.config = config;
 app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.moment = require('moment');
@@ -271,10 +271,8 @@ function rpsMeter(req, res, next) {
     // And do the work we want now (logging!)
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
-
     req.kvLog.originalURL = req.originalURL || req.url;
     req.kvLog.referer = (req.referer)?req.referer:'none';
-
     req.kvLog.remoteAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     req.kvLog.userAgent = req.useragent.source;
     req.kvLog.isBot = req.useragent.isBot;
@@ -283,9 +281,6 @@ function rpsMeter(req, res, next) {
     req.kvLog.Platform = req.useragent.Platform;
     req.kvLog.isMobile = req.useragent.isMobile;
     req.kvLog.isDesktop = req.useragent.isDesktop;
-
-    var level = req.kvLog._rlLevel;
-    delete req.kvLog._rlLevel;
 
     var entry = {};
     Object.keys(req.kvLog).forEach(function(key) {
@@ -296,7 +291,7 @@ function rpsMeter(req, res, next) {
       }
     });
 
-    logger.log(level, 'request analytics', entry);
+    logger.log('data', 'request analytics', entry);
   };
 
   next();
