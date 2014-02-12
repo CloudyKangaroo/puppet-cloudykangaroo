@@ -101,6 +101,17 @@ var displayEventDetails = function(text)
       return v.toString(16);
     });
 
+  var sensuEvent = JSON.parse(decodeURI(text));
+
+  if (sensuEvent.email && sensuEvent.company) {
+    var recipient = '<label for="recipient">Make Sure Recipient is a valid email for: <br/>'+ sensuEvent.company +'</label>' +
+      '<input type="email" class="form-control" id="' + uuid + '-recipient" value="' + sensuEvent.email + '">';
+  } else {
+    var recipient = '<label for="recipient">Make Sure Recipient is a valid email for: <br/>No Company Specified</label>' +
+      '<input type="email" class="form-control" id="' + uuid + '_recipient" value="monitor@contegix.com">';
+  }
+
+
   var html = '<container><div class="row"><div class="col-md-7"><pre>' + prettyPrintOne(decodeURI(text)) + '</pre></div><div class="col-md-4"><div class="row">';
   html +=  '<form role="form" id="' + uuid + '-form">' +
     '<div class="form-group">' +
@@ -111,12 +122,10 @@ var displayEventDetails = function(text)
     '</div></fieldset>' +
     '</div><div class="row"><fieldset><legend>Pass along any relevant documentation: </legend><div class="form-group">' +
     '<textarea class="form-control" type="text" id="documentation" name="documentation" rows="4""></textarea>' +
-    '<label for="exampleInputFile">File input</label>' +
-    '<input type="file" disabled id="exampleInputFile">' +
-    '<p class="help-block">File size limit 10MB.</p>' +
     '</fieldset>' +
     '<input type="hidden" value="' + uuid + '" id="uuid" name="uuid">' +
     '<input type="hidden" value="' + text + '" id="event" name="event">' +
+    recipient +
     '<button type="submit" id="' + uuid + '-submit" class="btn btn-default">Submit Ticket</button>' +
     '</form>' +
     '<script type="text/javascript">$("#escalate-' + uuid + '").click(function() { $("#' + uuid + '-ticketID").attr("disabled", this.checked); }); $( "#' + uuid + '-form" ).submit(handleTicketForm)</script></div></div></div>';
@@ -124,17 +133,36 @@ var displayEventDetails = function(text)
 };
 
 function handleTicketForm(event) {
+  event.preventDefault();
+
   var documentation = event.target[4].value;
   var ticketID = event.target[1].value;
-  var uuid = event.target[6].defaultValue;
-  var sensuEvent = JSON.parse(decodeURI(event.target[7].value));
+  var newTicket = event.target[2].checked;
+  var uuid = event.target[5].defaultValue;
+  var eventJSON =  decodeURI(event.target[6].value);
+  var recipient = event.target[7].value;
 
-  var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, visible: 1, time_spent: 1};
+  try {
+    var sensuEvent = JSON.parse(eventJSON);
+  } catch (e) {
+    console.log('failed to parse event JSON');
+    return false;
+  }
 
   $("#" + uuid + "-submit").attr('disabled','disabled');
 
+  var url = '/api/v1/ubersmith/tickets/';
+
+  if (newTicket) {
+    var data = {subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, recipient: recipient, priority: sensuEvent.status, client_id: sensuEvent.clientid, device_id: sensuEvent.dev};
+    url += 'ticket';
+  } else {
+    var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, visible: 1, time_spent: 1};
+    url += 'ticketid/' + ticketID + '/posts';
+  }
+
   $.ajax({
-    url: '/api/v1/ubersmith/tickets/ticketid/' + ticketID + '/posts',
+    url: url,
     type: 'post',
     dataType: 'json',
     data: data,
@@ -150,7 +178,6 @@ function handleTicketForm(event) {
       }
     }
   });
-
   event.preventDefault();
 }
 
