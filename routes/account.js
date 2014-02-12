@@ -8,11 +8,6 @@ module.exports = function (app, config, passport, redisClient) {
     }
   );
 
-  app.get('/account/login'
-    , function (req, res) {
-      res.render('account/login', { user:req.user, message:req.flash('error'), section: 'logout', navLinks: config.navLinks.account });
-    });
-
   app.get('/account/chat'
     , function (req, res) {
       res.render('account/chat', { user:req.user, section: 'chat', navLinks: config.navLinks.account });
@@ -23,6 +18,10 @@ module.exports = function (app, config, passport, redisClient) {
       res.render('account/chat', { user:req.user, section: 'chat', navLinks: config.navLinks.account });
     });
 
+  app.get('/account/login'
+    , function (req, res) {
+      res.render('account/login', { message:req.flash('error')});
+    });
 
   app.post('/account/login'
     , passport.authenticate('atlassian-crowd'
