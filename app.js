@@ -62,7 +62,7 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
-var ubersmithConfig = {redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
+var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
 
 /**
@@ -129,12 +129,13 @@ var timer = collection.timer('requestTime');
 /*
  Periodically output metrics to the log file
  */
+/*
 setInterval(function() {
   var metricslogger = ctxlog('metrics', 'debug', config.log.directory, {level: 'error'});
   var collectionJSON = collection.toJSON();
   metricslogger.log('data', 'metrics output', { collection: collectionJSON, type: 'metrics'});
 }, config.metrics.interval || 15000);
-
+*/
 
 /**
  * The Start of the Application Logic
@@ -201,7 +202,7 @@ app.use(passport.session());
 /*
    Route requests through the metrics and logging processing
  */
-app.use(rpsMeter);
+app.use(reqWrapper);
 
 /*
   Pass the requests through the routes
@@ -230,7 +231,7 @@ app.use(express.static(path.join(__dirname, 'public')));
  *  middleware so that every request is counted.
  */
 
-function rpsMeter(req, res, next) {
+function reqWrapper(req, res, next) {
 
   // Perform some work at the beginning of every request
 
@@ -258,6 +259,7 @@ function rpsMeter(req, res, next) {
 
   // Save the real end that we will wrap
   // http://stackoverflow.com/questions/8719626/adding-a-hook-to-globally-log-all-node-http-responses-in-node-js-express
+  // MIT License https://github.com/mathrawka/express-request-logger/blob/master/LICENSE
 
   var rEnd = res.end;
 
@@ -465,15 +467,19 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
       async.parallel([
         function (asyncCallback) {
           var request = require('request');
-          request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname, json: true }
+          var url = app.get('puppetdb_uri') + '/nodes/' + hostname;
+          request({ url: url, json: true }
             , function (error, response) {
+              logger.log('debug', 'response from puppet', {body: response.body, url: url});
               asyncCallback(error, response.body);
             });
         },
         function (asyncCallback) {
           var request = require('request');
-          request({ url: app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts', json: true }
+          var url = app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts';
+          request({ url: url, json: true }
             , function (error, response) {
+              logger.log('debug', 'response from puppet', {body: response.body, url: url});
               asyncCallback(error, response.body);
             });
         }
