@@ -7,39 +7,20 @@ var renderButton = function(silenced, silence_stash, client, check) {
 }
 
 var unsilenceCheck = function(oTable, silence_stash) {
-  var api_uri = '/api/v1/sensu/silence/';
-  var call_uri;
   splitstash = silence_stash.split('/');
-  if (splitstash[1] != undefined) {
-    call_uri = api_uri + 'client/' + encodeURI(splitstash[0]) + '/check/' + encodeURI(splitstash[1]);
-  } else {
-    call_uri = api_uri + 'client/' + encodeURI(splitstash[0])
-  };
-  var req = new XMLHttpRequest();
-  req.open('delete', call_uri, false);
-  req.send();
+  var client = splitstash[0];
+  var check = splitstash[1];
+  submitSilenceJSON(client, check, false);
   bootbox.alert({ message: silence_stash+" unsilenced. Click ok to reload the dashboard.", className: "small-bootbox", callback: function(){ location.reload() }})
 }
 
 var silenceCheck = function(oTable, client, check) {
-  bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", className: "small-bootbox", value: 8, callback: function(result) {
+  bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", className: "small-bootbox", value: 8, callback: function(duration) {
     if (result == undefined) {
       return;
-    } else if (result != null && parseInt(result) <= 72) {
-      var api_uri = '/api/v1/sensu/silence/';
-      var call_uri;
-      if (check != 'false') {
-       call_uri = api_uri + 'client/' + encodeURI(client) + '/check/' + encodeURI(check);
-      } else {
-        call_uri = api_uri + 'client/' +  encodeURI(client);
-      }
-      var params = "expires="+result*3600;
-      var req = new XMLHttpRequest();
-      req.open('post', call_uri, false);
-      req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      req.setRequestHeader("Content-length", params.length);
-      req.setRequestHeader("Connection", "close");
-      req.send(params);
+    } else if (result != null && parseInt(duration) <= 72) {
+
+      submitSilenceJSON(client, check, true, duration);
       bootbox.alert({ "message": client+"/"+check+" silenced. Click ok to reload the dashboard.", "className": "small-bootbox", "callback": function(){ location.reload() }})
     } else {
       bootbox.alert({ "message": "Length of time to silence in hours must be an integer <= 72", "className": "small-bootbox" })
@@ -47,7 +28,66 @@ var silenceCheck = function(oTable, client, check) {
   }})
 }
 
+var submitSilenceJSON = function(client, check, silence, duration) {
 
+  if (!client || client == '') {
+    console.log('Invalid Client: ');
+    console.log({client: client, check: check, silence: silence});
+    return false;
+  }
+
+  if (arguments.length <= 1) {
+    check = false;
+  }
+
+  if (arguments.length <= 2) {
+    silence = true;
+  }
+
+  if (arguments.length <= 3) {
+    duration = 4;
+  }
+
+  if (check === 'false') {
+    check = false;
+  }
+
+  var url = '/api/v1/sensu/silence/';
+
+  var data = {expires: duration * 3600};
+
+  if (check) {
+    url += 'client/' + encodeURI(client) + '/check/' + encodeURI(check);
+  } else {
+    url += 'client/' +  encodeURI(client);
+  }
+
+  if (silence) {
+    apiMethod = 'post';
+    verb = 'silence';
+  } else {
+    apiMethod = 'delete';
+    verb = 'unsilence';
+  }
+
+  $.ajax({
+    url: url,
+    type: apiMethod,
+    dataType: 'json',
+    data: data,
+    success: function(data) {
+      var response = JSON.parse(data);
+      if (response.status == true)
+      {
+        bootbox.alert({"message": 'Completed!', "className" : "small-bootbox"});
+        $("#" + uuid + "-submit").removeAttr('disabled')
+      } else {
+        bootbox.alert({"message": 'Failed to ' + verb + ' check: ' + response.error_message, "className" : "small-bootbox"});
+        $("#" + uuid + "-submit").removeAttr('disabled')
+      }
+    }
+  });
+}
 var displayTextAlert = function(text)
 {
   bootbox.alert('<pre class="prettyprint">' + decodeURI(text) + '</pre>');
@@ -87,9 +127,9 @@ function handleTicketForm(event) {
   var documentation = event.target[4].value;
   var ticketID = event.target[1].value;
   var uuid = event.target[6].defaultValue;
-  var sensuEvent = decodeURI(event.target[7].value);
-                  console.log(event);
-  var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: sensuEvent, documentation: documentation, visible: 1, time_spent: 1};
+  var sensuEvent = JSON.parse(decodeURI(event.target[7].value));
+
+  var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, visible: 1, time_spent: 1};
 
   $("#" + uuid + "-submit").attr('disabled','disabled');
 
@@ -103,6 +143,7 @@ function handleTicketForm(event) {
       if (response.status == true)
       {
         bootbox.alert({"message": 'Completed!', "className" : "small-bootbox"});
+        submitSilenceJSON(sensuEvent.client, sensuEvent.check);
       } else {
         bootbox.alert({"message": 'Failed to submit post: ' + response.error_message, "className" : "small-bootbox"});
         $("#" + uuid + "-submit").removeAttr('disabled')
