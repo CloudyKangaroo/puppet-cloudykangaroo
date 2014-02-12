@@ -7,7 +7,8 @@ html
     meta(name='description', content='Sensu/Ubersmith/Puppet Management Interface')
     meta(name='author', content='Contegix LLC')
     title=title
-    script(src='//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js')
+    if IE
+      script(src='//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js')
     include _head_css
     block head
   body
