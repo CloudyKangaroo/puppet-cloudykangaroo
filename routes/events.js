@@ -16,10 +16,11 @@ module.exports = function (app, config, passport, redisClient) {
 
       app.locals.logger.log('debug', 'incoming event', { type: 'event',  source: req.params.source, event: req.params.event, path: req.path })
 
+      res.send(202);
+
       form.parse(req, function(err, fields, files){
         if (err) {
           app.locals.logger.log('error', 'could not process incoming event', { error: err,  source: req.params.source, event: req.params.event, path: req.path });
-          res.send(500);
         }
 	      app.locals.logger.log('debug', 'parsing form', { type: 'event', fields: fields, files: files,  source: req.params.source, event: req.params.event });
       });
@@ -35,7 +36,6 @@ module.exports = function (app, config, passport, redisClient) {
 
       form.on('error', function(err) {
         app.locals.logger.log('error', 'could not process incoming event', { error: err,  source: req.params.source, event: req.params.event, path: req.path });
-        res.send(500);
       });
 
       form.on('aborted', function() {
@@ -70,8 +70,6 @@ module.exports = function (app, config, passport, redisClient) {
         }
 
         app.locals.audit.log('info', req.path, { type: 'audit', source: req.params.source, event: req.params.event, fields: fields, username: username, requestID: req.id, sessionID: req.sessionID })
-        // 202 Accepted
-        res.send(202);
       });
     });
 }
