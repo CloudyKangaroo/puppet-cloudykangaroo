@@ -14,7 +14,14 @@ module.exports = function (app, config, passport, redisClient) {
         {
           res.send(500);
         } else {
-          res.render('tickets/ticket',{ ticket: ticket, user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+          app.locals.ubersmith.getClientByID(ticket.client_id, function (err, client) {
+            if (err)
+            {
+              res.send(500);
+            } else {
+              res.render('tickets/ticket',{ ticket: ticket, client: client, user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+            }
+          });
         }
       });
     });
