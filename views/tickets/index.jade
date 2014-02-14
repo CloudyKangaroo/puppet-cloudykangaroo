@@ -1,85 +1,34 @@
-extends ../layout
+extends ../layout_nologin
 block head
-  include ../datatables_css
 
 block content
-  .container.col-xs-16.col-md-12
+  .container.col-md-12
     .row
-      .page-header
-        h1 Ticket List
-        .alert.alert-warning
-          p This page is still under development.
-
+      .jumbotron
+        h2 Welcome to the Support Center!
+        hr
+        h4 Every support request is assigned a unique ticket number which you can use to track the progress and responses online.
+        h4 For your reference we provide complete archives and history of all your support requests. A valid email address is required to submit a ticket.
+        p: a(href="/tickets/new").btn.btn-primary.btn-large Open a New Ticket &raquo;
     .row
-      .col-xs-16.col-md-12
-        .panel.panel-default
-          .panel-heading
-            .navbar
-              .navbar-header.pull-left
-                p.navbar-brand Ubersmith Tickets
-              .navbar-header.pull-right
-                button(type="button").btn.btn-sm.btn-primary New Ticket
-
-          .panel-body
-            table(id="table_tickets").table.table-condensed
-              thead
-                tr
-                  th ID
-                  th Created
-                  th Priority
-                  th Type
-                  th Company
-                  th Assignee
-                  th Subject
-                  th Touched
-              tbody
+      .col-md-6
+        .row
+          .col-md-2
+            a(href="/tickets/new")
+              img(src="/images/new_ticket_icon.png")
+          .col-md-9
+            h4 Open a New Ticket
+            p To update a previously submitted ticket, please
+              a(href="/tickets/list") &nbsp;go here
+            a(href="/tickets/new").btn.btn-success Open a New Ticket
+      .col-md-6
+        .row
+          .col-md-2
+            a(href="/tickets/list")
+              img(src="/images/check_status_icon.png")
+          .col-md-7
+            h4 Check Your Tickets
+            p Check the status of all your current tickets.
+            a(href="/tickets/list").btn.btn-info View All Tickets
+    .row &nbsp;
 block footer
-  include ../datatables_js
-  script(type='text/javascript').
-    $(document).ready(function() {
-      $('#table_tickets').dataTable( {
-        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-        "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/ubersmith/tickets',
-        "iDisplayLength": 10,
-        "bStateSave": true,
-        "bDeferRender": true,
-        "bSortClasses": false,
-        "aoColumns": [
-          {
-            "mData": "ticket_id",
-            "mRender": function (ticket_id) {
-              return '<a href="/tickets/ticketid/' + ticket_id + '">' + ticket_id + '</a>';
-            }
-          }, {
-            "mData": "timestamp"
-          }, {
-            "mData": "priority"
-          }, {
-            "mData": "type"
-          }, {
-            "mData": "listed_company",
-            "mRender": function (listed_company, type, row) {
-              if (listed_company)
-              {
-                return '<a href="/ubersmith/clients/clientid/' + row['client_id'] + '">' + listed_company.slice(0,15) + '</a>';
-              } else {
-                return '-';
-              }
-            }
-          }, {
-            "mData": "admin_username"
-          }, {
-            "mData": "subject",
-            "mRender": function (subject, type, row) {
-              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
-            }
-          }, {
-            "mData": "activity"
-          }],
-        "aaSorting": [[1,'desc'],[2, 'desc']],
-        "oLanguage": {
-          "sLengthMenu": "_MENU_ records per page"
-        }
-      });
-    });

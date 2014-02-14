@@ -720,10 +720,90 @@ module.exports = function (app, config, passport, redisClient) {
         })
     });
 
+  app.get('/api/v1/ubersmith/contacts/search'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+        var results = [];
+        var query = req.query.q;
+        app.locals.logger.log('debug', 'Search Query', {query: query});
+        results.push({"id":"1", "name":"jonathan.creasy@contegix.com"});
+        results.push({"id":"2", "name":"richard.chatterton@contegix.com"});
+        res.type('application/json');
+        res.send(results);
+    });
+
+  app.get('/api/v1/ubersmith/clients'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getClients(function(err, clientList) {
+        if (err)
+        {
+          //res.send(500);
+        } else {
+          var _ = require('underscore');
+          var clients = _.values(clientList);
+          res.type('application/json');
+          res.send(JSON.stringify({aaData: clients}));
+        }
+      });
+    });
+
   app.get('/api/v1/ubersmith/clients/clientid/:clientid'
     , app.locals.requireGroup('users')
     , function (req, res) {
       app.locals.ubersmith.getClientByID(req.params.clientid, function(err, client) {
+        res.type('application/json');
+        res.send(JSON.stringify(client));
+      });
+    });
+
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/contacts'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getContactsbyClientID(req.params.clientid, function(err, contactList) {
+        var _ = require('underscore');
+        var contacts = _.values(contactList);
+        res.type('application/json');
+        res.send(JSON.stringify(contacts));
+      });
+    });
+
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
+        var _ = require('underscore');
+        var devices = _.values(devicelist);
+        res.type('application/json');
+        res.send(JSON.stringify({ aaData: devices}));
+      });
+    });
+
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
+        if (err)
+        {
+          res.send(500);
+        }  else {
+          var _ = require('underscore');
+          var tickets = _.values(ticketList);
+          for (i=0; i<tickets.length; i++)
+          {
+            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+          }
+          res.type('application/json');
+          res.send(JSON.stringify({aaData: tickets}));
+        }
+      });
+    });
+
+  app.get('/api/v1/ubersmith/api/methods'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getAPIMethods(function(err, client) {
         res.type('application/json');
         res.send(JSON.stringify(client));
       });
@@ -881,54 +961,6 @@ module.exports = function (app, config, passport, redisClient) {
           res.type('application/json');
           res.send(JSON.stringify({ aaData: posts }));
         }
-      });
-    });
-
-  app.get('/api/v1/ubersmith/clients'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-        app.locals.ubersmith.getClients(function(err, clientList) {
-          if (err)
-          {
-            //res.send(500);
-          } else {
-            var _ = require('underscore');
-            var clients = _.values(clientList);
-            res.type('application/json');
-            res.send(JSON.stringify({aaData: clients}));
-          }
-        });
-    });
-
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      app.locals.ubersmith.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
-        if (err)
-        {
-          res.send(500);
-        }  else {
-          var _ = require('underscore');
-          var tickets = _.values(ticketList);
-          for (i=0; i<tickets.length; i++)
-          {
-            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
-          }
-          res.type('application/json');
-          res.send(JSON.stringify({aaData: tickets}));
-        }
-      });
-    });
-
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices'
-    , app.locals.requireGroup('users')
-    , function (req, res) {
-      app.locals.ubersmith.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
-        var _ = require('underscore');
-        var devices = _.values(devicelist);
-        res.type('application/json');
-        res.send(JSON.stringify({ aaData: devices}));
       });
     });
 

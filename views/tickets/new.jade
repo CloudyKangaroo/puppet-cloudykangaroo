@@ -1,0 +1,83 @@
+extends ../layout_nologin
+
+block head
+  link(rel='stylesheet', href='/chosen/chosen.css')
+  link(rel='stylesheet', href='/stylesheets/bootstrap-nav-wizard.css')
+  style(type='text/css').
+    .panel-wizard {
+      height: 29em;
+    }
+    .panel-body.main {
+      height: 90%;
+    }
+
+block content
+  .row
+    .page-header
+      h1 Create a new Ticket
+  .row
+    .col-md-2
+      .panel.panel-default
+        .panel-heading
+          h4 This is content.
+        .panel-body
+          p Yep.
+    .col-md-10
+      .row
+        .col-md-10
+          ul(id="workflowTabs").nav-wizard
+            li: a(href="#client", data-toggle="tab") Customer
+            li: a(href="#contacts", data-toggle="tab") Contacts
+            li: a(href="#device", data-toggle="tab") Device
+            li: a(href="#body", data-toggle="tab") Body
+            li: a(href="#complete", data-toggle="tab") Complete
+          #tab-content.tab-content
+            #client.tab-pane.active
+                .panel.panel-default.panel-wizard
+                  .panel-heading Select the Customer
+                  div.panel-body
+                    .row.panel-body.main
+                      select(id="clientID", data-placeholder="Select a Client").chosen-select
+                        each client in clients
+                          option(value="#{client.clientid}") #{client.company}
+                    .row.panel-body
+                      .btn.btn-default.pull-left.disabled &laquo; Back
+                      .btn.btn-default.pull-right.tabContacts Next &raquo;
+            #contacts.tab-pane
+              .panel.panel-default.panel-wizard
+                .panel-heading Select the Contacts
+                .panel-body
+                  .row.panel-body
+                    select(id="contactIDTOList", style="width:240px; height:1.1em;", data-placeholder="Select TO Contacts", multiple).chosen-select
+                    select(id="contactIDCCList", style="width:240px; height:1.1em;", data-placeholder="Select CC Contacts", multiple).chosen-select
+                  .row.panel-body
+                    .btn.btn-default.pull-left.tabClient &laquo; Back
+                    .btn.btn-default.pull-right.tabDevice Next &raquo;
+            #device.tab-pane
+              .panel.panel-default.panel-wizard
+                .panel-heading Select the Device
+                .panel-body
+                  .row.panel-body
+                    p Device
+                  .row.panel-body
+                    .btn.btn-default.pull-left.tabContacts &laquo; Back
+                    .btn.btn-default.pull-right.tabBody Next &raquo;
+            #body.tab-pane
+              .panel.panel-default.panel-wizard
+                .panel-heading Complete the Ticket
+                .panel-body
+                  .row.panel-body
+                    p Time: <br/> Subject: <br/> Body: <br/>
+                  .row.panel-body
+                    .btn.btn-default.pull-left.tabDevice &laquo; Back
+                    .btn.btn-default.pull-right.tabComplete Next &raquo;
+            #complete.tab-pane
+              .panel.panel-default.panel-wizard.panel-wizard
+                .panel-heading Complete!
+                .panel-body
+                  .row.panel-body
+                    p Yay done!
+
+block footer
+  script(src="/chosen/chosen.jquery.min.js")
+  script(src="/javascripts/newTicketWizard.js")
