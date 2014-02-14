@@ -1,6 +1,7 @@
 extends ../layout_nologin
 
 block head
+  link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css')
   link(rel='stylesheet', href='/chosen/chosen.css')
   link(rel='stylesheet', href='/stylesheets/bootstrap-nav-wizard.css')
   style(type='text/css').
@@ -9,6 +10,20 @@ block head
     }
     .panel-body.main {
       height: 90%;
+    }
+    .label {
+      color: #000000;
+    }
+    .item{
+      cursor:move;
+    }
+
+    .selected{
+      /* background-color:#ff9900; */
+    }
+
+    .list{
+      / * border:1px solid yellow; */
     }
 
 block content
@@ -24,7 +39,7 @@ block content
           p Yep.
     .col-md-10
       .row
-        .col-md-10
+        .col-md-11
           ul(id="workflowTabs").nav-wizard
             li: a(href="#client", data-toggle="tab") Customer
             li: a(href="#contacts", data-toggle="tab") Contacts
@@ -48,8 +63,26 @@ block content
                 .panel-heading Select the Contacts
                 .panel-body
                   .row.panel-body
-                    select(id="contactIDTOList", style="width:240px; height:1.1em;", data-placeholder="Select TO Contacts", multiple).chosen-select
-                    select(id="contactIDCCList", style="width:240px; height:1.1em;", data-placeholder="Select CC Contacts", multiple).chosen-select
+                    .col-md-5
+                      .row
+                        .panel.panel-default
+                          .panel-heading Contacts to address this ticket to:
+                          .panel-body
+                            #toList.droppable.list
+                      .row
+                        .panel.panel-default
+                          .panel-heading Contacts to also send a copy to (cc):
+                          .panel-body
+                            #toList.droppable.list
+                    .col-md-4
+                      #sourceList.droppable.list.well
+                    .col-md-3
+                      ul.list-group
+                        li.list-group-item: span.label.glyphicon.glyphicon-ok-sign &nbsp;Can Submit
+                        li.list-group-item: span.label.glyphicon.glyphicon-eye-open &nbsp;Can View
+                        li.list-group-item: span.label.glyphicon.glyphicon-user &nbsp;Manage Contacts
+                        li.list-group-item: span.label.glyphicon.glyphicon-usd &nbsp;Edit Orders
+                        li.list-group-item: span.label.glyphicon.glyphicon-remove &nbsp;No Access
                   .row.panel-body
                     .btn.btn-default.pull-left.tabClient &laquo; Back
                     .btn.btn-default.pull-right.tabDevice Next &raquo;
@@ -79,5 +112,6 @@ block content
                     p Yay done!
 
 block footer
+  script(src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js")
   script(src="/chosen/chosen.jquery.min.js")
   script(src="/javascripts/newTicketWizard.js")
