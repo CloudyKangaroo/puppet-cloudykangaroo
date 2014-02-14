@@ -3,6 +3,9 @@ block head
   include ../datatables_css
   link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
   link(rel='stylesheet', href='/stylesheets/prettify.css')
+  link(rel='stylesheet', href='/stylesheets/token-input.css')
+  link(rel='stylesheet', href='/stylesheets/token-input-bootstrap.less')
+
 block content
   .container.col-md-12
     .row
@@ -64,7 +67,17 @@ block content
                     span.pull-right  #{client.email}
                   li.list-group-item Phone:
                     span.pull-right  #{client.phone}
-
+    .row
+      .col-md-12
+        .panel.panel-primary
+          .panel-heading
+            .panel-title Post New Item
+          .panel-body
+            form.form-horizontal(role="form")
+              .form-group
+                label.col-sm-2.control-label(for="inputEmail12") Email
+                .col-sm-10
+                  intput.form-control(id="inputEmail12", type="email", placeholder="Enter Email Address")
     .row
       .col-md-12
         .panel.panel-default
@@ -81,7 +94,19 @@ block content
 block footer
   include ../datatables_js
   script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
+  script(src='/javascripts/jquery.tokeninput.js')
+
   script(type='text/javascript').
+    $(document).ready(function () {
+      var tokenConfig = {
+        theme: "bootstrap",
+        preventDuplicates: true,
+        tokenLimit: 5,
+        hintText: null,
+        animateDropdown: false
+      };
+      $("#inputEmail12").tokenInput("/api/v1/ubersmith/contacts/search/", tokenConfig);
+    });
     $(document).ready(function(){
       // Add prettyprint class to pre elements
       $('pre').addClass('prettyprint');
