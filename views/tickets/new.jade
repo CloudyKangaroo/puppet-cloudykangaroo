@@ -34,9 +34,11 @@ block content
     .col-md-2
       .panel.panel-default
         .panel-heading
-          h4 This is content.
+          h4 Ticket Information
         .panel-body
-          p Yep.
+          #clientIDDisplay
+          #contactListDisplay
+          #deviceIDDisplay
     .col-md-10
       .row
         .col-md-11
@@ -81,8 +83,9 @@ block content
                         li.list-group-item: span.label.glyphicon.glyphicon-ok-sign &nbsp;Can Submit
                         li.list-group-item: span.label.glyphicon.glyphicon-eye-open &nbsp;Can View
                         li.list-group-item: span.label.glyphicon.glyphicon-user &nbsp;Manage Contacts
-                        li.list-group-item: span.label.glyphicon.glyphicon-usd &nbsp;Edit Orders
-                        li.list-group-item: span.label.glyphicon.glyphicon-remove &nbsp;No Access
+                        li.list-group-item: span.label.glyphicon.glyphicon-usd &nbsp;Billing Access
+                        li.list-group-item: span.label.glyphicon.glyphicon-star-empty &nbsp;DC Access
+                        li.list-group-item: span.label.glyphicon.glyphicon-exclamation-sign &nbsp;No Access
                   .row.panel-body
                     .btn.btn-default.pull-left.tabClient &laquo; Back
                     .btn.btn-default.pull-right.tabDevice Next &raquo;
@@ -91,7 +94,7 @@ block content
                 .panel-heading Select the Device
                 .panel-body
                   .row.panel-body
-                    p Device
+                    select(id="deviceID", data-placeholder="Select a Device").chosen-select
                   .row.panel-body
                     .btn.btn-default.pull-left.tabContacts &laquo; Back
                     .btn.btn-default.pull-right.tabBody Next &raquo;

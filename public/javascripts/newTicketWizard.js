@@ -10,13 +10,11 @@ var buildAccessIcons = function(access) {
     } else if (access['view_tickets'] && access['view_tickets'] == 'edit') {
       access_html += '<span class="glyphicon glyphicon-eye-open pull-right"></span>';
     } else {
-      access_html += '<span class="glyphicon glyphicon-remove pull-right"></span>';
+      access_html += '<span class="glyphicon glyphicon-exclamation-sign pull-right"></span>';
     }
 
     if (access['view_orders'] && access['view_orders'] == 'edit') {
       access_html += '<span class="glyphicon glyphicon-usd pull-right"></span>';
-    } else if (access['view_orders']) {
-      access_html += '<span class="glyphicon glyphicon-eye-close pull-right"></span>';
     }
 
     if(access['manage_contacts'] && access['manage_contacts'] == 'edit') {
@@ -26,8 +24,7 @@ var buildAccessIcons = function(access) {
   }
   return access_html;
 }
-
-var populateContactLists = function () {
+var populateContactLists = function (clientID) {
   /*
 
    submit_new_ticket: "edit"    inbox_plus
@@ -39,7 +36,6 @@ var populateContactLists = function () {
    view_quotes: "edit",
    */
 
-  var clientID = $('#clientID').val();
   $('#toList').html('');
   $('#ccList').html('');
   $('#sourceList').html('');
@@ -55,10 +51,33 @@ var populateContactLists = function () {
         access_html = buildAccessIcons([]);
       }
 
-      options += '<div class="item draggable" id="' + contact['contact_id'] + '">' + contact['real_name'] + ' &nbsp;' + access_html + '</div>';
+      if (contact.real_name == 'Amir Keric' || contact.real_name == 'Amir West')
+      {
+        contact.real_name = 'Dr. BadAss';
+        access_html += '<span class="glyphicon glyphicon-star-empty pull-right"></span>';
+      }
+
+      if (contact.dc_access_role && contact.dc_access_role != 'N/A') {
+        access_html += '<span class="glyphicon glyphicon-star-empty pull-right"></span>';
+      }
+
+      options += '<div class="item draggable" id="contact_' + contact['contact_id'] + '">' + contact['real_name'] + '&nbsp;' +access_html + '</span></div>';
     }
     $('#sourceList').html(options);
     prepareDroppableLists();
+  });
+}
+
+var populateDeviceList = function (clientID) {
+  $('#deviceID').html('');
+  $.getJSON('/api/v1/ubersmith/clients/clientid/' + clientID + '/devices', function(data){
+    var options = '';
+    var aaData = data.aaData;
+    for (var x = 0; x < aaData.length; x++) {
+      var device = aaData[x];
+      options += '<option value="' + device.dev + '">' + device.dev_desc + '</option>';
+    }
+    $('#deviceID').html(options);
   });
 }
 
@@ -124,12 +143,26 @@ $(document).ready(function() {
 
   $('div.tabDevice').click(function (e) {
     e.preventDefault();
+    if ($('#toList').html() == '') {
+      alert('You must select a contact by dragging one from the grey box.');
+      $('#toList').addClass('bg-warning')
+      $('#sourceList').addClass('bg-primary')
+      return false;
+    } else {
+      $('#toList').removeClass('bg-warning');
+      $('#sourceList').removeClass('bg-primary')
+    }
     $('#workflowTabs a[href="#device"]').tab('show')
   });
 
   $('div.tabContacts').click(function (e) {
     e.preventDefault();
-    populateContactLists();
+    var clientID = $('#clientID').val();
+    var clientName = $('#clientID option:selected').text();
+    var display_html =  clientID + ' - ' + clientName;
+    $('#deviceIDDisplay').html(display_html);
+    populateContactLists(clientID);
+    populateDeviceList(clientID);
     $('#workflowTabs a[href="#contacts"]').tab('show')
   });
 
