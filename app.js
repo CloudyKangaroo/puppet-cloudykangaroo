@@ -12,7 +12,6 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var flash = require('connect-flash');
-var passport = require('passport');
 var useragent = require('express-useragent');
 
 /*
@@ -64,59 +63,6 @@ redisClient.on("connect"
  */
 var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
-
-/**
- * Authentication System
- */
-
-var users = [];
-
-passport.serializeUser(function(user, done) {
-  var userId = RegExp('[^/]*$').exec(user.id)||[,null][1];
-  redisClient.set("user:"+userId, JSON.stringify(user));
-  done(null, userId);
-});
-
-passport.deserializeUser(function(id, done) {
-  redisClient.get("user:"+id, function(err, data) {
-   try {
-    var parsedJSON = JSON.parse(data);
-   }
-   catch (e) {
-       app.locals.logger.log('error', 'uncaught exception');
-   }
-    var user = parsedJSON;
-    done(null, user);
-  });
-});
-
-// passport-attlassian-crowd from : https://bitbucket.org/knecht_andreas/passport-atlassian-crowd
-// MIT License
-
-var AtlassianCrowdStrategy = require('passport-atlassian-crowd').Strategy;
-
-passport.use(new AtlassianCrowdStrategy({
-    crowdServer: CrowdAuth['server'],
-    crowdApplication: CrowdAuth['application'],
-    crowdApplicationPassword: CrowdAuth['password'],
-    retrieveGroupMemberships: true
-  },
-  function (userprofile, done) {
-    // asynchronous verification, for effect...
-    process.nextTick(function () {
-      var _ = require('underscore');
-      var exists = _.any(users, function (user) {
-        return user.id == userprofile.id;
-      });
-
-      if (!exists) {
-        users.push(userprofile);
-      }
-
-      return done(null, userprofile);
-    });
-  }
-));
 
 /*
 Metrics
@@ -180,7 +126,6 @@ app.use(express.methodOverride());
 
 app.use(require('connect-requestid'));
 app.use(useragent.express());
-app.use(flash());
 
 /*
  Initialize the session and prepare user authentication
@@ -194,9 +139,10 @@ app.use(express.session({
   }),
   secret: config.cookie.secret
 }));
-
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(flash());
+var authenticator = require('./lib/auth')(app, config);
+app.use(authenticator.passport.initialize());
+app.use(authenticator.passport.session());
 //app.use(express.csrf())
 
 /*
@@ -313,47 +259,6 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 })
 
-app.locals.ensureAuthenticated = function (req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  } else {
-    logger.log('debug', 'user is not authenticated',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
-    res.render('account/login', { user: req.user, message: req.flash('error') });
-  }
-}
-
-app.locals.ensureAPIAuthenticated = function (req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  } else {
-    logger.log('debug', 'API client is not authenticated',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
-    res.send(403);
-  }
-}
-
-app.locals.requireGroup = function (group) {
-  return function (req, res, next) {
-    if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
-      next();
-    } else {
-      if (req.user) {
-        logger.log('debug', req.user + ' is not a member of ' + group,  { username: req.user.username, requestID: req.id, sessionID: req.sessionID });
-      } else {
-        logger.log('debug', 'this request requires authentication',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
-      }
-      res.render('account/login', { user: req.user, message: req.flash('error') });
-      /*, function (err, html) {
-       if (err)
-       {
-       logger.log('error', 'error rendering jade template', {error: err, requestID: req.id, sessionID: req.sessionID});
-       res.send(500);
-       } else {
-       res.end(html);
-       }
-       });*/
-    }
-  }
-};
 
 app.locals.getEventClass = function (eventStatus) {
   require('enum').register();
@@ -656,6 +561,7 @@ app.locals.getSensuDevice = function(hostname, getDevCallback) {
     }
   });
 }
+
 app.locals.dumpError = function (err, loggerObj)
 {
   if (typeof err === 'object') {
@@ -683,43 +589,9 @@ app.locals.parseRedisSet = function (redisSet)
   return retItems;
 }
 
-require("./routes")(app, config, passport, redisClient);
-
+require("./routes")(app, config, authenticator, redisClient);
 var server = require('http').createServer(app);
-var io = require('socket.io').listen(server,{ log: false });
-
-io.sockets.on('connection', function (socket) {
-  var pubsubClient = redis.createClient(config.redis.port, config.redis.host);
-  var remoteIP = '';
-
-  //remoteIP = client.handshake.headers['x-forwarded-for'] || client.handshake.address.address;
-
-  pubsubClient.on("connect"
-    , function () {
-      redisClient.select(config.redis.pubsubdb, function (err, reply) {
-        logger.log('debug', 'pubsubClient Connected to db ' + config.redis.pubsubdb);
-      });
-    });
-
-  socket.on('subscribe'
-    , function(data) {
-        socket.join(data.room);
-        pubsubClient.subscribe(data.room);
-  });
-
-  socket.on('unsubscribe'
-    , function(data) {
-        socket.leave(data.room);
-        pubsubClient.unsubscribe(data.room);
-  });
-  
-  pubsubClient.on("message", function(channel, message) {
-    var msgObj = {channel: channel, text: message, uuid:require('uuid').v4()};
-    socket.in(channel).emit('popAlert', JSON.stringify(msgObj), function(data) {
-     // logger.log('debug', 'handled message', {uuid: data});
-    });
-  });
-});
+var socketsIO = require('./lib/sockets.io')(app, config, server);
 
 if (!module.parent) {
   server.listen(app.get('port'), function () {
@@ -727,6 +599,5 @@ if (!module.parent) {
     logger.log('silly', 'Route Listing', {routes: app.routes});
   });
 };
-
 
 module.exports = app;

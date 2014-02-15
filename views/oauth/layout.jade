@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='description', content='')
+    meta(name='author', content='')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootswatch/3.0.3/yeti/bootstrap.min.css')
+    link(rel='stylesheet', href='/bootstrap/css/ionicons.min.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')
+    if IE
+      script(src='//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js')
+    block head
+  body
+    .container
+      #content.container
+        .row
+          .col-md-14
+            block content
+    script(src='//code.jquery.com/jquery-1.11.0.min.js')
+    script(src='//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js')
+    block footer
