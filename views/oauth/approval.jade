@@ -1,0 +1,17 @@
+extends layout
+block head
+  link(rel='stylesheet', href='/stylesheets/login.css')
+block content
+  #container
+    #message
+      if message
+        p.text-error #{message}
+    .panel.panel-default
+      .panel-heading #{client.name} is requesting access to your account.
+      .panel-body
+        form(role="form", action="/oauth2/authorize/decision", method="post")
+          .form-group
+            input(type="hidden", name="transaction_id", value="#{transactionID}")
+            .label(for="allow") Do you approve?
+            buttom(id="allow", type="submit").btn.btn-default Allow
+            buttom(id="deny", type="submit", name="cancel").btn.btn-default Allow

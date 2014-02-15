@@ -1,4 +1,7 @@
-module.exports = function (app, config, passport, redisClient) {
+module.exports = function (app, config, authenticator, redisClient) {
+  var passport = authenticator.passport;
+
+  require('./auth')(app, config, authenticator, redisClient);
   require('./ubersmith')(app, config, passport, redisClient);
   require('./monitoring')(app, config, passport, redisClient);
   require('./account')(app, config, passport, redisClient);
