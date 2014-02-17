@@ -17,5 +17,4 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       res.render('account/chat', { user:req.user, section: 'chat', navLinks: config.navLinks.account });
     });
-
 }
