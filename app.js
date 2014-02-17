@@ -98,6 +98,7 @@ app.locals.timer = timer;
 app.locals.config = config;
 app.locals.logger = logger;
 app.locals.audit = auditLog;
+app.locals.redisClient = redisClient;
 app.locals.moment = require('moment');
 app.locals.ubersmith = ubersmith;
 app.locals.title = 'Cloudy Kangaroo';
