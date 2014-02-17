@@ -27,6 +27,7 @@
   "dependencies": {
     "express": "3.4.x",
     "redis": "0.9.x",
+    "nock": "0.27.x",
     "connect-redis": "1.4.x",
     "async": "0.2.x",
     "colors": "0.6.x",
@@ -49,6 +50,7 @@
     "passport-http-bearer": "0.2.x",
     "passport-oauth2-client-password": "0.1.x",
     "passport-atlassian-crowd": "0.0.x",
+    "passport-local": "0.2.*",
     "moment" : "2.3.1",
     "formidable": "1.0.x",
     "enum" : "0.2.x",

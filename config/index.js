@@ -52,6 +52,6 @@ config.redis.port = process.env.REDIS_PORT || 6379;
 config.redis.db = process.env.REDIS_DB || 1;
 
 config.http.port = process.env.PORT || 3000;
-config.cookie.secret = 'supersecure';
+config.cookie.secret = 'securit3333!!';
 
 module.exports = config;

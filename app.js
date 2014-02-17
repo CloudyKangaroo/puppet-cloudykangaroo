@@ -1,9 +1,20 @@
 /**
  * Application Dependencies
  */
+if (process.env.NODE_ENV == 'development')
+{
+  CrowdAuth = new Array();
+  CrowdAuth['server'] = '';
+  CrowdAuth['application'] = '';
+  CrowdAuth['password'] = '';
+  UberAuth = new Array();
+  UberAuth['username'] = '';
+  UberAuth['password'] = '';
+  UberAuth['url'] = ''
+} else {
+  require('./config/system-credentials.js');
+}
 
-// Site Specific Requirements
-require('./config/system-credentials.js');
 var config = require('./config');
 
 // Generic Requirements
@@ -15,7 +26,7 @@ var flash = require('connect-flash');
 var useragent = require('express-useragent');
 
 /*
-  Initialize the Logging Framework
+ Initialize the Logging Framework
  */
 
 // Application Logs
@@ -61,6 +72,7 @@ redisClient.on("connect"
 /*
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
+
 var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
 var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
 
@@ -124,7 +136,6 @@ app.use(express.favicon());
 app.use(express.json({strict: false}));
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-
 app.use(require('connect-requestid'));
 app.use(useragent.express());
 
@@ -216,7 +227,7 @@ function reqWrapper(req, res, next) {
     // Do the work expected
     res.end = rEnd;
     res.end(chunk, encoding);
-  
+
     // And do the work we want now (logging!)
     req.kvLog.status = res.statusCode;
     req.kvLog.response_time = (new Date() - req._rlStartTime);
@@ -258,8 +269,7 @@ function reqWrapper(req, res, next) {
  */
 app.configure('development', function(){
   app.use(express.errorHandler());
-})
-
+});
 
 app.locals.getEventClass = function (eventStatus) {
   require('enum').register();
