@@ -15,7 +15,7 @@ module.exports = function (app, config, authenticator, redisClient) {
 
   // TODO: Deprecate this and "ensureAuthenticated" to move to connect-ensure-login
   app.post('/account/login'
-    , authenticator.passport.authenticate('atlassian-crowd', { successReturnToOrRedirect: '/', failureRedirect:'/account', failureFlash:"Invalid username or password."})
+    , authenticator.passport.authenticate(authenticator.authenticationStrategy, { successReturnToOrRedirect: '/', failureRedirect:'/account', failureFlash:"Invalid username or password."})
     , function (req, res) {
       app.locals.app.locals.logger.log('debug', 'User Login:' + req.user.username, { username: req.user.username, requestID: req.id, sessionID: req.sessionID });
       backURL=req.header('Referer') || '/account';
