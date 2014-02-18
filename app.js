@@ -17,6 +17,12 @@ if (process.env.NODE_ENV == 'development')
 
 var config = require('./config');
 
+if (process.env.NODE_ENV != 'development')
+{
+  config.log.level = 'error';
+  config.log.screen = 'hide';
+}
+
 // Generic Requirements
 var redis = require('redis');
 var express = require('express');
@@ -31,8 +37,8 @@ var useragent = require('express-useragent');
 
 // Application Logs
 var ctxlog = require('contegix-logger');
-var logger = ctxlog('main', config.log.level, config.log.directory, { level: config.log.level}, {level: 'error'});
-var auditLog = ctxlog('audit', config.log.level, config.log.directory, {level: config.log.level}, {level: 'error'});
+var logger = ctxlog('main', config.log.level, config.log.directory, { level: config.log.screen}, {level: config.log.level});
+var auditLog = ctxlog('audit', config.log.level, config.log.directory, {level: config.log.screen}, {level: config.log.level});
 
 // Access Logs
 var reqLogger = require('express-request-logger');
