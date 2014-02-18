@@ -11,6 +11,7 @@ if (process.env.NODE_ENV == 'development')
   UberAuth['username'] = '';
   UberAuth['password'] = '';
   UberAuth['url'] = ''
+  UberAuth['host'] = ''
 } else {
   require('./config/system-credentials.js');
 }
@@ -79,8 +80,12 @@ redisClient.on("connect"
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
 
-var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
-var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+try { 
+  var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
+  var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+} catch (e) {
+  logger.log('error', 'Could not initialize Ubersmith', { error: e.message });
+}
 
 /*
 Metrics
