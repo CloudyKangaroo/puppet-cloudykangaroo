@@ -1,7 +1,7 @@
 {
   "name": "cloudy-kangaroo",
   "description": "Service Provider Management w/Sensu, Puppet and Ubersmith",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "homepage": "http://contegix.github.io/cloudykangaroo",
   "author": {
@@ -45,12 +45,11 @@
     "contegix-logger": "0.1.x",
     "oauth2orize": "0.x.x",
     "passport": "0.1.x",
-    "passport-local": "0.1.x",
+    "passport-local": "0.2.x",
     "passport-http": "0.2.x",
     "passport-http-bearer": "0.2.x",
     "passport-oauth2-client-password": "0.1.x",
     "passport-atlassian-crowd": "0.0.x",
-    "passport-local": "0.2.*",
     "moment" : "2.3.1",
     "formidable": "1.0.x",
     "enum" : "0.2.x",
