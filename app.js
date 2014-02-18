@@ -397,7 +397,7 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
           var url = app.get('puppetdb_uri') + '/nodes/' + hostname;
           request({ url: url, json: true }
             , function (error, response) {
-              logger.log('debug', 'response from puppet', {body: response.body, url: url});
+              logger.log('verbose', 'response from puppet', {body: response.body, url: url});
               asyncCallback(error, response.body);
             });
         },
@@ -406,7 +406,7 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
           var url = app.get('puppetdb_uri') + '/nodes/' + hostname + '/facts';
           request({ url: url, json: true }
             , function (error, response) {
-              logger.log('debug', 'response from puppet', {body: response.body, url: url});
+              logger.log('verbose', 'response from puppet', {body: response.body, url: url});
               asyncCallback(error, response.body);
             });
         }
