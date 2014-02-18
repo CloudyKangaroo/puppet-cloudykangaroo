@@ -18,7 +18,7 @@ var silenceCheck = function(oTable, client, check) {
   bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", className: "small-bootbox", value: 8, callback: function(duration) {
     if (duration == undefined) {
       return;
-    } else if (duration != null && parseInt(duration) <= 72) {
+    } else if (duration != null && parseInt(duration) <= 72 && parseInt(duration) >= 1) {
 
       submitSilenceJSON(client, check, true, duration);
       bootbox.alert({ "message": client+"/"+check+" silenced. Click ok to reload the dashboard.", "className": "small-bootbox", "callback": function(){ location.reload() }})
