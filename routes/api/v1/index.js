@@ -187,8 +187,9 @@ module.exports = function (app, config, passport, redisClient) {
       var _ = require('underscore');
       var request = require('request');
       var hostname = req.params.hostname;
+      var url = app.get('puppetdb_uri') + '/catalogs/' + hostname;
       app.locals.logger.log('debug', 'Requesting data from Puppet', {url: url})
-      request({ url: app.get('puppetdb_uri') + '/catalogs/' + req.params.hostname, json: true }
+      request({ url: url, json: true }
         , function (err, response, body) {
           if (err) {
             res.send(500);
@@ -217,7 +218,7 @@ module.exports = function (app, config, passport, redisClient) {
               var resourceList = catalog.resources;
               var checks = [];
               _.each(resourceList, function (resource) {
-                if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu_check')
+                if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu::Check')
                 {
                   checks.push({title: resource.title, standalone: resource.parameters.standalone, subscribers: resource.parameters.subscribers, handlers: resource.parameters.handlers, interval: resource.parameters.interval, command: resource.parameters.command, parameters: resource.parameters});
                 }
@@ -225,8 +226,11 @@ module.exports = function (app, config, passport, redisClient) {
               res.type('application/json');
               res.send(JSON.stringify({ aaData: checks }));
             } else {
-              res.type('applicaiton/json');
-              res.send(JSON.stringify({ aaData: []}));
+              if (body.error && body.error == 'Could not find catalog for ' + hostname) {
+                res.send(404);
+              } else {
+                res.send(500);
+              }
             }
           }
         })
