@@ -130,6 +130,17 @@ var prepareDroppableLists = function(){
   });
 };
 
+function getContactsFromList(listElementSelector) {
+  var contactListElements = $(listElementSelector).children('div');
+  var contactList = [];
+  for(x=0;x<contactListElements.length;x++)
+  {
+    var contactEntry = contactListElements[x];
+    var contact = {id: contactEntry.id.replace('contact_', ''), name: contactEntry.innerText};
+    contactList.push(contact);
+  }
+  return contactList;
+}
 $(document).ready(function() {
   $('div.tabComplete').click(function (e) {
     e.preventDefault();
@@ -152,6 +163,19 @@ $(document).ready(function() {
       $('#toList').removeClass('bg-warning');
       $('#sourceList').removeClass('bg-primary')
     }
+    var toContacts = getContactsFromList('#toList');
+    var ccContacts = getContactsFromList('#ccList');
+
+    var display_html = '<ul>';
+    for (i=0; i<toContacts.length;i++) {
+      display_html += '<li>to: ' + toContacts[i].id + ' - ' + toContacts[i].name + '</li>';
+    }
+    for (i=0; i<ccContacts.length;i++) {
+      display_html += '<li>cc: ' + ccContacts[i].id + ' - ' + ccContacts[i].name + '</li>';
+    }
+    display_html += '</ul>';
+    $('#contactListDisplay').html(display_html);
+
     $('#workflowTabs a[href="#device"]').tab('show')
   });
 
@@ -160,7 +184,7 @@ $(document).ready(function() {
     var clientID = $('#clientID').val();
     var clientName = $('#clientID option:selected').text();
     var display_html =  clientID + ' - ' + clientName;
-    $('#deviceIDDisplay').html(display_html);
+    $('#clientIDDisplay').html(display_html);
     populateContactLists(clientID);
     populateDeviceList(clientID);
     $('#workflowTabs a[href="#contacts"]').tab('show')
