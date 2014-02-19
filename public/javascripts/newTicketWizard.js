@@ -61,7 +61,19 @@ var populateContactLists = function (clientID) {
         access_html += '<span class="glyphicon glyphicon-star-empty pull-right"></span>';
       }
 
-      options += '<div class="item draggable" id="contact_' + contact['contact_id'] + '">' + contact['real_name'] + '&nbsp;' +access_html + '</span></div>';
+      var title = contact['real_name'] + ' <' +  contact['email'] + '>';
+
+      /*if (contact.dc_access_role) {
+        title += "<br/>DC Access:" + contact.dc_access_role;
+      }
+      if (contact.billing_role) {
+        title += "<br/>Billing Access:" + contact.billing_role;
+      }
+      if (contact.sales_role) {
+        title += "<br/>Sales Access:" + contact.sales_role;
+      }*/
+
+      options += '<div class="item draggable" id="contact_' + contact['contact_id'] + '"><a href="#" data-toggle="tooltip" data-placement="right" title="' + title + '">' + contact['real_name'] + '</a>&nbsp;' +access_html + '</div>';
     }
     $('#sourceList').html(options);
     prepareDroppableLists();
@@ -82,6 +94,10 @@ var populateDeviceList = function (clientID) {
 }
 
 var prepareDroppableLists = function(){
+  $('a').tooltip({
+    'selector': '',
+    'placement': 'right'
+  });
   $(".droppable").droppable({
     drop: function(event, ui) {
       var $list = $(this);
