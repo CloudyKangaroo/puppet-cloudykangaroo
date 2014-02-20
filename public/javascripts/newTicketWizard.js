@@ -158,16 +158,23 @@ function getContactsFromList(listElementSelector) {
   return contactList;
 }
 $(document).ready(function() {
-  $('div.tabComplete').click(function (e) {
-    e.preventDefault();
-    $('#workflowTabs a[href="#complete"]').tab('show')
-  });
 
-  $('div.tabBody').click(function (e) {
+  $('div.tabClient').click(function (e) {
     e.preventDefault();
-    $('#workflowTabs a[href="#body"]').tab('show')
+    $('#workflowTabs a[href="#client"]').tab('show')
   });
-
+  // The transition from Client to Contacts
+  $('div.tabContacts').click(function (e) {
+    e.preventDefault();
+    var clientID = $('#clientID').val();
+    var clientName = $('#clientID option:selected').text();
+    var display_html =  clientID + ' - ' + clientName;
+    $('#clientIDDisplay').html(display_html);
+    populateContactLists(clientID);
+    populateDeviceList(clientID);
+    $('#workflowTabs a[href="#contacts"]').tab('show')
+  });
+  // The transition from Contacts to Device
   $('div.tabDevice').click(function (e) {
     e.preventDefault();
     if ($('#toList').html() == '') {
@@ -194,24 +201,23 @@ $(document).ready(function() {
 
     $('#workflowTabs a[href="#device"]').tab('show')
   });
-
-  $('div.tabContacts').click(function (e) {
+  // The transition from Device to Body
+  $('div.tabBody').click(function (e) {
     e.preventDefault();
-    var clientID = $('#clientID').val();
-    var clientName = $('#clientID option:selected').text();
-    var display_html =  clientID + ' - ' + clientName;
-    $('#clientIDDisplay').html(display_html);
-    populateContactLists(clientID);
-    populateDeviceList(clientID);
-    $('#workflowTabs a[href="#contacts"]').tab('show')
+    var deviceID = $('#deviceID').val();
+    var deviceName = $('#deviceID option:selected').text();
+    var display_html =  deviceID + ' - ' + deviceName;
+    $('#deviceIDDisplay').html(display_html);
+    $('#workflowTabs a[href="#body"]').tab('show')
   });
-
-  $('div.tabClient').click(function (e) {
+  // The transition from Body to Complete
+  $('div.tabComplete').click(function (e) {
     e.preventDefault();
-    $('#workflowTabs a[href="#client"]').tab('show')
+    $('#workflowTabs a[href="#complete"]').tab('show')
   });
-
+  // Show the tabs
   $('#workflowTabs a:first').tab('show');
+
   $('#client a').click(function (e) {
     e.preventDefault()
     $(this).tab('show')
