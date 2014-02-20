@@ -1,7 +1,7 @@
 /**
  * Application Dependencies
  */
-if (process.env.NODE_ENV == 'development')
+/*if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
   CrowdAuth['server'] = '';
@@ -12,9 +12,9 @@ if (process.env.NODE_ENV == 'development')
   UberAuth['password'] = '';
   UberAuth['url'] = ''
   UberAuth['host'] = ''
-} else {
+} else {*/
   require('./config/system-credentials.js');
-}
+//}
 
 var config = require('./config');
 
