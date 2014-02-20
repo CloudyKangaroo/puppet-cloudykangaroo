@@ -925,7 +925,6 @@ module.exports = function (app, config, passport, redisClient) {
         var priority = req.body.priority;
         var client_id = req.body.clientID;
         var device_id = req.body.deviceID;
-        var timestamp = Date.now();
         var sensuEventData = req.body.sensuEvent || '';
 
         var eventJSON = decodeURI(sensuEventData);
@@ -949,7 +948,7 @@ module.exports = function (app, config, passport, redisClient) {
         msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
         msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
 
-        var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id, timestamp: timestamp};
+        var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id};
 
         app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
           if (err)
