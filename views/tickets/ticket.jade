@@ -1,14 +1,85 @@
 extends ../layout
 block head
   include ../datatables_css
+  link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
+  link(rel='stylesheet', href='/stylesheets/prettify.css')
+  link(rel='stylesheet', href='/stylesheets/token-input.css')
+  link(rel='stylesheet', href='/stylesheets/token-input-bootstrap.less')
 
 block content
-  .container.col-xs-16.col-md-12
+  .container.col-md-12
     .row
       .page-header
         h1 Ticket #{ticket.ticket_id}
     .row
-      .col-xs-16.col-md-12
+      .col-md-12
+        #rawData.panel-group
+        .panel.panel-default
+          .panel-heading
+            .panel-title
+              a(data-toggle="collapse" data-parent="#rawData" href="#rawTicket") View Raw Ticket
+          #rawTicket.panel-collapse.collapse
+            pre #{JSON.stringify(ticket, undefined, 2)}
+
+    .row
+      .col-md-12
+        .panel.panel-default
+          .panel-heading Account Information
+          .panel-body
+            p Client ID:
+              span.pull-right #{clientid}
+            p Company:
+              span.label.label-success.pull-right #{client.company}
+            p Address:
+              span.pull-right
+                address
+                  p #{client.address} #{client.city}, #{client.state}. #{client.zip}
+            p Created:
+              span.pull-right #{getFormattedTimestamp(client.created)}
+            p Contact Information:
+              ul.list-group
+                li.list-group-item Name:
+                  span.pull-right #{client.first} #{client.last}
+                li.list-group-item Email:
+                  span.pull-right  #{client.email}
+                li.list-group-item Phone:
+                  span.pull-right  #{client.phone}
+      .col-md-12
+        .panel.panel-primary
+          .panel-heading
+            .panel-title Ticket Details
+          .panel-body
+            p Client ID:
+              span.pull-right #{clientid}
+              p Company:
+                span.label.label-success.pull-right #{client.company}
+              p Address:
+                span.pull-right
+                  address
+                    p #{client.address} #{client.city}, #{client.state}. #{client.zip}
+              p Created:
+                span.pull-right #{getFormattedTimestamp(client.created)}
+              p Contact Information:
+                ul.list-group
+                  li.list-group-item Name:
+                    span.pull-right #{client.first} #{client.last}
+                  li.list-group-item Email:
+                    span.pull-right  #{client.email}
+                  li.list-group-item Phone:
+                    span.pull-right  #{client.phone}
+    .row
+      .col-md-12
+        .panel.panel-primary
+          .panel-heading
+            .panel-title Post New Item
+          .panel-body
+            form.form-horizontal(role="form")
+              .form-group
+                label.col-sm-2.control-label(for="inputEmail12") Email
+                .col-sm-10
+                  intput.form-control(id="inputEmail12", type="email", placeholder="Enter Email Address")
+    .row
+      .col-md-12
         .panel.panel-default
           .panel-heading
             p Ticket Posts
@@ -17,16 +88,30 @@ block content
             table(id="table_posts").table.table-condensed
               thead
                 tr
-                  th Timestamp
-                  th Type
-                  th Visible
-                  th Author
-                  th Subject
+                  th Post Info
                   th Body
               tbody
 block footer
   include ../datatables_js
+  script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
+  script(src='/javascripts/jquery.tokeninput.js')
+
   script(type='text/javascript').
+    $(document).ready(function () {
+      var tokenConfig = {
+        theme: "bootstrap",
+        preventDuplicates: true,
+        tokenLimit: 5,
+        hintText: null,
+        animateDropdown: false
+      };
+      $("#inputEmail12").tokenInput("/api/v1/ubersmith/contacts/search/", tokenConfig);
+    });
+    $(document).ready(function(){
+      // Add prettyprint class to pre elements
+      $('pre').addClass('prettyprint');
+      prettyPrint();
+    }); // end document.ready
     $(document).ready(function() {
       $('#table_posts').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -39,39 +124,54 @@ block footer
         "aoColumns": [
           {
             "mData": "timestamp",
-            "sWidth": "120px"
-          }, {
-            "mData": "type",
-            "sWidth": "90px",
-            "mRender": function(type) {
-              if (type == 23)
-              {
-                return "<span class='pull-right label label-info'>Comment</span>";
-              } else if (type == 21) {
-                return "<span class='pull-right label label-primary'>Follow-Up</span>";
-              } else {
-                return "<span class='pull-right label label-default'>Other</span>";
+            "sWidth": "160px",
+            "mRender": function(timestamp, type, row) {
+              var entry = '<table style="width:100%"><tr>';
+
+              var type = '<td>';
+              switch (row['type']) {
+                case 23:
+                  type += '<span class="label label-info">Comment</span>';
+                  break;
+                case 21:
+                  type += '<span class="label label-info">Follow-Up</span>';
+                  break;
+                default:
+                  type += '<span class="label label-info">Other</span>';
+                  break;
               }
+              type += '</td>';
+
+              var timestamp = '<td><span class="label label-primary">' + row['timestamp'] + '</span></td>';
+
+              var hidden = '<td>';
+              if (row['hidden'] != 1) {
+                hidden += '<span class="label label-warning">visible</span>'
+              } else {
+                hidden += '<span class="label label-primary">hidden</span>';
+              }
+              hidden += '</td>';
+
+              var author = '<td colspan="3"><span><h5>Author:<br/>' + row['author'] + '</h5></span></td>';
+              var subject = '<td colspan="3"><span><h5>Subject:<br/>' + row['subject'] + '</h5></span></td>';
+
+              entry += type;
+              entry += hidden;
+              entry += timestamp;
+              entry += '</tr><tr>';
+              entry += author;
+              //entry += '</tr><tr>';
+              //entry += subject;
+              entry += '</tr></table>';
+              return entry;
             }
           }, {
-            "mData": "hidden",
-            "sWidth": "70px",
-            "mRender": function(hidden) {
-              if (hidden != 1)
-              {
-                return "<span class='pull-right label label-warning'>visible</span>";
-              } else {
-                return "<span class='pull-right label label-primary'>hidden</span>";
-              }
+            "mData": "body",
+            "mRender": function(body, type, row) {
+              var subject = '<td colspan="3"><span><h5>Subject:<br/><pre>' + row['subject'] + '</pre></h5></span></td>';
+              var body = '<td><h5>Body:<br/><pre>' + body + '</pre></h5></td>';
+              return '<table style="width:100%"><tr>' + subject + '</tr><tr>' + body + '</tr></table>';
             }
-          }, {
-            "mData": "author",
-            "sWidth": "120px"
-          }, {
-            "mData": "subject",
-            "sWidth": "120px"
-          }, {
-            "mData": "body"
           }],
         "aaSorting": [[0,'desc']],
         "oLanguage": {

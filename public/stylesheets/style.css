@@ -2,18 +2,28 @@ body {
     padding-top: 40px;
 }
 
+.center {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 a {
     color: #00B7FF;
 }
 
-.navbar
+.navbar-default .navbar-nav>li>a
 {
-   /* background-color: #5e00ff;*/
+    padding-bottom: 12px;
 }
 
 .navbar-default .navbar-nav>li>a
 {
   color: #000000;
+}
+.navbar-default .navbar-nav>li.active>a
+{
+    color: #010101;
 }
 
 .gauge {
@@ -21,25 +31,24 @@ a {
     display: inline-block;
     margin: 1em;
 }
+
 .gauge.xs {
     width:40px; height:40px;
     display: inline-block;
     margin: 1em;
 }
+
 .gauge.xl {
     width:200px; height:160px;
     display: inline-block;
     margin: 1em;
 }
 
-.navbar-default .navbar-nav>li>a
-{
-  padding-bottom: 12px;
-}
 .alert-success, .alert-danger, .alert-warning, .alert-info
 {
     background-image: none;
 }
+
 .nav-button
 {
   padding-bottom: 11px;
@@ -52,6 +61,7 @@ a {
     padding-top: 0px;
     border-bottom-width: 0px;
 }
+
 .panel-heading>.navbar
 {
     margin-bottom: 0px;
@@ -63,6 +73,7 @@ a {
     vertical-align: middle !important;
     margin-top: 4px;
 }
+
 .dataTables_wrapper
 {
   padding-top: 10px;

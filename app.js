@@ -82,7 +82,13 @@ redisClient.on("connect"
 
 try { 
   var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
-  var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+  if (process.env.NODE_ENV == 'development')
+  {
+    var ubersmith = require('cloudy-localsmith')(ubersmithConfig);
+  } else {
+    var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+  }
+
 } catch (e) {
   logger.log('error', 'Could not initialize Ubersmith', { error: e.message });
 }
@@ -131,6 +137,10 @@ app.set('title', 'Cloudy Kangaroo');
 app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.use(function(req, res, next) {
+  app.locals.pretty = true;
+  next();
+});
 app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
 app.set('puppetdb_uri', 'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3');
 
@@ -176,6 +186,7 @@ app.use(reqWrapper);
 /*
   Pass the requests through the routes
  */
+
 app.use(app.router);
 
 /*
