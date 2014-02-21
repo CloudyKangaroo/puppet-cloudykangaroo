@@ -621,6 +621,28 @@ module.exports = function (app, config, passport, redisClient) {
         });
     });
 
+  app.get('/api/v1/ubersmith/devices/devgroups'
+    , app.locals.requireGroup('users')
+    , function (req, res) {
+      app.locals.ubersmith.getDeviceTypeList(
+        function (err, deviceGroupList){
+          if (deviceGroupList == null)
+          {
+            res.send(500);
+          } else {
+            var _ = require('underscore');
+            var deviceGroups = _.values(deviceGroupList);
+            var returnList = [];
+            _.each(deviceGroups, function(group) {
+              returnList.push(_.pick(group, ['devtype_group_id', 'name', 'priority']));
+            });
+
+            res.type('application/json');
+            res.send(JSON.stringify(returnList));
+          }
+        });
+    });
+
   app.get('/api/v1/ubersmith/devices/hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {

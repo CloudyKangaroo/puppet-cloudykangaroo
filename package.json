@@ -42,6 +42,7 @@
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
     "cloudy-ubersmith": "0.2.7",
+    "cloudy-localsmith": "0.0.x",
     "contegix-logger": "0.1.x",
     "oauth2orize": "0.x.x",
     "passport": "0.1.x",

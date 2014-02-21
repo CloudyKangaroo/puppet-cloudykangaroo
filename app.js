@@ -1,7 +1,7 @@
 /**
  * Application Dependencies
  */
-/*if (process.env.NODE_ENV == 'development')
+if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
   CrowdAuth['server'] = '';
@@ -12,9 +12,9 @@
   UberAuth['password'] = '';
   UberAuth['url'] = ''
   UberAuth['host'] = ''
-} else {*/
+} else {
   require('./config/system-credentials.js');
-//}
+}
 
 var config = require('./config');
 
@@ -82,7 +82,13 @@ redisClient.on("connect"
 
 try { 
   var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
-  var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+  if (process.env.NODE_ENV == 'development')
+  {
+    var ubersmith = require('cloudy-localsmith')(ubersmithConfig);
+  } else {
+    var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+  }
+
 } catch (e) {
   logger.log('error', 'Could not initialize Ubersmith', { error: e.message });
 }
