@@ -8,18 +8,20 @@ html
     meta(name='author', content='')
     link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css')
     link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css')
-    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootswatch/3.0.3/yeti/bootstrap.min.css')
-    link(rel='stylesheet', href='/bootstrap/css/ionicons.min.css')
     link(rel='stylesheet', href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')
+    style(type='text/css').
+      .center {
+        float: none;
+        margin-left: auto;
+        margin-right: auto;
+      }
     if IE
       script(src='//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js')
     block head
   body
-    .container
-      #content.container
-        .row
-          .col-md-14
-            block content
+    #content.container
+      .col-md-14
+        block content
     script(src='//code.jquery.com/jquery-1.11.0.min.js')
     script(src='//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js')
     block footer
