@@ -1,4 +1,5 @@
-cloudykangaroo
+
+Cloudy Kangaroo
 ==============
 
 Sensu Monitoring Interface
@@ -7,18 +8,6 @@ Sensu Monitoring Interface
 [![Coverage Status](https://coveralls.io/repos/johann8384/cloudykangaroo/badge.png)](https://coveralls.io/r/johann8384/cloudykangaroo)
 [![Dependency Status](https://www.versioneye.com/user/projects/52d8c749ec13758876000199/badge.png)](https://www.versioneye.com/user/projects/52d8c749ec13758876000199)
 
-Notes:
+The Cloudy Kangaroo project is an interface to allow you to interact with your management systems. Currently Puppet, Sensu and Ubersmith are supported data providers/integration points.
 
-Add to .git/config:
-```
-[core]
-  whitespace = tabwidth=2,tab-in-indent,cr-at-eol,trailing-space
-```
-
-example contents for crowd-credentials.js
-```
-CrowdAuth = new Array();
-CrowdAuth['server'] = "https://crowd.example.com";
-CrowdAuth['application'] = "cloudy-kangaroo";
-CrowdAuth['password'] = "secretwords";
-```
+Integrations and data providers like Graphite, Libvirt, Salesforce, osTicket, ZenDesk are also in the works.
