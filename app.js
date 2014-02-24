@@ -1,27 +1,28 @@
 /**
  * Application Dependencies
  */
+
+var config = require('./config');
+
 if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
   CrowdAuth['server'] = '';
   CrowdAuth['application'] = '';
   CrowdAuth['password'] = '';
+
   UberAuth = new Array();
   UberAuth['username'] = '';
   UberAuth['password'] = '';
   UberAuth['url'] = ''
   UberAuth['host'] = ''
+
 } else {
+
   require('./config/system-credentials.js');
-}
-
-var config = require('./config');
-
-if (process.env.NODE_ENV != 'development')
-{
   config.log.level = 'error';
   config.log.screen = 'hide';
+
 }
 
 // Generic Requirements
@@ -88,7 +89,6 @@ try {
   } else {
     var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
   }
-
 } catch (e) {
   logger.log('error', 'Could not initialize Ubersmith', { error: e.message });
 }
@@ -466,16 +466,50 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
 app.locals.getSensuEvents = function (getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
-  app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
-    if (deviceHostnames == null)
-    {
-      getEventsCallback(new Error, null);
+  if (app.locals.ubersmith.getSensuEvents)
+  {
+    app.locals.ubersmith.getSensuEvents(15, 0, getEventsCallback);
+  } else {
+    app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+      if (deviceHostnames == null)
+      {
+        getEventsCallback(new Error, null);
+      } else {
+        request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var events = [];
+            _.each(body, function(event) {
+              _.defaults(event, deviceHostnames[event.client]);
+              event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+              events.push(event);
+            });
+            app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+            getEventsCallback( error, events )
+          } else {
+            app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+            getEventsCallback( error, null )
+          }
+        });
+      }
+    });
+  }
+};
+
+app.locals.getSensuDeviceEvents = function (hostname, getEventsCallback ) {
+  var _ = require('underscore');
+  var request = require('request');
+  app.locals.ubersmith.getDeviceByHostname(hostname, function (error, device) {
+    if (!device || error) {
+      getEventsCallback( error, null );
+    } else if (app.locals.ubersmith.getSensuEvents) {
+      app.locals.ubersmith.getSensuEvents(2, device.deviceID, getEventsCallback);
     } else {
-      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+      var url = app.get('sensu_uri') + '/events/' + device.dev_desc + '.contegix.mgmt'
+      request({ url: app.get('sensu_uri') + '/events/' + device.dev_desc + '.contegix.mgmt', json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           var events = [];
           _.each(body, function(event) {
-            _.defaults(event, deviceHostnames[event.client]);
+            _.defaults(event, device);
             event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
             events.push(event);
           });
@@ -486,8 +520,9 @@ app.locals.getSensuEvents = function (getEventsCallback ) {
           getEventsCallback( error, null )
         }
       });
-    }});
-  };
+    }
+  });
+};
 
 app.locals.getSensuStashes = function (stashes, getStashCallback) {
   var request = require('request');
