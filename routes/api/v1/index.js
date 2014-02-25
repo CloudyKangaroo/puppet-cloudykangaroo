@@ -855,36 +855,33 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
         var ticketID = req.params.ticketid;
         var subject = req.body.subject;
-        var visible = req.body.comment;
-        var from = req.user.username + '@contegix.com';
-        var time_spent = req.body.time_spent;
+        var visible = req.body.comment || 0;
+        var from = req.user.email;
+        var time_spent = req.body.time_spent || 1;
+        var documentation = req.body.documentation || '';
+        var sensuEventData = req.body.sensuEvent || '';
+        var checkString = "Created Ticket from Monitoring Event:\n";
 
-        var eventJSON = decodeURI(req.body.sensuEvent);
-        var sensuEvent = JSON.parse(eventJSON);
-        var documentation = req.body.documentation;
+        if (sensuEventData != '')
+        {
+          var eventJSON = decodeURI(sensuEventData);
+          var sensuEvent = JSON.parse(eventJSON);
+          checkString += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
+          checkString += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
+          checkString += "Flapping: " + sensuEvent.flapping + "\n";
+          checkString += "Location: " + sensuEvent.location + "\n";
+          checkString += "Device: " + sensuEvent.dev_desc;
+          checkString += "\n\n";
+        }
 
-        var msgBody = "Created Ticket from Monitoring Event:\n";
-        msgBody += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
-        msgBody += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
-        msgBody += "Flapping: " + sensuEvent.flapping + "\n";
-        msgBody += "Location: " + sensuEvent.location + "\n";
-        msgBody += "Device: " + sensuEvent.dev_desc;
-        msgBody += "\n\n";
+        var msgBody = checkString;
         msgBody += "Additional Documentation: \n";
         msgBody += documentation;
         msgBody += "\n\n";
-        msgBody += "Contegix | Technical Support\n";
-        msgBody += "(314) 622-6200 ext. 3\n";
-        msgBody += "https://portal.contegix.com\n";
-        msgBody += "http://status.contegix.com\n";
-        msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
-        msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
+        msgBody += app.locals.config.support.signatureTemplate;
 
 
-        //var form = 'ticket_id=' + ticketID + '&subject=' + encodeURI(subject) + '&body=' + msgBody + '&visible=' + visible + '&from=' + from + '&time_spent=' + time_spent;
-        var postData = {ticket_id: ticketID, subject: subject, body: msgBody, visible: visible, from: from, time_spent: time_spent};
-
-        app.locals.crmModule.postItemToUbersmith('support.ticket_post_staff_response', postData, function (err, response) {
+      app.locals.crmModule.addPostToTicket(ticketID, subject, msgBody, visible, from, time_spent, function (err, response) {
           if (err)
           {
             if (err.code == 'ETIMEDOUT')
@@ -902,52 +899,101 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/ubersmith/tickets/ticket'
     , app.locals.requireGroup('users')
     , function (req, res) {
-        var subject = req.body.subject;
-        var msgBody = req.body.msgBody;
-        var recipient = req.body.recipient;
-        var author = req.user.username + '@contegix.com';
-        var priority = req.body.priority;
-        var client_id = req.body.clientID;
-        var device_id = req.body.deviceID;
-        var sensuEventData = req.body.sensuEvent || '';
+      var clientID = req.body.clientID;
 
-        var eventJSON = decodeURI(sensuEventData);
-        var sensuEvent = JSON.parse(eventJSON);
-        var documentation = req.body.documentation;
+      app.locals.crmModule.getAdminByEmail(req.user.email, function (err, adminList) {
+        if (err) {
+          res.send(500);
+        } else {
+          var _ = require('underscore');
+          adminList = _.values(adminList);
 
-        var msgBody = "Created Ticket from Monitoring Event:\n";
-        msgBody += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
-        msgBody += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
-        msgBody += "Flapping: " + sensuEvent.flapping + "\n";
-        msgBody += "Location: " + sensuEvent.location + "\n";
-        msgBody += "Device: " + sensuEvent.dev_desc;
-        msgBody += "\n\n";
-        msgBody += "Additional Documentation: \n";
-        msgBody += documentation;
-        msgBody += "\n\n";
-        msgBody += "Contegix | Technical Support\n";
-        msgBody += "(314) 622-6200 ext. 3\n";
-        msgBody += "https://portal.contegix.com\n";
-        msgBody += "http://status.contegix.com\n";
-        msgBody += "Twitter: @contegix | http://twitter.com/contegix\n";
-        msgBody += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
+          _.each(adminList, function(admin) {
+             if (admin.email == req.user.email) {
+                req.user.adminID = admin.id;
+             }
+          });
 
-        var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id};
-
-        app.locals.crmModule.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
-          if (err)
-          {
-            if (err.code == 'ETIMEDOUT')
-            {
-              res.send(504);
-            } else {
-              res.send(500);
-            }
-          } else {
-            res.send(JSON.stringify(response));
+          if (!req.user.adminID) {
+            req.user.adminID = 0;
           }
-        });
+
+          app.locals.crmModule.getContactsbyClientID(clientID, function (err, contactList) {
+            if (err) {
+              res.send(500);
+            } else {
+              var toList = [];
+              var ccList = [];
+              var contactList = _.values(contactList);
+              _.each(contactList, function(contact) {
+                if (contact.access) {
+                   var access = contact.access;
+                   if (access['submit_new_ticket'] && access['submit_new_ticket'] == 'edit')
+                   {
+                     toList.push(contact.email);
+                   } else if (access['submit_new_ticket']) {
+                     ccList.push(contact.email);
+                   }
+                }
+              });
+              req.body.ccList = ccList;
+              req.body.toList = toList;
+              createSupportTicket(req, res);
+            }
+          });
+        }
+      })
     });
+
+  function createSupportTicket(req, res) {
+    var subject = req.body.subject;
+    var recipient = req.body.recipient;
+    var user_id = req.user.adminID;
+    var author = req.user.email;
+    var ccList = req.body.ccList;
+    var toList = req.body.toList;
+    var priority = req.body.priority || 1;
+    var clientID = req.body.clientID || 0;
+    var contactID = req.body.contactID || 0;
+    var deviceID = req.body.deviceID || 0;
+    var documentation = req.body.documentation || '';
+    var sensuEventData = req.body.sensuEvent || '';
+
+    if (sensuEventData != '')
+    {
+      var eventJSON = decodeURI(sensuEventData);
+      var sensuEvent = JSON.parse(eventJSON);
+      var checkString = "Created Ticket from Monitoring Event:\n";
+      checkString += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
+      checkString += "Status: " + sensuEvent.status + "\nIssued: " + sensuEvent.issued + "\n";
+      checkString += "Flapping: " + sensuEvent.flapping + "\n";
+      checkString += "Location: " + sensuEvent.location + "\n";
+      checkString += "Device: " + sensuEvent.dev_desc;
+      checkString += "\n\n";
+    }
+
+    var documentation = req.body.documentation;
+
+    var msgBody = checkString;
+    msgBody += "Additional Documentation: \n";
+    msgBody += documentation;
+    msgBody += "\n\n";
+    msgBody += app.locals.config.support.signatureTemplate;
+
+    app.locals.crmModule.createNewTicket(msgBody, subject, recipient, user_id, author, ccList, toList, priority, clientID, contactID, deviceID, function (err, response) {
+      if (err)
+      {
+        if (err.code == 'ETIMEDOUT')
+        {
+          res.send(504);
+        } else {
+          res.send(500);
+        }
+      } else {
+        res.send(JSON.stringify(response));
+      }
+    });
+  };
 
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
     , app.locals.requireGroup('users')
