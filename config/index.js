@@ -37,8 +37,8 @@ config.production = {};
 config.production.log = {};
 config.development.log = {};
 config.metrics = {};
-config.ubersmith = {};
-config.ubersmith.warm_cache = true;
+config.crmModule = {};
+config.crmModule.warm_cache = true;
 config.mgmtDomain = '.contegix.mgmt';
 config.log.access_log = './access.log';
 config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
@@ -63,5 +63,15 @@ config.redis.db = process.env.REDIS_DB || 1;
 
 config.http.port = process.env.PORT || 3000;
 config.cookie.secret = 'securit3333!!';
+config.support = {};
+
+signatureTemplate = "Contegix | Technical Support\n";
+signatureTemplate += "(314) 622-6200 ext. 3\n";
+signatureTemplate += "https://portal.contegix.com\n";
+signatureTemplate += "http://status.contegix.com\n";
+signatureTemplate += "Twitter: @contegix | http://twitter.com/contegix\n";
+signatureTemplate += "Twitter: @contegixstatus | http://twitter.com/contegixstatus\n";
+
+config.support.signatureTemplate = signatureTemplate;
 
 module.exports = config;
