@@ -172,11 +172,12 @@ app.use(express.session({
   }),
   secret: config.cookie.secret
 }));
+
 app.use(flash());
+
 var authenticator = require('./lib/auth')(app, config);
 app.use(authenticator.passport.initialize());
 app.use(authenticator.passport.session());
-//app.use(express.csrf())
 
 /*
    Route requests through the metrics and logging processing
@@ -188,16 +189,6 @@ app.use(reqWrapper);
  */
 
 app.use(app.router);
-
-/*
-  Handle Errors
- */ /*
-app.use(function(err, req, res, next) {
-  if(!err) return next(); // you also need this line
-  logger.log('error', 'Express caught error in request', { error: err, requestID: req.id, sessionID: req.sessionID});
-  res.send(500);
-//  next(err);
-});   */
 
 /*
   Last chance, perhaps it is a static resource, most of this offloaded to Nginx

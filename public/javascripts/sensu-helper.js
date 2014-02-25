@@ -154,7 +154,7 @@ function handleTicketForm(event) {
   var url = '/api/v1/ubersmith/tickets/';
 
   if (newTicket) {
-    var data = {subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, recipient: recipient, priority: sensuEvent.status, client_id: sensuEvent.clientid, device_id: sensuEvent.dev};
+    var data = {subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, recipient: recipient, priority: sensuEvent.status, clientID: sensuEvent.clientid, deviceID: sensuEvent.dev};
     url += 'ticket';
   } else {
     var data = {ticketID: ticketID, subject: 'Monitoring System Escalated Event', sensuEvent: encodeURI(JSON.stringify(sensuEvent)), documentation: documentation, visible: 1, time_spent: 1};
