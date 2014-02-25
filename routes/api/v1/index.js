@@ -252,7 +252,16 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/events/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      var _ = require('underscore');
+      var hostname = req.params.hostname;
+      app.locals.getSensuDeviceEvents(hostname, function (err, events) {
+         if (err) {
+           res.send(500);
+         } else {
+           res.type('application/json');
+           res.send(JSON.stringify({ aaData: events }));
+         }
+      });
+      /*var _ = require('underscore');
       var request = require('request');
       app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
         if (deviceHostnames == null)
@@ -276,7 +285,7 @@ module.exports = function (app, config, passport, redisClient) {
             }
           });
         }
-      });
+      });*/
     });
 
   app.get('/api/v1/sensu/events/filtered'
