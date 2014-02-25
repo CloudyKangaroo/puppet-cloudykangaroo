@@ -40,7 +40,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceTypeList(function(err, deviceTypeList) {
+      app.locals.crmModule.getDeviceTypeList(function(err, deviceTypeList) {
         if (err) {
           res.send(500);
         } else {
@@ -53,7 +53,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/devices/deviceid/:deviceid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceByID(req.params.deviceid
+      app.locals.crmModule.getDeviceByID(req.params.deviceid
         , function (error, uberDevice) {
           if (!uberDevice)
           {
@@ -65,7 +65,7 @@ module.exports = function (app, config, passport, redisClient) {
 
             async.parallel([
               function (asyncCallback) {
-                app.locals.ubersmith.getDeviceByID(req.params.deviceid, asyncCallback);
+                app.locals.crmModule.getDeviceByID(req.params.deviceid, asyncCallback);
               },
               function (asyncCallback) {
                 app.locals.getPuppetDevice(hostname, function (error, puppetDevice){
@@ -119,7 +119,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/ubersmith/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceByHostname(req.params.hostname
+      app.locals.crmModule.getDeviceByHostname(req.params.hostname
         , function (error, uberDevice) {
           if (!uberDevice)
           {
@@ -146,10 +146,10 @@ module.exports = function (app, config, passport, redisClient) {
         var async = require('async');
         async.parallel([
           function(callback){
-            app.locals.ubersmith.getClientByID(req.params.clientid, callback);
+            app.locals.crmModule.getClientByID(req.params.clientid, callback);
           },
           function(callback){
-            app.locals.ubersmith.getContactsbyClientID(req.params.clientid, callback);
+            app.locals.crmModule.getContactsbyClientID(req.params.clientid, callback);
           }
         ],
           function(err, results) {

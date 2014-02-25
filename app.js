@@ -11,18 +11,18 @@ if (process.env.NODE_ENV == 'development')
   CrowdAuth['application'] = '';
   CrowdAuth['password'] = '';
 
-  UberAuth = new Array();
-  UberAuth['username'] = '';
-  UberAuth['password'] = '';
-  UberAuth['url'] = ''
-  UberAuth['host'] = ''
+  crmAuth = new Array();
+  crmAuth['username'] = '';
+  crmAuth['password'] = '';
+  crmAuth['url'] = ''
+  crmAuth['host'] = ''
 
+  config.log.level = config.development.log.level;
+  config.log.screen = config.development.log.screen;
 } else {
-
+  config.log.level = config.production.log.level;
+  config.log.screen = config.production.log.screen;
   require('./config/system-credentials.js');
-  config.log.level = 'error';
-  config.log.screen = 'hide';
-
 }
 
 // Generic Requirements
@@ -82,15 +82,15 @@ redisClient.on("connect"
  */
 
 try { 
-  var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
+  var crmModuleConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: crmAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.crmModule.warm_cache};
   if (process.env.NODE_ENV == 'development')
   {
-    var ubersmith = require('cloudy-localsmith')(ubersmithConfig);
+    var crmModule = require('cloudy-localsmith')(crmModuleConfig);
   } else {
-    var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+    var crmModule = require('cloudy-ubersmith')(crmModuleConfig);
   }
 } catch (e) {
-  logger.log('error', 'Could not initialize Ubersmith', { error: e.message });
+  logger.log('error', 'Could not initialize CRM Module', { error: e.message });
 }
 
 /*
@@ -129,7 +129,7 @@ app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.redisClient = redisClient;
 app.locals.moment = require('moment');
-app.locals.ubersmith = ubersmith;
+app.locals.crmModule = crmModule;
 app.locals.title = 'Cloudy Kangaroo';
 app.enable('trust proxy');
 
@@ -466,11 +466,11 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
 app.locals.getSensuEvents = function (getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
-  if (app.locals.ubersmith.getSensuEvents)
+  if (app.locals.crmModule.getSensuEvents)
   {
-    app.locals.ubersmith.getSensuEvents(15, 0, getEventsCallback);
+    app.locals.crmModule.getSensuEvents(15, 0, getEventsCallback);
   } else {
-    app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
       if (deviceHostnames == null)
       {
         getEventsCallback(new Error, null);
@@ -498,11 +498,11 @@ app.locals.getSensuEvents = function (getEventsCallback ) {
 app.locals.getSensuDeviceEvents = function (hostname, getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
-  app.locals.ubersmith.getDeviceByHostname(hostname, function (error, device) {
+  app.locals.crmModule.getDeviceByHostname(hostname, function (error, device) {
     if (!device || error) {
       getEventsCallback( error, null );
-    } else if (app.locals.ubersmith.getSensuEvents) {
-      app.locals.ubersmith.getSensuEvents(2, device.deviceID, getEventsCallback);
+    } else if (app.locals.crmModule.getSensuEvents) {
+      app.locals.crmModule.getSensuEvents(2, device.deviceID, getEventsCallback);
     } else {
       var url = app.get('sensu_uri') + '/events/' + device.dev_desc + '.contegix.mgmt'
       request({ url: app.get('sensu_uri') + '/events/' + device.dev_desc + '.contegix.mgmt', json: true }, function (error, response, body) {
