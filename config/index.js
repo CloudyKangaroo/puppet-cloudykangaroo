@@ -32,6 +32,10 @@ config.puppetdb = {};
 config.http = {};
 config.cookie = {};
 config.log = {};
+config.development = {};
+config.production = {};
+config.production.log = {};
+config.development.log = {};
 config.metrics = {};
 config.ubersmith = {};
 config.ubersmith.warm_cache = true;
@@ -41,6 +45,11 @@ config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.metrics.interval = 15000;
 config.log.level = 'info';
 config.log.screen = 'debug';
+config.development.log.level = 'info';
+config.development.log.screen = 'debug';
+config.production.log.level = 'warn';
+config.production.log.screen = 'hide';
+
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 

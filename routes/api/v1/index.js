@@ -261,31 +261,6 @@ module.exports = function (app, config, passport, redisClient) {
            res.send(JSON.stringify({ aaData: events }));
          }
       });
-      /*var _ = require('underscore');
-      var request = require('request');
-      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
-        if (deviceHostnames == null)
-        {
-          res.send(500);
-        } else {
-          request({ url: app.get('sensu_uri') + '/events/' + req.params.hostname, json: true }, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-              var events = [];
-              _.each(body, function(event) {
-                _.defaults(event, deviceHostnames[event.client]);
-                event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
-                events.push(event);
-              });
-              app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-              res.type('application/json');
-              res.send(JSON.stringify({ aaData: events }));
-            } else {
-              app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
-              res.send(500);
-            }
-          });
-        }
-      });*/
     });
 
   app.get('/api/v1/sensu/events/filtered'
@@ -536,7 +511,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+      app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
         if (deviceHostnames == null)
         {
           res.send(500);
@@ -613,7 +588,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/devices/devgroupid/:devgroupid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDevicesbyTypeGroupID(req.params.devgroupid
+      app.locals.crmModule.getDevicesbyTypeGroupID(req.params.devgroupid
         , function (err, deviceList){
           if (deviceList == null)
           {
@@ -633,7 +608,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/devices/devgroups'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceTypeList(
+      app.locals.crmModule.getDeviceTypeList(
         function (err, deviceGroupList){
           if (deviceGroupList == null)
           {
@@ -655,7 +630,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/devices/hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
-        app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
+        app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
           if (deviceHostnames == null)
           {
             res.send(500);
@@ -672,7 +647,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getTicketsbyDeviceID(req.params.deviceid
+      app.locals.crmModule.getTicketsbyDeviceID(req.params.deviceid
       , function (err, ticketList){
           if (err)
           {
@@ -694,7 +669,7 @@ module.exports = function (app, config, passport, redisClient) {
       app.get('/api/v1/ubersmith/devices/rack/:rack'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDevicesByRack(req.params.rack
+      app.locals.crmModule.getDevicesByRack(req.params.rack
         , function (error, device) {
           if (error != null)
           {
@@ -714,7 +689,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceByHostname(req.params.hostname
+      app.locals.crmModule.getDeviceByHostname(req.params.hostname
         , function (error, device) {
           if (error != null)
           {
@@ -734,7 +709,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/devices/deviceid/:deviceid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceByID(req.params.deviceid
+      app.locals.crmModule.getDeviceByID(req.params.deviceid
         , function (error, device) {
           if (error != null)
           {
@@ -766,7 +741,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getClients(function(err, clientList) {
+      app.locals.crmModule.getClients(function(err, clientList) {
         if (err)
         {
           //res.send(500);
@@ -782,7 +757,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients/clientid/:clientid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getClientByID(req.params.clientid, function(err, client) {
+      app.locals.crmModule.getClientByID(req.params.clientid, function(err, client) {
         res.type('application/json');
         res.send(JSON.stringify(client));
       });
@@ -791,7 +766,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients/clientid/:clientid/contacts'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getContactsbyClientID(req.params.clientid, function(err, contactList) {
+      app.locals.crmModule.getContactsbyClientID(req.params.clientid, function(err, contactList) {
         var _ = require('underscore');
         var contacts = _.values(contactList);
         res.type('application/json');
@@ -802,7 +777,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
+      app.locals.crmModule.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
         var _ = require('underscore');
         var devices = _.values(devicelist);
         res.type('application/json');
@@ -813,7 +788,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
+      app.locals.crmModule.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
         if (err)
         {
           res.send(500);
@@ -834,7 +809,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/api/methods'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getAPIMethods(function(err, client) {
+      app.locals.crmModule.getAPIMethods(function(err, client) {
         res.type('application/json');
         res.send(JSON.stringify(client));
       });
@@ -843,7 +818,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/tickets'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getTickets(function(err, ticketList) {
+      app.locals.crmModule.getTickets(function(err, ticketList) {
         if (err)
         {
           res.send(500);
@@ -864,7 +839,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
+      app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
         if (err)
         {
           res.send(500);
@@ -909,7 +884,7 @@ module.exports = function (app, config, passport, redisClient) {
         //var form = 'ticket_id=' + ticketID + '&subject=' + encodeURI(subject) + '&body=' + msgBody + '&visible=' + visible + '&from=' + from + '&time_spent=' + time_spent;
         var postData = {ticket_id: ticketID, subject: subject, body: msgBody, visible: visible, from: from, time_spent: time_spent};
 
-        app.locals.ubersmith.postItemToUbersmith('support.ticket_post_staff_response', postData, function (err, response) {
+        app.locals.crmModule.postItemToUbersmith('support.ticket_post_staff_response', postData, function (err, response) {
           if (err)
           {
             if (err.code == 'ETIMEDOUT')
@@ -959,7 +934,7 @@ module.exports = function (app, config, passport, redisClient) {
 
         var postData = {subject: subject, body: msgBody, author: author, recipient: recipient, client_id: client_id, device_id: device_id};
 
-        app.locals.ubersmith.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
+        app.locals.crmModule.postItemToUbersmith('support.ticket_submit_outgoing', postData, function (err, response) {
           if (err)
           {
             if (err.code == 'ETIMEDOUT')
@@ -977,7 +952,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
+      app.locals.crmModule.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
         if (err)
         {
           res.send(500);
@@ -997,7 +972,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/global/devices/deviceid/:deviceid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.ubersmith.getDeviceByID(req.params.deviceid
+      app.locals.crmModule.getDeviceByID(req.params.deviceid
         , function (error, uberDevice) {
           if (error != null)
           {
@@ -1042,7 +1017,7 @@ module.exports = function (app, config, passport, redisClient) {
       var hostname =  req.params.hostname;
       async.parallel([
         function (asyncCallback) {
-          app.locals.ubersmith.getDeviceByHostname(hostname, function (err, device){
+          app.locals.crmModule.getDeviceByHostname(hostname, function (err, device){
             if (err)
             {
               asyncCallback(null, { error: 'No information is known about ' + hostname, device: {}});
