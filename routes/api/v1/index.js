@@ -218,9 +218,10 @@ module.exports = function (app, config, passport, redisClient) {
               var resourceList = catalog.resources;
               var checks = [];
               _.each(resourceList, function (resource) {
-                if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu::Check')
+                if (_.contains(resource.tags, 'sensu::check') && resource.type == 'Sensu::Check' && resource.title != 'ping_' + hostname)
                 {
-                  checks.push({title: resource.title, standalone: resource.parameters.standalone, subscribers: resource.parameters.subscribers, handlers: resource.parameters.handlers, interval: resource.parameters.interval, command: resource.parameters.command, parameters: resource.parameters});
+                  var check = {title: resource.title, occurrences: resource.parameters.occurrences, standalone: resource.parameters.standalone, subscribers: resource.parameters.subscribers, handlers: resource.parameters.handlers, interval: resource.parameters.interval, command: resource.parameters.command, parameters: resource.parameters};
+                  checks.push(_.defaults(check, {command: '', handlers: [], occurrences: 0, interval: 0}));
                 }
               });
               res.type('application/json');
@@ -758,7 +759,8 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients/clientid/:clientid'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.crmModule.getClientByID(req.params.clientid, function(err, client) {
+      var clientID = req.params.clientid;
+      app.locals.crmModule.getClientByID(clientID, function(err, client) {
         res.type('application/json');
         res.send(JSON.stringify(client));
       });
@@ -767,7 +769,8 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/ubersmith/clients/clientid/:clientid/contacts'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.crmModule.getContactsbyClientID(req.params.clientid, function(err, contactList) {
+      var clientID = req.params.clientid;
+      app.locals.crmModule.getContactsbyClientID(clientID, function(err, contactList) {
         var _ = require('underscore');
         var contacts = _.values(contactList);
         res.type('application/json');
