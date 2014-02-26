@@ -489,8 +489,7 @@ app.locals.getSensuEvents = function (getEventsCallback ) {
 app.locals.getSensuDeviceEvents = function (hostname, getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
-  app.locals.crmModule.getDeviceByHostname(hostname, function (error, deviceList) {
-    var device = deviceList[0];
+  app.locals.crmModule.getDeviceByHostname(hostname, function (error, device) {
     if (error) {
 
       app.locals.logger.log('error', 'Could not get device by hostname', {error: error.message});
