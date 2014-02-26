@@ -170,7 +170,7 @@ block footer
             "mData": "client",
             "sWidth": "140px",
             "mRender": function (client, type, row) {
-              return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('.contegix.mgmt', '') + '</a>';
+              return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('#{config.mgmtDomain}', '') + '</a>';
             }
           }, {
             "mData": "check",

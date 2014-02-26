@@ -147,7 +147,7 @@ module.exports = function (app, config, passport, redisClient) {
     , function (req, res) {
       var hoursAgo = req.params.hours;
       var request = require('request');
-      var queryString = '?query=["and", ["=", "status", "failure"], ["~", "certname", "contegix.mgmt$"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
+      var queryString = '?query=["and", ["=", "status", "failure"], ["~", "certname", "' + app.locals.config.mgmtDomain + '$"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
       var URL = app.get('puppetdb_uri') + '/events' + queryString;
 
       request({ url: URL, json: true }, function (error, response, body) {
@@ -1030,7 +1030,7 @@ module.exports = function (app, config, passport, redisClient) {
             res.send(404);
           } else {
             var async = require('async');
-            var hostname =  uberDevice.dev_desc + '.contegix.mgmt';
+            var hostname =  uberDevice.dev_desc + app.locals.config.mgmtDomain;
             async.parallel([
               function (asyncCallback) {
                 app.locals.getPuppetDevice(hostname, asyncCallback);
