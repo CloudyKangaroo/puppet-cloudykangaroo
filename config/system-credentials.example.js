@@ -1,0 +1,9 @@
+CrowdAuth = new Array();
+CrowdAuth['server'] = "https://mycrowdhostname";
+CrowdAuth['application'] = 'mycrowdapp';
+CrowdAuth['password'] = 'mycrowdpassword';
+crmAuth = new Array();
+crmAuth['username'] = 'username';
+crmAuth['password'] = 'password';
+crmAuth['url'] = 'https://mycrmhostname/mycrmapi/api';
+crmAuth['host'] = 'mycrmhostname';
