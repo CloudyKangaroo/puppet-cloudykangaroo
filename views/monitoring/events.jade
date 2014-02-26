@@ -216,7 +216,6 @@ block footer
             return true;
           }
       });
-      //$(".dropdown-menu li a").click(function() {
       $("#silencemenu .dropdown .dropdown-menu li a").click(function() {
         //Callback for dropdown, set show variable, change name, and redraw the table.
         show = $(this).text();
@@ -228,7 +227,6 @@ block footer
     var intervalId = setInterval(function() {
       oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
     }, refreshInterval);
-    //$(".dropdown-menu li a").click(function() {
     $("#refreshmenu .dropdown .dropdown-menu li a").click(function() {
       var newRefreshInterval = parseInt($(this).text());
       $('#dRefresh').html('Refresh every ' + newRefreshInterval + ' seconds<span class="caret"</span>');
