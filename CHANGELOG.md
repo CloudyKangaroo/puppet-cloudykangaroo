@@ -1,5 +1,14 @@
 # Cloudykangaroo Changelog
 
+### v0.2.3
+
+- Added sample system-credentials file
+- Fixed various error handling paths, ensureing errors were passed and logged properly
+- Added auto-refresh of events listing
+- Fixe #57 #39
+- Fixed missing data issue #98
+- Removed references to '.contegix.mgmt', replaced with config.mgmtDomain reference
+
 ### v0.2.2
 
 
