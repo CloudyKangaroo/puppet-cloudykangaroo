@@ -1,27 +1,28 @@
 /**
  * Application Dependencies
  */
-/*if (process.env.NODE_ENV == 'development')
+
+var config = require('./config');
+
+if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
   CrowdAuth['server'] = '';
   CrowdAuth['application'] = '';
   CrowdAuth['password'] = '';
-  UberAuth = new Array();
-  UberAuth['username'] = '';
-  UberAuth['password'] = '';
-  UberAuth['url'] = ''
-  UberAuth['host'] = ''
-} else {*/
+
+  crmAuth = new Array();
+  crmAuth['username'] = '';
+  crmAuth['password'] = '';
+  crmAuth['url'] = ''
+  crmAuth['host'] = ''
+
+  config.log.level = config.development.log.level;
+  config.log.screen = config.development.log.screen;
+} else {
+  config.log.level = config.production.log.level;
+  config.log.screen = config.production.log.screen;
   require('./config/system-credentials.js');
-//}
-
-var config = require('./config');
-
-if (process.env.NODE_ENV != 'development')
-{
-  config.log.level = 'error';
-  config.log.screen = 'hide';
 }
 
 // Generic Requirements
@@ -81,10 +82,15 @@ redisClient.on("connect"
  */
 
 try { 
-  var ubersmithConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: UberAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.ubersmith.warm_cache};
-  var ubersmith = require('cloudy-ubersmith')(ubersmithConfig);
+  var crmModuleConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: crmAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.crmModule.warm_cache};
+  if (process.env.NODE_ENV == 'development')
+  {
+    var crmModule = require('cloudy-localsmith')(crmModuleConfig);
+  } else {
+    var crmModule = require('cloudy-ubersmith')(crmModuleConfig);
+  }
 } catch (e) {
-  logger.log('error', 'Could not initialize Ubersmith', { error: e.message });
+  logger.log('error', 'Could not initialize CRM Module', { error: e.message });
 }
 
 /*
@@ -123,7 +129,7 @@ app.locals.logger = logger;
 app.locals.audit = auditLog;
 app.locals.redisClient = redisClient;
 app.locals.moment = require('moment');
-app.locals.ubersmith = ubersmith;
+app.locals.crmModule = crmModule;
 app.locals.title = 'Cloudy Kangaroo';
 app.enable('trust proxy');
 
@@ -166,11 +172,12 @@ app.use(express.session({
   }),
   secret: config.cookie.secret
 }));
+
 app.use(flash());
+
 var authenticator = require('./lib/auth')(app, config);
 app.use(authenticator.passport.initialize());
 app.use(authenticator.passport.session());
-//app.use(express.csrf())
 
 /*
    Route requests through the metrics and logging processing
@@ -182,16 +189,6 @@ app.use(reqWrapper);
  */
 
 app.use(app.router);
-
-/*
-  Handle Errors
- */ /*
-app.use(function(err, req, res, next) {
-  if(!err) return next(); // you also need this line
-  logger.log('error', 'Express caught error in request', { error: err, requestID: req.id, sessionID: req.sessionID});
-  res.send(500);
-//  next(err);
-});   */
 
 /*
   Last chance, perhaps it is a static resource, most of this offloaded to Nginx
@@ -433,11 +430,6 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
             } else {
               var facts = results[1];
               var factInfo = {};
-              /*
-               { certname: 'metamarkets14.contegix.mgmt',
-               name: 'virtual',
-               value: 'physical' }
-               */
               for (i=0; i<facts.length; i++)
               {
                 var fact = facts[i];
@@ -460,16 +452,61 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
 app.locals.getSensuEvents = function (getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
-  app.locals.ubersmith.getDeviceHostnames(function (err, deviceHostnames){
-    if (deviceHostnames == null)
-    {
-      getEventsCallback(new Error, null);
+  if (app.locals.crmModule.getSensuEvents)
+  {
+    app.locals.crmModule.getSensuEvents(15, 0, getEventsCallback);
+  } else {
+    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
+      if (deviceHostnames == null)
+      {
+        getEventsCallback(new Error, null);
+      } else {
+        request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var events = [];
+            _.each(body, function(event) {
+              _.defaults(event, deviceHostnames[event.client]);
+              event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
+              events.push(event);
+            });
+            app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
+            getEventsCallback( error, events )
+          } else {
+            app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
+            getEventsCallback( error, null )
+          }
+        });
+      }
+    });
+  }
+};
+
+app.locals.getSensuDeviceEvents = function (hostname, getEventsCallback ) {
+  var _ = require('underscore');
+  var request = require('request');
+  app.locals.crmModule.getDeviceByHostname(hostname, function (error, device) {
+    if (error) {
+
+      app.locals.logger.log('error', 'Could not get device by hostname', {error: error.message});
+      getEventsCallback(error, null );
+
+    } else if (!device || device == [] || device == '') {
+
+      app.locals.logger.log('error', 'No device found for that hostname', {hostname: hostname});
+      getEventsCallback({code: 404, message: 'No device found for: ' + hostname}, null);
+
+    } else if (app.locals.crmModule.getSensuEvents) {
+
+      app.locals.crmModule.getSensuEvents(2, device.deviceID, getEventsCallback);
+
     } else {
-      request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
+
+      var url = app.get('sensu_uri') + '/events/' + device.dev_desc + app.locals.config.mgmtDomain;
+      request({ url: app.get('sensu_uri') + '/events/' + device.dev_desc + app.locals.config.mgmtDomain, json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           var events = [];
           _.each(body, function(event) {
-            _.defaults(event, deviceHostnames[event.client]);
+            _.defaults(event, device);
             event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
             events.push(event);
           });
@@ -480,8 +517,9 @@ app.locals.getSensuEvents = function (getEventsCallback ) {
           getEventsCallback( error, null )
         }
       });
-    }});
-  };
+    }
+  });
+};
 
 app.locals.getSensuStashes = function (stashes, getStashCallback) {
   var request = require('request');

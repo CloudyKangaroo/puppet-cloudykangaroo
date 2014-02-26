@@ -15,7 +15,7 @@ module.exports = function (app, config, passport, redisClient) {
     , app.locals.ensureAuthenticated
     , function (req, res) {
       var _ = require('underscore');
-        app.locals.ubersmith.getClients(function (err, clientList) {
+        app.locals.crmModule.getClients(function (err, clientList) {
            if (err) {
              res.send(500);
            } else {
@@ -28,12 +28,12 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/tickets/ticketid/:ticketid'
     , app.locals.ensureAuthenticated
     , function (req, res) {
-      app.locals.ubersmith.getTicketbyTicketID(req.params.ticketid, function (err, ticket) {
+      app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function (err, ticket) {
         if (err)
         {
           res.send(500);
         } else {
-          app.locals.ubersmith.getClientByID(ticket.client_id, function (err, client) {
+          app.locals.crmModule.getClientByID(ticket.client_id, function (err, client) {
             if (err)
             {
               res.send(500);
