@@ -170,7 +170,11 @@ function handleTicketForm(event) {
       var response = JSON.parse(data);
       if (response.status == true)
       {
-        bootbox.alert({"message": 'Completed!', "className" : "small-bootbox"});
+        if (newTicket) {
+          bootbox.alert({ 'message': 'Completed! New ticket: <a href="https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket='+ response.data +'">'+ response.data +'</a>', "className": "small-bootbox"});
+        } else {
+          bootbox.alert({"message": 'Completed! ' + response.data, "className": "small-bootbox"});
+        }
         submitSilenceJSON(sensuEvent.client, sensuEvent.check);
       } else {
         bootbox.alert({"message": 'Failed to submit post: ' + response.error_message, "className" : "small-bootbox"});
