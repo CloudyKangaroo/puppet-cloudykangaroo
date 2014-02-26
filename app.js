@@ -489,14 +489,26 @@ app.locals.getSensuEvents = function (getEventsCallback ) {
 app.locals.getSensuDeviceEvents = function (hostname, getEventsCallback ) {
   var _ = require('underscore');
   var request = require('request');
-  app.locals.crmModule.getDeviceByHostname(hostname, function (error, device) {
-    if (!device || error) {
-      getEventsCallback( error, null );
+  app.locals.crmModule.getDeviceByHostname(hostname, function (error, deviceList) {
+    var device = deviceList[0];
+    if (error) {
+
+      app.locals.logger.log('error', 'Could not get device by hostname', {error: error.message});
+      getEventsCallback(error, null );
+
+    } else if (!device || device == [] || device == '') {
+
+      app.locals.logger.log('error', 'No device found for that hostname', {hostname: hostname});
+      getEventsCallback({code: 404, message: 'No device found for: ' + hostname}, null);
+
     } else if (app.locals.crmModule.getSensuEvents) {
+
       app.locals.crmModule.getSensuEvents(2, device.deviceID, getEventsCallback);
+
     } else {
-      var url = app.get('sensu_uri') + '/events/' + device.dev_desc + '.contegix.mgmt'
-      request({ url: app.get('sensu_uri') + '/events/' + device.dev_desc + '.contegix.mgmt', json: true }, function (error, response, body) {
+
+      var url = app.get('sensu_uri') + '/events/' + device.dev_desc + app.locals.config.mgmtDomain;
+      request({ url: app.get('sensu_uri') + '/events/' + device.dev_desc + app.locals.config.mgmtDomain, json: true }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           var events = [];
           _.each(body, function(event) {
