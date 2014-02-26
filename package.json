@@ -1,7 +1,7 @@
 {
   "name": "cloudy-kangaroo",
   "description": "Service Provider Management w/Sensu, Puppet and Ubersmith",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "homepage": "http://contegix.github.io/cloudykangaroo",
   "author": {
