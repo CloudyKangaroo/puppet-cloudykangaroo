@@ -255,6 +255,7 @@ module.exports = function (app, config, passport, redisClient) {
       var hostname = req.params.hostname;
       app.locals.getSensuDeviceEvents(hostname, function (err, events) {
          if (err) {
+           app.locals.logger.log('error', 'Error handling request', {message: err.message});
            res.send(500);
          } else {
            res.type('application/json');
