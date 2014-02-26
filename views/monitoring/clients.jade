@@ -45,7 +45,7 @@ block footer
             "mData": "name",
             "sWidth": "120px",
             "mRender": function (name, type, row) {
-              return '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + name.replace('.contegix.mgmt', '') + '</a>';
+              return '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + name.replace('#{config.mgmtDomain}', '') + '</a>';
             }
           }, {
             "mData": "address",

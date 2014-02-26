@@ -6,7 +6,7 @@ block head
 block content
     .page-header
       h1 Device Detail
-      h4 #{uberDevice.dev_desc}.contegix.mgmt
+      h4 #{uberDevice.dev_desc}#{config.mgmtDomain}
     .container
       .row
         .col-md-12
@@ -165,7 +165,7 @@ block footer
       $('#table_facts').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/puppet/devices/hostname/#{uberDevice.dev_desc}.contegix.mgmt/facts',
+        "sAjaxSource": '/api/v1/puppet/devices/hostname/#{uberDevice.dev_desc}#{config.mgmtDomain}/facts',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
@@ -188,7 +188,7 @@ block footer
       $('#table_checks').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/sensu/checks/hostname/#{uberDevice.dev_desc}.contegix.mgmt',
+        "sAjaxSource": '/api/v1/sensu/checks/hostname/#{uberDevice.dev_desc}#{config.mgmtDomain}',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
@@ -224,7 +224,7 @@ block footer
       oTable = $('#table_events').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/sensu/events/hostname/#{uberDevice.dev_desc}.contegix.mgmt',
+        "sAjaxSource": '/api/v1/sensu/events/hostname/#{uberDevice.dev_desc}#{config.mgmtDomain}',
         "iDisplayLength": 5,
         "bStateSave": true,
         "bDeferRender": true,

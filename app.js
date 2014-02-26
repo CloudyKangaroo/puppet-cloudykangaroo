@@ -430,11 +430,6 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
             } else {
               var facts = results[1];
               var factInfo = {};
-              /*
-               { certname: 'metamarkets14.contegix.mgmt',
-               name: 'virtual',
-               value: 'physical' }
-               */
               for (i=0; i<facts.length; i++)
               {
                 var fact = facts[i];

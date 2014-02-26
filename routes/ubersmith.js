@@ -61,7 +61,7 @@ module.exports = function (app, config, passport, redisClient) {
             res.send(404);
           } else {
             var async = require('async');
-            var hostname =  uberDevice.dev_desc + '.contegix.mgmt';
+            var hostname =  uberDevice.dev_desc + app.locals.config.mgmtDomain;
 
             async.parallel([
               function (asyncCallback) {
