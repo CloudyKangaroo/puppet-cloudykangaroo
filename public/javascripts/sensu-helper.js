@@ -11,7 +11,7 @@ var unsilenceCheck = function(oTable, silence_stash) {
   var client = splitstash[0];
   var check = splitstash[1];
   submitSilenceJSON(client, check, false);
-  bootbox.alert({ message: silence_stash+" unsilenced. Click ok to reload the dashboard.", className: "small-bootbox", callback: function(){ location.reload() }})
+  bootbox.alert({ message: silence_stash+" unsilenced. Click ok to reload the dashboard.", className: "small-bootbox", callback: function(){ oTable.fnReloadAjax('/api/v1/sensu/events/filtered'); }})
 }
 
 var silenceCheck = function(oTable, client, check) {
@@ -21,7 +21,7 @@ var silenceCheck = function(oTable, client, check) {
     } else if (duration != null && parseInt(duration) <= 72 && parseInt(duration) >= 1) {
 
       submitSilenceJSON(client, check, true, duration);
-      bootbox.alert({ "message": client+"/"+check+" silenced. Click ok to reload the dashboard.", "className": "small-bootbox", "callback": function(){ location.reload() }})
+      bootbox.alert({ "message": client+"/"+check+" silenced. Click ok to reload the dashboard.", "className": "small-bootbox", "callback": function(){ oTable.fnReloadAjax('/api/v1/sensu/events/filtered'); }})
     } else {
       bootbox.alert({ "message": "Length of time to silence in hours must be an integer <= 72", "className": "small-bootbox" })
     }
