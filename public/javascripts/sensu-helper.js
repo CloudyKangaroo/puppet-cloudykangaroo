@@ -28,7 +28,7 @@ var silenceCheck = function(oTable, client, check) {
   }})
 }
 
-var submitSilenceJSON = function(client, check, silence, duration) {
+var submitSilenceJSON = function(client, check, silence, duration, ticketID) {
 
   if (!client || client == '') {
     console.log('Invalid Client: ');
@@ -48,13 +48,17 @@ var submitSilenceJSON = function(client, check, silence, duration) {
     duration = 4;
   }
 
+  if (arguments.length <= 4) {
+    ticketID = 'none';
+  }
+
   if (check === 'false') {
     check = false;
   }
 
   var url = '/api/v1/sensu/silence/';
 
-  var data = {expires: duration * 3600};
+  var data = {expires: duration * 3600, ticketID: ticketID};
 
   if (check) {
     url += 'client/' + encodeURI(client) + '/check/' + encodeURI(check);
@@ -75,8 +79,7 @@ var submitSilenceJSON = function(client, check, silence, duration) {
     type: apiMethod,
     dataType: 'json',
     data: data,
-    success: function(data) {
-      var response = JSON.parse(data);
+    success: function(response) {
       if (response.status == true)
       {
         bootbox.alert({"message": 'Completed!', "className" : "small-bootbox"});
@@ -166,20 +169,26 @@ function handleTicketForm(event) {
     type: 'post',
     dataType: 'json',
     data: data,
-    success: function(data) {
-      var response = JSON.parse(data);
+    success: function(response) {
       if (response.status == true)
       {
+        var ticketID = response.data.id;
+        var ticketURL = response.data.url;
+
         if (newTicket) {
-          bootbox.alert({ 'message': 'Completed! New ticket: <a href="https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket='+ response.data +'">'+ response.data +'</a>', "className": "small-bootbox"});
+          bootbox.alert({ 'message': 'Completed! New ticket: <a href="='+ ticketURL +'">'+ ticketID +'</a>', "className": "small-bootbox"});
         } else {
-          bootbox.alert({"message": 'Completed! ' + response.data, "className": "small-bootbox"});
+          bootbox.alert({"message": 'Completed! ' + ticketID, "className": "small-bootbox"});
         }
-        submitSilenceJSON(sensuEvent.client, sensuEvent.check);
+        submitSilenceJSON(sensuEvent.client, sensuEvent.check, true, 96, ticketID);
       } else {
         bootbox.alert({"message": 'Failed to submit post: ' + response.error_message, "className" : "small-bootbox"});
         $("#" + uuid + "-submit").removeAttr('disabled')
       }
+    },
+    error: function(data) {
+      bootbox.alert({"message": 'Failed to submit post: ' + response.error_message, "className" : "small-bootbox"});
+      $("#" + uuid + "-submit").removeAttr('disabled');
     }
   });
   event.preventDefault();
