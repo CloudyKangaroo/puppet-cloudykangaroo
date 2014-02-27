@@ -404,7 +404,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires)
+      app.locals.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires), req.body.ticketID
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -418,7 +418,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceCheck(req.user.username, req.params.client, req.params.check, parseInt(req.body.expires)
+      app.locals.silenceCheck(req.user.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -895,7 +895,10 @@ module.exports = function (app, config, passport, redisClient) {
               res.send(500);
             }
           } else {
-            res.send(JSON.stringify(response));
+            var ticketID = response['data'];
+            var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}};
+            res.type('application/json');
+            res.send(JSON.stringify(responseObj));
           }
         });
     });
@@ -942,14 +945,29 @@ module.exports = function (app, config, passport, redisClient) {
               });
               req.body.ccList = ccList;
               req.body.toList = toList;
-              createSupportTicket(req, res);
+              createSupportTicket(req, res, function (err, response) {
+                if (err)
+                {
+                  if (err.code == 'ETIMEDOUT')
+                  {
+                    res.send(504);
+                  } else {
+                    res.send(500);
+                  }
+                } else {
+                  var ticketID = response['data'];
+                  var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}};
+                  res.type('application/json');
+                  res.send(JSON.stringify(responseObj));
+                }
+              });
             }
           });
         }
       })
     });
 
-  function createSupportTicket(req, res) {
+  function createSupportTicket(req, res, callback) {
     var subject = req.body.subject;
     var recipient = req.body.recipient;
     var user_id = req.user.adminID;
@@ -984,19 +1002,7 @@ module.exports = function (app, config, passport, redisClient) {
     msgBody += "\n\n";
     msgBody += app.locals.config.support.signatureTemplate;
 
-    app.locals.crmModule.createNewTicket(msgBody, subject, recipient, user_id, author, ccList, toList, priority, clientID, contactID, deviceID, function (err, response) {
-      if (err)
-      {
-        if (err.code == 'ETIMEDOUT')
-        {
-          res.send(504);
-        } else {
-          res.send(500);
-        }
-      } else {
-        res.send(JSON.stringify(response));
-      }
-    });
+    app.locals.crmModule.createNewTicket(msgBody, subject, recipient, user_id, author, ccList, toList, priority, clientID, contactID, deviceID, callback);
   };
 
   app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts'
