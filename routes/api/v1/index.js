@@ -294,8 +294,13 @@ module.exports = function (app, config, passport, redisClient) {
           var silenced = results.silenced;
           var events = results.events;
           var silenced_hash = {};
+          var silenced_contents = {};
           for (var i = 0; i < silenced.length; i++) {
             var split_path = silenced[i].path.split('/');
+            if (silenced[i].content.ticketID) {
+              silenced[i].content['ticketUrl'] = 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + silenced[i].content.ticketID;
+            }
+            silenced_contents[split_path.slice(1, 3).join('/')] = silenced[i].content
             if (!(split_path[1] in silenced_hash)) {
               silenced_hash[split_path[1]] = [ ];
             }
@@ -309,6 +314,11 @@ module.exports = function (app, config, passport, redisClient) {
           for (var i = 0; i < events.length; i++) {
             var element = events[i];
             if (element['client'] in silenced_hash && (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
+              if (silenced_hash[element['client']][0] && silenced_hash[element['client']].indexOf(element['check']) == -1) {
+                element['silence_contents'] = silenced_contents[element['client']];
+              } else {
+                element['silence_contents'] = silenced_contents[element['client']+'/'+element['check']];
+              }
               element['silenced'] = 1;
               var client = element['client'];
               var check;
@@ -321,6 +331,7 @@ module.exports = function (app, config, passport, redisClient) {
             } else {
               element['silenced'] = 0;
               element['silence_stash'] = '';
+              element['silence_contents'] = '';
             }
             filtered_events.push(element)
           }
@@ -955,6 +966,7 @@ module.exports = function (app, config, passport, redisClient) {
                     res.send(500);
                   }
                 } else {
+                  response = JSON.parse(response);
                   var ticketID = response['data'];
                   var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}};
                   res.type('application/json');

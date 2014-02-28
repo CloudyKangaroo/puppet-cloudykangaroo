@@ -13,9 +13,11 @@ block content
          b(class='caret')
         ul.dropdown-menu(role='menu', aria-labelledby='dropwdownMenu1')
           li
+            a(href='#', tabindex='-1') Unsilenced
+          li 
             a(href='#', tabindex='-1') Silenced
           li 
-            a(href='#', tabindex='-1') Unsilenced
+            a(href='#', tabindex='-1') Ticketed
           li 
             a(href='#', tabindex='-1') All
      .container(id="refreshmenu")
@@ -41,6 +43,9 @@ block content
             th Check
             th Flapping
             th Count
+            th User
+            th Silenced At
+            th Ticket
             th.visible-lg Output
         tbody
 block footer
@@ -48,6 +53,7 @@ block footer
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.1.0/bootbox.min.js')
   script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
   script(src='/javascripts/sensu-helper.js')
+  script(src='/javascripts/moment.min.js')
   script(type='text/javascript').
     $.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw )
     {
@@ -186,12 +192,42 @@ block footer
             "mData": "occurrences",
             "sWidth": "40px"
           }, {
+            "mData": "silence_contents",
+            "mRender": function(contents, type, row) {
+              var silence_contents = row['silence_contents']
+              if (silence_contents != '' && typeof(silence_contents.user) !== 'undefined') {
+                return silence_contents.user;
+              } else {
+                return '';
+              }
+            }
+          }, {
+            "mData": "silence_contents",
+            "mRender": function(contents, type, row) {
+              var silence_contents = row['silence_contents']
+              if (silence_contents != '' && typeof(silence_contents.timestamp) !== 'undefined') {
+                return moment.utc(parseInt(silence_contents.timestamp) * 1000).local();
+              } else {
+                return '';
+              }
+            }
+          }, {
+            "mData": "silence_contents",
+            "sWidth": "60px",
+            "mRender": function(contents, type, row) {
+              var silence_contents = row['silence_contents'];
+              if (silence_contents != '' && typeof(silence_contents.ticketID) !== 'undefined') {
+                return '<a href="' + silence_contents.ticketUrl + '">' + silence_contents.ticketID +'</a>';
+              } else {
+                return '';
+              }
+            }
+          }, {
             "mData": "output",
             "mRender": function (output, type, row) {
               var dispOutput = output.slice(0,75).replace(/["']/g, "");
               var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
               return "<a onclick=\"displayEventDetails('" + txtBoxText + "');\">" + dispOutput + "</a>";
-
             }
           }],
         "aaSorting": [[1,'desc']],
@@ -204,7 +240,7 @@ block footer
         //Filter by dropdown selection on table draw
         function( oSettings, aData, iDataIndex) {
           var row = oSettings.aoData[iDataIndex]._aData
-          , silenced = row.silenced;
+          , silenced = row.silenced, silence_contents = row.silence_contents;
 
           if(show === 'All') {
             return true;
@@ -212,17 +248,36 @@ block footer
             return (silenced === 0);
           } else if (show === 'Silenced') {
             return (silenced === 1);
+          } else if (show === 'Ticketed') {
+            return (typeof(silence_contents.ticketID) !== 'undefined')
           } else {
             return true;
           }
       });
+      
       $("#silencemenu .dropdown .dropdown-menu li a").click(function() {
         //Callback for dropdown, set show variable, change name, and redraw the table.
         show = $(this).text();
         $('#dLabel').html(show + '<span class="caret"</span>');
         oTable.fnDraw();
+        setColumns(show);
       });
+      setColumns(show);
     });
+    var setColumns = function(show) {
+      var showSilenceColumns;
+      if (show == 'Unsilenced') {
+        showSilenceColumns = false;
+      } else {
+        showSilenceColumns = true;
+      }
+
+      oTable.fnSetColumnVis(5, showSilenceColumns);
+      oTable.fnSetColumnVis(6, showSilenceColumns);
+      oTable.fnSetColumnVis(7, showSilenceColumns);
+      oTable.fnSetColumnVis(8, showSilenceColumns);
+    }
+
     var refreshInterval = 30000;
     var intervalId = setInterval(function() {
       oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
