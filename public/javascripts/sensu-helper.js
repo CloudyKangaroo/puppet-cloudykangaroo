@@ -172,8 +172,12 @@ function handleTicketForm(event) {
     success: function(response) {
       if (response.status == true)
       {
-        var ticketID = response.data.id;
         var ticketURL = response.data.url;
+
+        if (newTicket)
+        {
+           ticketID = response.data.id;
+        }
 
         if (newTicket) {
           bootbox.alert({ 'message': 'Completed! New ticket: <a href="='+ ticketURL +'">'+ ticketID +'</a>', "className": "small-bootbox"});
