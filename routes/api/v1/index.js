@@ -314,7 +314,7 @@ module.exports = function (app, config, passport, redisClient) {
           for (var i = 0; i < events.length; i++) {
             var element = events[i];
             if (element['client'] in silenced_hash && (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) != -1)) {
-              if (silenced_hash[element['client']][0] && silenced_hash[element['client']].indexOf(element['check']) == -1) {
+              if (silenced_hash[element['client']][0] == 0 || silenced_hash[element['client']].indexOf(element['check']) == -1) {
                 element['silence_contents'] = silenced_contents[element['client']];
               } else {
                 element['silence_contents'] = silenced_contents[element['client']+'/'+element['check']];
