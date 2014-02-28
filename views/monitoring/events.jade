@@ -216,7 +216,7 @@ block footer
             "sWidth": "60px",
             "mRender": function(contents, type, row) {
               var silence_contents = row['silence_contents'];
-              if (silence_contents != '' && typeof(silence_contents.ticketID) !== 'undefined') {
+              if (silence_contents != '' && typeof(silence_contents.ticketID) !== 'undefined' && silence_contents.ticketID != 'none') {
                 return '<a href="' + silence_contents.ticketUrl + '">' + silence_contents.ticketID +'</a>';
               } else {
                 return '';
@@ -249,7 +249,7 @@ block footer
           } else if (show === 'Silenced') {
             return (silenced === 1);
           } else if (show === 'Ticketed') {
-            return (typeof(silence_contents.ticketID) !== 'undefined')
+            return (typeof(silence_contents.ticketID) !== 'undefined' && silence_contents.ticketID != 'none')
           } else {
             return true;
           }
