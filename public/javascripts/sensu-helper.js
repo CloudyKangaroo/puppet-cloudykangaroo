@@ -164,6 +164,7 @@ function handleTicketForm(event) {
     url += 'ticketid/' + ticketID + '/posts';
   }
 
+
   $.ajax({
     url: url,
     type: 'post',
@@ -176,7 +177,7 @@ function handleTicketForm(event) {
         var ticketURL = response.data.url;
 
         if (newTicket) {
-          bootbox.alert({ 'message': 'Completed! New ticket: <a href="='+ ticketURL +'">'+ ticketID +'</a>', "className": "small-bootbox"});
+          bootbox.alert({ 'message': 'Completed! New ticket: <a href="'+ ticketURL +'">'+ ticketID +'</a>', "className": "small-bootbox"});
         } else {
           bootbox.alert({"message": 'Completed! ' + ticketID, "className": "small-bootbox"});
         }
@@ -215,3 +216,4 @@ function syntaxHighlight(json) {
     return '<span class="' + cls + '">' + match + '</span>';
   });
 }
+
