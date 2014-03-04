@@ -3,7 +3,7 @@
  */
 
 var config = require('./config');
-
+var utils = require('./lib/utils');
 if (process.env.NODE_ENV == 'development')
 {
   CrowdAuth = new Array();
@@ -294,21 +294,8 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.locals.getFormattedTimestamp = function (timeStamp, dateString) {
-  if (arguments.length == 1) {
-    var dateString = 'MMM DD H:mm:ss';
-  }
-  var offset = app.locals.moment(timeStamp * 1000);
-  return offset.format(dateString);
-}
-
-app.locals.getFormattedISO8601 = function (timeStamp, dateString) {
-  if (arguments.length == 1) {
-    var dateString = 'MMM DD H:mm:ss';
-  }
-  var offset = app.locals.moment(timeStamp);
-  return offset.format(dateString);
-}
+app.locals.getFormattedTimestamp = utils.getFormattedTimestamp;
+app.locals.getFormattedISO8601 = utils.getFormattedISO8601;
 
 app.locals.getCombinedDevices = function () {
   var url = app.get('puppetdb_uri') + '/nodes?query=["=", ["fact", "kernel"], "Linux"]';

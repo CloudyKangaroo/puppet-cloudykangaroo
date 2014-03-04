@@ -1,4 +1,6 @@
 module.exports = function (app, config, passport, redisClient) {
+  var utils = require('../../../lib/utils');
+
   app.get('/api/v1/puppet/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -549,7 +551,7 @@ module.exports = function (app, config, passport, redisClient) {
                         _.defaults(device, deviceHostnames[device.name]);
                         _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
                         /*var events = [];
-                        device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
+                        device.timestamp = utils.getFormattedTimestamp(device.timestamp);
                         _.each(eventList, function (event) {
                           if (device.name == event.client)
                           {
@@ -670,8 +672,8 @@ module.exports = function (app, config, passport, redisClient) {
             var tickets = _.values(ticketList);
             for (i=0; i<tickets.length; i++)
             {
-              tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-              tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+              tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
+              tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
             }
             res.type('application/json');
             res.send(JSON.stringify({aaData: tickets}));
@@ -812,8 +814,8 @@ module.exports = function (app, config, passport, redisClient) {
           var tickets = _.values(ticketList);
           for (i=0; i<tickets.length; i++)
           {
-            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+            tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
           }
           res.type('application/json');
           res.send(JSON.stringify({aaData: tickets}));
@@ -842,8 +844,8 @@ module.exports = function (app, config, passport, redisClient) {
           var tickets = _.values(ticketList);
           for (i=0; i<tickets.length; i++)
           {
-            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+            tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
           }
           res.type('application/json');
           res.send(JSON.stringify({aaData: tickets}));
@@ -1029,7 +1031,7 @@ module.exports = function (app, config, passport, redisClient) {
           var posts = _.values(postsList);
           for (i=0; i<posts.length; i++)
           {
-            posts[i].timestamp = app.locals.getFormattedTimestamp(posts[i].timestamp);
+            posts[i].timestamp = utils.getFormattedTimestamp(posts[i].timestamp);
           }
           res.type('application/json');
           res.send(JSON.stringify({ aaData: posts }));
