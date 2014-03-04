@@ -1,4 +1,6 @@
 module.exports = function (app, config, passport, redisClient) {
+  var utils = require('../../../lib/utils');
+
   app.get('/api/v1/puppet/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
@@ -240,7 +242,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/events'
     , app.locals.requireGroup('users')
     , function (req, res) {
-    app.locals.getSensuEvents(function(err, events) {
+    app.locals.monModule.getEvents(function(err, events) {
       if (err) {
         res.send(500)
       } else {
@@ -254,7 +256,7 @@ module.exports = function (app, config, passport, redisClient) {
     , app.locals.requireGroup('users')
     , function (req, res) {
       var hostname = req.params.hostname;
-      app.locals.getSensuDeviceEvents(hostname, function (err, events) {
+      app.locals.monModule.getDeviceEvents(hostname, function (err, events) {
          if (err) {
            app.locals.logger.log('error', 'Error handling request', {message: err.message});
            res.send(500);
@@ -272,7 +274,7 @@ module.exports = function (app, config, passport, redisClient) {
       var response = async.series({
         events: function(callback) {
           setTimeout(function() {
-            app.locals.getSensuEvents(function(err, events) {
+            app.locals.monModule.getEvents(function(err, events) {
               if (!err) {
                 callback(err, events);
               } else {
@@ -282,7 +284,7 @@ module.exports = function (app, config, passport, redisClient) {
           }, 60)},
         silenced: function(callback) {
           setTimeout(function() {
-            app.locals.getSensuStashes('silence', function (err, stashes) {
+            app.locals.monModule.getStashes('silence', function (err, stashes) {
               if (!err) {
                 callback(err, stashes);
               } else {
@@ -380,7 +382,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/stashes/:stash'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.getSensuStashes(req.params.stash
+      app.locals.monModule.getStashes(req.params.stash
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -395,7 +397,7 @@ module.exports = function (app, config, passport, redisClient) {
     , app.locals.requireGroup('users')
     , function (req, res) {
       var _ = require('underscore');
-      app.locals.getSensuStashes('.*'
+      app.locals.monModule.getStashes('.*'
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -415,7 +417,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/sensu/silence/client/:client'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires), req.body.ticketID
+      app.locals.monModule.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires), req.body.ticketID
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -429,7 +431,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/sensu/silence/client/:client/check/:check'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.silenceCheck(req.user.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID
+      app.locals.monModule.silenceCheck(req.user.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID
         , function (err, response) {
           if (err) {
             res.send(500);
@@ -549,7 +551,7 @@ module.exports = function (app, config, passport, redisClient) {
                         _.defaults(device, deviceHostnames[device.name]);
                         _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
                         /*var events = [];
-                        device.timestamp = app.locals.getFormattedTimestamp(device.timestamp);
+                        device.timestamp = utils.getFormattedTimestamp(device.timestamp);
                         _.each(eventList, function (event) {
                           if (device.name == event.client)
                           {
@@ -573,7 +575,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.getSensuDevice(req.params.hostname
+      app.locals.monModule.getDevice(req.params.hostname
         , function (err, device) {
           if (err) {
             res.send(500);
@@ -587,7 +589,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/sensu/devices/hostname/:hostname/events'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.getSensuDevice(req.params.hostname
+      app.locals.monModule.getDevice(req.params.hostname
         , function (err, device) {
           if (err) {
             res.send(500);
@@ -670,8 +672,8 @@ module.exports = function (app, config, passport, redisClient) {
             var tickets = _.values(ticketList);
             for (i=0; i<tickets.length; i++)
             {
-              tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-              tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+              tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
+              tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
             }
             res.type('application/json');
             res.send(JSON.stringify({aaData: tickets}));
@@ -812,8 +814,8 @@ module.exports = function (app, config, passport, redisClient) {
           var tickets = _.values(ticketList);
           for (i=0; i<tickets.length; i++)
           {
-            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+            tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
           }
           res.type('application/json');
           res.send(JSON.stringify({aaData: tickets}));
@@ -842,8 +844,8 @@ module.exports = function (app, config, passport, redisClient) {
           var tickets = _.values(ticketList);
           for (i=0; i<tickets.length; i++)
           {
-            tickets[i].timestamp = app.locals.getFormattedTimestamp(tickets[i].timestamp);
-            tickets[i].activity = app.locals.getFormattedTimestamp(tickets[i].activity);
+            tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
+            tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
           }
           res.type('application/json');
           res.send(JSON.stringify({aaData: tickets}));
@@ -1029,7 +1031,7 @@ module.exports = function (app, config, passport, redisClient) {
           var posts = _.values(postsList);
           for (i=0; i<posts.length; i++)
           {
-            posts[i].timestamp = app.locals.getFormattedTimestamp(posts[i].timestamp);
+            posts[i].timestamp = utils.getFormattedTimestamp(posts[i].timestamp);
           }
           res.type('application/json');
           res.send(JSON.stringify({ aaData: posts }));
@@ -1054,7 +1056,7 @@ module.exports = function (app, config, passport, redisClient) {
                 app.locals.getPuppetDevice(hostname, asyncCallback);
               },
               function (asyncCallback) {
-                app.locals.getSensuDevice(hostname, asyncCallback);
+                app.locals.monModule.getDevice(hostname, asyncCallback);
               }
             ], function(err, results) {
               if (err)
@@ -1105,7 +1107,7 @@ module.exports = function (app, config, passport, redisClient) {
           });
         },
         function (asyncCallback) {
-          app.locals.getSensuDevice(hostname, function (err, device){
+          app.locals.monModule.getDevice(hostname, function (err, device){
             if (err)
             {
               asyncCallback(null, {});

@@ -73,7 +73,7 @@ module.exports = function (app, config, passport, redisClient) {
                 });
               },
               function (asyncCallback) {
-                app.locals.getSensuDevice(hostname, asyncCallback);
+                app.locals.monModule.getDevice(hostname, asyncCallback);
               }
             ], function(err, results) {
                if (err)
