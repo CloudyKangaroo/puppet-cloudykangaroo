@@ -81,7 +81,7 @@ redisClient.on("connect"
   Kick off the Ubersmith background update, pulls from Ubersmith and stores in Redis
  */
 
-try { 
+try {
   var crmModuleConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: crmAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.crmModule.warm_cache};
   if (process.env.NODE_ENV == 'development')
   {
@@ -91,6 +91,14 @@ try {
   }
 } catch (e) {
   logger.log('error', 'Could not initialize CRM Module', { error: e.message });
+  throw e;
+}
+
+try {
+  var monModule = require('./lib/monitoring')(config, logger, crmModule, redisClient);
+} catch (e) {
+  logger.log('error', 'Could not initialize Monitoring Module', { error: e.message});
+  throw e;
 }
 
 /*
@@ -130,6 +138,8 @@ app.locals.audit = auditLog;
 app.locals.redisClient = redisClient;
 app.locals.moment = require('moment');
 app.locals.crmModule = crmModule;
+app.locals.monModule = monModule;
+
 app.locals.title = 'Cloudy Kangaroo';
 app.enable('trust proxy');
 
@@ -141,8 +151,8 @@ app.use(function(req, res, next) {
   app.locals.pretty = true;
   next();
 });
-app.set('sensu_uri', 'http://' + config.sensu.host + ':' + config.sensu.port);
-app.set('puppetdb_uri', 'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3');
+app.set('sensu_uri', config.sensu.uri);
+app.set('puppetdb_uri', config.puppetdb.uri);
 
 app.use(reqLogger.create(logger));
 app.use(express.logger({stream: logstream }));
@@ -284,13 +294,6 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.locals.getEventClass = function (eventStatus) {
-  require('enum').register();
-  var StatusEnum = new Enum({'warning': 1, 'danger': 2, 'success': 0});
-  var eventClass = StatusEnum.get(eventStatus);
-  return eventClass;
-}
-
 app.locals.getFormattedTimestamp = function (timeStamp, dateString) {
   if (arguments.length == 1) {
     var dateString = 'MMM DD H:mm:ss';
@@ -325,7 +328,7 @@ app.locals.getCombinedDevices = function () {
 
           aSyncRequests.push(
             function (callback) {
-              var url = app.get('sensu_uri') + '/clients/';
+              var url = config.sensu.uri + '/clients/';
               request({ url: url, json: true }
                 , function (error, response) {
                     callback(error, response);
@@ -445,184 +448,6 @@ app.locals.getPuppetDevice = function(hostname, getDevCallback) {
           }
         }
       });
-    }
-  });
-}
-
-app.locals.getSensuEvents = function (getEventsCallback ) {
-  var _ = require('underscore');
-  var request = require('request');
-  if (app.locals.crmModule.getSensuEvents)
-  {
-    app.locals.crmModule.getSensuEvents(15, 0, getEventsCallback);
-  } else {
-    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
-      if (deviceHostnames == null)
-      {
-        getEventsCallback(new Error, null);
-      } else {
-        request({ url: app.get('sensu_uri') + '/events', json: true }, function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var events = [];
-            _.each(body, function(event) {
-              _.defaults(event, deviceHostnames[event.client]);
-              event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
-              events.push(event);
-            });
-            app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-            getEventsCallback( error, events )
-          } else {
-            app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
-            getEventsCallback( error, null )
-          }
-        });
-      }
-    });
-  }
-};
-
-app.locals.getSensuDeviceEvents = function (hostname, getEventsCallback ) {
-  var _ = require('underscore');
-  var request = require('request');
-  app.locals.crmModule.getDeviceByHostname(hostname, function (error, device) {
-    if (error) {
-
-      app.locals.logger.log('error', 'Could not get device by hostname', {error: error.message});
-      getEventsCallback(error, null );
-
-    } else if (!device || device == [] || device == '') {
-
-      app.locals.logger.log('error', 'No device found for that hostname', {hostname: hostname});
-      getEventsCallback({code: 404, message: 'No device found for: ' + hostname}, null);
-
-    } else if (app.locals.crmModule.getSensuEvents) {
-
-      app.locals.crmModule.getSensuEvents(2, device.deviceID, getEventsCallback);
-
-    } else {
-
-      var url = app.get('sensu_uri') + '/events/' + device.dev_desc + app.locals.config.mgmtDomain;
-      request({ url: app.get('sensu_uri') + '/events/' + device.dev_desc + app.locals.config.mgmtDomain, json: true }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          var events = [];
-          _.each(body, function(event) {
-            _.defaults(event, device);
-            event['issued'] = app.locals.getFormattedTimestamp(event['issued']);
-            events.push(event);
-          });
-          app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + '/events'});
-          getEventsCallback( error, events )
-        } else {
-          app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + '/events'})
-          getEventsCallback( error, null )
-        }
-      });
-    }
-  });
-};
-
-app.locals.getSensuStashes = function (stashes, getStashCallback) {
-  var request = require('request');
-  request({url: app.get('sensu_uri') + '/stashes', json: true}
-    , function (error, response, body) {
-      if (error) {
-        getStashCallback(error, body)
-      } else {
-        var re = new RegExp('^' + stashes)
-        var filtered_response = body.filter(function (element) {
-          if (re.exec(element.path)) { return true }
-        });
-        getStashCallback(error, filtered_response)
-      }
-    })
-}
-
-app.locals.silenceCheck = function (user, client, check, expires, ticketID, silenceCheckCallback) {
-  var request = require('request');
-  var reqBody = {
-    path: "silence/" + client + "/" + check,
-    content: { "timestamp": (Math.round(Date.now() / 1000)), "user": user , ticketID: ticketID},
-    expire: expires
-  };
-  logger.log('silly', reqBody);
-  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
-    , function (error, msg, response) {
-      logger.log('info', response);
-      silenceCheckCallback(error, response)
-    }
-  );
-}
-
-app.locals.silenceClient = function (user, client, expires, ticketID, silenceClientCallback) {
-  var request = require('request');
-  var reqBody = {
-    path: "silence/" + client,
-    content: { "timestamp": (Math.round(Date.now() / 1000)), "user": user , ticketID: ticketID},
-    expire: expires
-  };
-  logger.log('silly', reqBody);
-  request({ method: 'POST', url: app.get('sensu_uri') + '/stashes', json: true, body: JSON.stringify(reqBody) }
-    , function (error, msg, response) {
-      logger.log('debug', response);
-      silenceClientCallback(error, response)
-    }
-  );
-}
-
-app.locals.getSensuDevice = function(hostname, getDevCallback) {
-  var async = require('async');
-  redisClient.get('sensu:devices:' + hostname, function (err, reply) {
-    if (!err && reply)
-    {
-      logger.log('debug', 'got device from Redis');
-       try {
-        var parsedJSON = JSON.parse(reply);
-       }
-       catch (e) {
-           logger.log('error','uncaught exception');
-       }
-      getDevCallback(null, parsedJSON);
-    } else {
-      logger.log('debug', 'getting device from sensu');
-      async.parallel([
-        function (asyncCallback) {
-          var request = require('request');
-          request({ url: app.get('sensu_uri')+ '/client/' + hostname, json: true }
-            , function (error, response) {
-              asyncCallback(error, response.body);
-            });
-        },
-        function (asyncCallback) {
-          var request = require('request');
-          request({ url: app.get('sensu_uri') + '/events/' + hostname, json: true }
-            , function (error, response) {
-              asyncCallback(error, response.body);
-            });
-        }
-      ], function(err, results) {
-          if (err)
-          {
-            getDevCallback(err);
-          } else {
-            if (results && results.length==2)
-            {
-              if (!results[0])
-              {
-                var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
-                var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
-                var sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
-              } else {
-                var sensuDevice = {node: results[0], events: results[1]};
-              }
-              redisClient.set('sensu:devices:' + hostname, JSON.stringify(sensuDevice));
-              redisClient.expire('sensu:devices:' + hostname, 5)
-              getDevCallback(err, sensuDevice);
-            } else {
-              app.locals.logger.log('error', 'could not retrieve events and node from Sensu', { results: JSON.stringify(results) });
-              getDevCallback(new Error('could not retrieve events and node from Sensu'));
-            }
-          }
-        });
     }
   });
 }

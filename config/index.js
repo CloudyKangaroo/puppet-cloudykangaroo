@@ -37,6 +37,7 @@ config.production = {};
 config.production.log = {};
 config.development.log = {};
 config.metrics = {};
+
 config.crmModule = {};
 config.crmModule.warm_cache = false;
 config.crmModule.ticketingHost = 'portal.contegix.com';
@@ -54,9 +55,11 @@ config.production.log.screen = 'hide';
 
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
+config.sensu.uri = 'http://' + config.sensu.host + ':' + config.sensu.port;
 
 config.puppetdb.host = process.env.PUPPETDB_HOST || 'puppet-db01.contegix.com';
 config.puppetdb.port = process.env.PUPPETDB_PORT || 8080;
+config.puppetdb.uri =  'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3';
 
 config.redis.uri = process.env.REDIS_URI;
 config.redis.host = process.env.REDIS_HOST || 'localhost';
