@@ -68,8 +68,8 @@ module.exports = function (app, config, passport, redisClient) {
         } else {
           var username = 'none';
         }
-
-        app.locals.audit.log('info', req.path, { type: 'audit', source: req.params.source, event: req.params.event, fields: fields, username: username, requestID: req.id, sessionID: req.sessionID })
+        var auditLog = ctxlog('audit', config.log.level, config.log.directory, {level: config.log.screen}, {level: config.log.level});
+        auditLog.log('info', req.path, { type: 'audit', source: req.params.source, event: req.params.event, fields: fields, username: username, requestID: req.id, sessionID: req.sessionID })
       });
     });
 }

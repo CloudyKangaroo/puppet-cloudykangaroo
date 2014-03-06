@@ -66,12 +66,7 @@ block content
                 span.pull-right #{puppetDevice.facts.physicalprocessorcount} socket (#{puppetDevice.facts.processorcount/puppetDevice.facts.physicalprocessorcount} core) x #{puppetDevice.facts.processor0}
               p Interfaces
                 span.pull-right Management: #{puppetDevice.facts.interface_mgmt} Public: #{puppetDevice.facts.interface_public}
-              p Catalog Timestamp
-                span.pull-right #{getFormattedISO8601(puppetDevice.catalog_timestamp)}
-              p Facts Timestamp
-                span.pull-right #{getFormattedISO8601(puppetDevice.facts_timestamp)}
-              p Report Timestamp
-                span.pull-right #{getFormattedISO8601(puppetDevice.report_timestamp)}
+
         .col-md-6
           .panel.panel-default
             .panel-heading Ubersmith Information

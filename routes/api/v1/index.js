@@ -4,7 +4,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/devices/hostname/:hostname'
     , app.locals.requireGroup('users')
     , function (req, res) {
-      app.locals.getPuppetDevice(req.params.hostname
+      app.locals.puppetModule.getDevice(req.params.hostname
         , function (err, device) {
           if (err) {
             res.send(500);
@@ -95,6 +95,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours'
     , app.locals.requireGroup('users')
     , function (req, res) {
+      var moment = require('moment');
       var hoursAgo = req.params.hours;
       var request = require('request');
       var queryString = '?query=[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]';
@@ -116,7 +117,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours'
     , app.locals.requireGroup('users')
     , function (req, res) {
-
+      var moment = require('moment');
       var hoursAgo = req.params.hours;
       var request = require('request');
       var queryString = '?query=["and", ["~", "certname", ".*"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
@@ -147,6 +148,7 @@ module.exports = function (app, config, passport, redisClient) {
   app.get('/api/v1/puppet/failures/hours/:hours'
     , app.locals.requireGroup('users')
     , function (req, res) {
+      var moment = require('moment');
       var hoursAgo = req.params.hours;
       var request = require('request');
       var queryString = '?query=["and", ["=", "status", "failure"], ["~", "certname", "' + app.locals.config.mgmtDomain + '$"],[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]]';
@@ -171,7 +173,7 @@ module.exports = function (app, config, passport, redisClient) {
       var _ = require('underscore');
       var request = require('request');
       var hostname = req.params.hostname;
-      app.locals.getPuppetDevice(hostname
+      app.locals.puppetModule.getDevice(hostname
         , function (err, device) {
           if (err) {
             res.send(500);
@@ -1053,7 +1055,7 @@ module.exports = function (app, config, passport, redisClient) {
             var hostname =  uberDevice.dev_desc + app.locals.config.mgmtDomain;
             async.parallel([
               function (asyncCallback) {
-                app.locals.getPuppetDevice(hostname, asyncCallback);
+                app.locals.puppetModule.getDevice(hostname, asyncCallback);
               },
               function (asyncCallback) {
                 app.locals.monModule.getDevice(hostname, asyncCallback);
@@ -1097,7 +1099,7 @@ module.exports = function (app, config, passport, redisClient) {
           });
         },
         function (asyncCallback) {
-          app.locals.getPuppetDevice(hostname, function (err, device){
+          app.locals.puppetModule.getDevice(hostname, function (err, device){
             if (err)
             {
               asyncCallback(null, {});

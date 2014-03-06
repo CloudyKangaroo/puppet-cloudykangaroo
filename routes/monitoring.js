@@ -99,7 +99,8 @@ module.exports = function (app, config, passport, redisClient) {
           var clients = body;
           for (i=0; i<clients.length; i++)
           {
-            clients[i].timestamp = app.locals.getFormattedTimestamp(clients[i].timestamp);
+            var utils = require('../lib/utils');
+            clients[i].timestamp = utils.getFormattedTimestamp(clients[i].timestamp);
           }
           res.type('application/json');
           res.send(JSON.stringify({ aaData: clients }));

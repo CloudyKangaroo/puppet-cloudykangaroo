@@ -68,7 +68,7 @@ module.exports = function (app, config, passport, redisClient) {
                 app.locals.crmModule.getDeviceByID(req.params.deviceid, asyncCallback);
               },
               function (asyncCallback) {
-                app.locals.getPuppetDevice(hostname, function (error, puppetDevice){
+                app.locals.puppetModule.getDevice(hostname, function (error, puppetDevice){
                      asyncCallback(error, puppetDevice)
                 });
               },
