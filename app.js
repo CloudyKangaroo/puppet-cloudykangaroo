@@ -34,7 +34,12 @@ if (process.env.NODE_ENV == 'development') {
 }
 
 // Generic Requirements
-var redis = require('redis');
+if (process.env.NODE_ENV == 'test') {
+  var redis = require("fakeredis");
+} else {
+  var redis = require('redis');
+}
+
 var express = require('express');
 var http = require('http');
 var path = require('path');

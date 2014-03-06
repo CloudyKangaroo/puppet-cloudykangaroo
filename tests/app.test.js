@@ -1,4 +1,5 @@
 process.env.NODE_ENV = 'test';
+process.env.LOG_DIR = './';
 var app = require('../app');
 var request = require('supertest');
 var assert = require('assert');
