@@ -4,8 +4,8 @@
 
 var config = require('./config');
 var utils = require('./lib/utils');
-if (process.env.NODE_ENV == 'development')
-{
+
+if (process.env.NODE_ENV == 'development' || process.env.NODE_ENV == 'test') {
   CrowdAuth = new Array();
   CrowdAuth['server'] = '';
   CrowdAuth['application'] = '';
@@ -16,9 +16,17 @@ if (process.env.NODE_ENV == 'development')
   crmAuth['password'] = '';
   crmAuth['url'] = ''
   crmAuth['host'] = ''
+}
 
+if (process.env.NODE_ENV == 'development') {
   config.log.level = config.development.log.level;
   config.log.screen = config.development.log.screen;
+} else if (process.env.NODE_ENV == 'test') {
+  var db = require('./lib/db');
+  var mockUser = db.users.syncfindByUsername('test');
+  config.log.level = 'hide';
+  config.log.screen = 'hide';
+  config.mgmtDomain = '.unittest.us';
 } else {
   config.log.level = config.production.log.level;
   config.log.screen = config.production.log.screen;
@@ -83,7 +91,7 @@ redisClient.on("connect"
 
 try {
   var crmModuleConfig = {mgmtDomain: config.mgmtDomain, redisPort: config.redis.port, redisHost: config.redis.host, redisDb: config.redis.db, uberAuth: crmAuth, logLevel: config.log.level, logDir: config.log.directory, warm_cache: config.crmModule.warm_cache};
-  if (process.env.NODE_ENV == 'development')
+  if (process.env.NODE_ENV == 'development' || process.env.NODE_ENV == 'test')
   {
     var crmModule = require('cloudy-localsmith')(crmModuleConfig);
   } else {
@@ -186,7 +194,11 @@ app.use(express.session({
 app.use(flash());
 
 var authenticator = require('./lib/auth')(app, config);
-app.use(authenticator.passport.initialize());
+if (process.env.NODE_ENV == 'test') {
+  app.use(authenticator.mockPassport.initialize(mockUser));
+} else {
+  app.use(authenticator.passport.initialize());
+}
 app.use(authenticator.passport.session());
 
 /*
