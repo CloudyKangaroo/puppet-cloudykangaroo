@@ -49,7 +49,7 @@
     "cloudy-localsmith": "0.1.0",
     "contegix-logger": "0.1.x",
     "oauth2orize": "1.0.x",
-    "passport": "0.1.x",
+    "passport": "0.2.x",
     "passport-local": "0.1.x",
     "passport-http": "0.2.x",
     "passport-http-bearer": "1.0.x",

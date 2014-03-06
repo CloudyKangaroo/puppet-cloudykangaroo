@@ -22,8 +22,6 @@ if (process.env.NODE_ENV == 'development') {
   config.log.level = config.development.log.level;
   config.log.screen = config.development.log.screen;
 } else if (process.env.NODE_ENV == 'test') {
-  var db = require('./lib/db');
-  var mockUser = db.users.syncfindByUsername('test');
   config.log.level = 'hide';
   config.log.screen = 'hide';
   config.mgmtDomain = '.unittest.us';
@@ -200,7 +198,7 @@ app.use(flash());
 
 var authenticator = require('./lib/auth')(app, config);
 if (process.env.NODE_ENV == 'test') {
-  app.use(authenticator.mockPassport.initialize(mockUser));
+  app.use(authenticator.mockPassport.initialize());
 } else {
   app.use(authenticator.passport.initialize());
 }
