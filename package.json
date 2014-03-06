@@ -27,6 +27,7 @@
   "dependencies": {
     "express": "3.4.x",
     "redis": "0.9.x",
+    "fakeredis": "0.1.3",
     "nock": "0.27.x",
     "mocha": "1.17.x",
     "assert": "1.1.x",
@@ -45,7 +46,7 @@
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
     "cloudy-ubersmith": "0.2.12",
-    "cloudy-localsmith": "0.0.x",
+    "cloudy-localsmith": "0.1.0",
     "contegix-logger": "0.1.x",
     "oauth2orize": "0.x.x",
     "passport": "0.1.x",

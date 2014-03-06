@@ -60,16 +60,6 @@ module.exports = function (app, config, authenticator, redisClient) {
           app.locals.logger.log('debug', 'this request requires authentication',  { username: 'none', requestID: req.id, sessionID: req.sessionID });
         }
         res.render('account/login', { user: req.user, message: req.flash('error') });
-        //res.render('account/login', { user: req.user, message: undefined });
-        /*, function (err, html) {
-         if (err)
-         {
-         app.locals.logger.log('error', 'error rendering jade template', {error: err, requestID: req.id, sessionID: req.sessionID});
-         res.send(500);
-         } else {
-         res.end(html);
-         }
-         });*/
       }
     }
   };
