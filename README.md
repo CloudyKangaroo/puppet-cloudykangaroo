@@ -1,11 +1,9 @@
-
 Cloudy Kangaroo
 ==============
 
 Sensu Monitoring Interface
 
-[![Build Status](https://api.travis-ci.org/johann8384/cloudykangaroo.png?branch=master)](https://travis-ci.org/johann8384/cloudykangaroo)
-[![Coverage Status](https://coveralls.io/repos/johann8384/cloudykangaroo/badge.png)](https://coveralls.io/r/johann8384/cloudykangaroo)
+[![Build Status](https://travis-ci.org/CloudyKangaroo/cloudykangaroo.png?branch=master)](https://travis-ci.org/CloudyKangaroo/cloudykangaroo)
 [![Dependency Status](https://www.versioneye.com/user/projects/52d8c749ec13758876000199/badge.png)](https://www.versioneye.com/user/projects/52d8c749ec13758876000199)
 
 The Cloudy Kangaroo project is an interface to allow you to interact with your management systems. Currently Puppet, Sensu and Ubersmith are supported data providers/integration points.

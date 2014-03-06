@@ -1,5 +1,11 @@
 # Cloudykangaroo Changelog
 
+### v0.3.1
+
+- Moved code to src
+- Added Grunt to run unit tests, linting and code coverage checks
+- Removed UUID
+
 ### v0.3.0
 
 - Added monModule, removed getSensu* from app.js

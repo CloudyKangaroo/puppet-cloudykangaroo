@@ -1,0 +1,164 @@
+extends ../layout
+block head
+  include ../datatables_css
+
+block content
+  .page-header
+    h1 Customer Detail
+    h4 #{client.company}
+  .container
+    .row
+      .col-md-14
+        .panel.panel-default
+          .panel-heading Device List
+          .panel-body
+            table(id="table_devices").table.table-condensed.table-striped
+              thead
+                tr
+                  th Type
+                  th Hostname
+                  th Description
+                  th Status
+                  th Location
+              tbody
+
+      .row
+        .col-md-12
+          .panel.panel-default
+            .panel-heading Ticket List
+            .panel-body
+              table(id="table_tickets").table.table-condensed
+                thead
+                  tr
+                    th Created
+                    th Priority
+                    th Type
+                    th Device
+                    th Assignee
+                    th Subject
+                    th Touched
+                tbody
+      .row
+        .col-md-8
+          .panel.panel-default
+            .panel-heading Contacts List
+            .panel-body
+              table(id="table_contacts").table.table-condensed.table-striped
+                thead
+                  tr
+                    th Information
+                    th Roles
+                tbody
+                  each contact in client.contacts
+                    tr
+                      td
+                        ul.list-group
+                          li.list-group-item Name:
+                            span.pull-right #{contact.real_name}
+                          li.list-group-item Email:
+                            span.pull-right  #{contact.email}
+                          li.list-group-item Phone:
+                            span.pull-right  #{contact.phone}
+                      td
+                        ul.list-group
+                          li.list-group-item Sales Role:
+                            span.pull-right #{contact.sales_role}
+                          li.list-group-item Billing Role:
+                            span.pull-right  #{contact.billing_role}
+                          li.list-group-item DC Access Role:
+                            span.pull-right  #{contact.dc_access_role}
+
+        .col-md-4
+          .panel.panel-default
+            .panel-heading Account Information
+            .panel-body
+              p Client ID:
+                span.pull-right #{clientid}
+              p Company:
+                span.label.label-success.pull-right #{client.company}
+              p Address:
+                span.pull-right
+                  address
+                    p #{client.address} #{client.city}, #{client.state}. #{client.zip}
+              p Created:
+                span.pull-right #{client.created}
+              p Contact Information:
+                ul.list-group
+                  li.list-group-item Name:
+                    span.pull-right #{client.first} #{client.last}
+                  li.list-group-item Email:
+                    span.pull-right  #{client.email}
+                  li.list-group-item Phone:
+                    span.pull-right  #{client.phone}
+
+block footer
+  include ../datatables_js
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_tickets').dataTable( {
+        "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+        "sPaginationType": "bootstrap",
+        "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/tickets',
+        "iDisplayLength": 10,
+        "bStateSave": true,
+        "bSortClasses": false,
+        "aoColumns": [
+          {
+            "mData": "timestamp"
+          }, {
+            "mData": "priority"
+          }, {
+            "mData": "type"
+          }, {
+            "mData": "device_id",
+            "mRender": function (device_id, type, row) {
+              return '<a href="/ubersmith/devices/deviceid/' + device_id + '">' + row['dev_desc'] + '</a>';
+            }
+          }, {
+            "mData": "admin_username"
+          }, {
+            "mData": "subject",
+            "mRender": function (subject, type, row) {
+              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
+            }
+          }, {
+            "mData": "activity"
+          }],
+        "aaSorting": [[0,'desc'],[1, 'asc']],
+        "oLanguage": {
+          "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });
+
+  script(type='text/javascript').
+    $(document).ready(function() {
+      $('#table_devices').dataTable( {
+      "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+      "sPaginationType": "bootstrap",
+      "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/devices',
+      "iDisplayLength": 15,
+      "bStateSave": true,
+      "bDeferRender": true,
+      "bSortClasses": false,
+      "aoColumns": [
+        {
+          "mData": "type"
+        }, {
+          "mData": "dev",
+          "mRender": function (dev, type, row) {
+            return '<a href="/ubersmith/devices/deviceid/' + dev + '">' + row['dev_desc'] + '</a>';
+          }
+        }, {
+          "mData": "label"
+        }, {
+          "mData": "active"
+        }, {
+          "mData": "location"
+        }],
+        "aaSorting": [[0,'desc'],[1, 'desc']],
+        "oLanguage": {
+        "sLengthMenu": "_MENU_ records per page"
+        }
+      });
+    });

@@ -1,63 +1,87 @@
 {
   "name": "cloudy-kangaroo",
   "description": "Service Provider Management w/Sensu, Puppet and Ubersmith",
-  "version": "0.2.3",
+  "version": "0.3.1",
   "private": true,
-  "homepage": "http://contegix.github.io/cloudykangaroo",
+  "homepage": "http://cloudykangaroo.github.io/cloudykangaroo",
   "author": {
-      "name": "Jonathan Creasy",
-      "email": "jonathan.creasy@gmail.com"
+    "name": "Jonathan Creasy",
+    "email": "jonathan.creasy@gmail.com"
   },
   "repository": {
-      "type": "git",
-      "url": "https://github.com/contegix/cloudykangaroo"
+    "type": "git",
+    "url": "https://github.com/cloudykangaroo/cloudykangaroo"
   },
   "bugs": {
-      "url": "https://github.com/contegix/cloudykangaroo/issues/new"
+    "url": "https://github.com/cloudykangaroo/cloudykangaroo/issues/new"
   },
   "license": {
-      "type": "MIT",
-      "url": "https://github.com/contegix/cloudykangaroo/blob/master/LICENSE"
+    "type": "MIT",
+    "url": "https://github.com/cloudykangaroo/cloudykangaroo/blob/master/LICENSE"
   },
   "scripts": {
     "start": "forever start -a -l c/var/log/cloudykangaroo/forever.log -o /var/log/cloudykangaroo/out.log -e /var/log/cloudykangaroo/err.log app.js",
-    "test": "mocha --recursive -u tdd --reporter spec"
+    "test": "grunt test"
   },
-  "dependencies": {
-    "express": "3.4.x",
-    "redis": "0.10.x",
-    "fakeredis": "0.1.3",
+  "devDependencies": {
+    "fakeredis": "0.1.x",
+    "grunt": "0.4.x",
+    "grunt-env": "0.4.1",
     "mocha": "1.17.x",
+    "should": "3.1.3",
+    "blanket": "1.1.x",
+    "jshint": "2.4.x",
+    "grunt-blanket": "0.0.8",
+    "grunt-contrib-jshint": "0.8.x",
+    "grunt-mocha-test": "0.9.x",
+    "grunt-mocha-cov": "0.2.x",
+    "travis-cov": "0.2.x",
     "assert": "1.1.x",
     "supertest": "0.9.x",
-    "connect-redis": "1.4.x",
+    "cloudy-localsmith": "0.1.0",
+    "grunt-mocha-cov": "~0.2.1"
+  },
+  "dependencies": {
+    "express": "3.5.x",
+    "redis": "0.10.x",
+    "connect-redis": "1.5.x",
     "async": "0.2.x",
     "util": "0.10.x",
-    "uuid": "1.4.x",
     "express-useragent": "0.0.11",
     "connect-requestid": "1.1.x",
-    "connect-redis": "1.4.x",
     "connect-ensure-login": "0.1.1",
     "express-request-logger": "0.0.x",
     "metrics": "0.1.x",
     "measured": "0.1.x",
     "connect-flash": ">=0.0.x",
     "cloudy-ubersmith": "0.2.12",
-    "cloudy-localsmith": "0.1.0",
     "contegix-logger": "0.1.x",
     "oauth2orize": "1.0.x",
     "passport": "0.2.x",
-    "passport-local": "0.1.x",
+    "passport-local": "1.0.x",
     "passport-http": "0.2.x",
     "passport-http-bearer": "1.0.x",
     "passport-oauth2-client-password": "0.1.x",
     "passport-atlassian-crowd": "0.0.x",
-    "moment" : "2.5.x",
+    "moment": "2.5.x",
     "formidable": "1.0.x",
     "request": "2.34.x",
     "socket.io": "0.9.x",
-    "underscore":"1.6.x",
+    "underscore": "1.6.x",
+    "cache-manager": "0.3.x",
+    "sol-redis-pool": "0.1.x",
     "jade": "1.3.0"
+  },
+  "config": {
+    "travis-cov": {
+      "threshold": 38,
+      "pattern": "src",
+      "data-cover-never": "node_modules"
+    },
+    "blanket": {
+      "pattern": "src",
+      "data-cover-never": "node_modules"
+    }
   },
   "engines": {
     "node": ">=0.10"

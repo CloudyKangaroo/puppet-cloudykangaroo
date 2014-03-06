@@ -1,0 +1,20 @@
+{
+  "jshint bitwise"  : true,
+  "curly"           : true,
+  "eqeqeq"          : true,
+  "devel"           : false,
+  "forin"           : true,
+  "newcap"          : true,
+  "noarg"           : true,
+  "noempty"         : true,
+  "nonew"           : true,
+  "undef"           : true,
+  "strict"          : true,
+  "trailing"        : true,
+  "latedef"         : true,
+  "unused"          : true,
+  "indent"          : 2,
+  "sub"             : false,
+  "node"            : true,
+  "maxerr"          : 50
+}

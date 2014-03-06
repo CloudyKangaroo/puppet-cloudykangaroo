@@ -9,7 +9,7 @@ var assert = require('assert');
 // https://github.com/visionmedia/supertest
 // https://github.com/visionmedia/express/tree/master/test
 
-describe('GET /tickets', function(){
+describe('GET /signage', function(){
   it('should return code 200', function(done){
     request(app)
       .get('/tickets')
@@ -20,14 +20,4 @@ describe('GET /tickets', function(){
        .get('/tickets')
        .expect('Content-Type', 'text/html; charset=utf-8', done);
   });
-  /*it('should be the welcome page', function(done) {
-    request(app)
-      .get('/tickets')
-      .expect(hasWelcomeText, done);
-  });*/
 });
-
-function hasWelcomeText(res) {
-  return; // this test is not working
-  expect(res.body).to.contain('Welcome to the Ticket System!')
-};

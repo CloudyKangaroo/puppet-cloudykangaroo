@@ -1,4 +1,6 @@
 lib-cov
+coverage
+pattern
 *.log
 logs
 *.seed
@@ -10,11 +12,16 @@ logs
 *.gz
 .idea
 pids
+coverage.*
+xunit.xml
+jshint.xml
 logs
 results
-config/system-credentials.js
-config/system-credentials.js.tmp
+src/config/system-credentials.js
+src/config/system-credentials.js.tmp
 npm-debug.log
 node_modules
 dump.rdb
 access.log
+system-credentials.js
+system-credentials.js.tmp
