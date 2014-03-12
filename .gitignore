@@ -12,6 +12,7 @@ logs
 *.gz
 .idea
 pids
+lcov.info
 coverage.*
 xunit.xml
 jshint.xml
