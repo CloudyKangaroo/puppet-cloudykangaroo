@@ -913,7 +913,7 @@ module.exports = function (app, config, passport, redisClient) {
           response = JSON.parse(response);
         }
         var ticketID = req.params.ticketid;
-        var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}}
+        var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}};
         res.type('application/json');
         res.send(JSON.stringify(responseObj));
       }
