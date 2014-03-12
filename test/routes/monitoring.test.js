@@ -101,7 +101,7 @@ var isTheCorrectList = function(res) {
   "use strict";
   var clientList = res.body.aaData;
   var client = clientList[0];
-  clientList.length.should.equal(715);
+  clientList.length.should.equal(719);
   client.should.have.property('address');
   client.should.have.property('name');
   client.should.have.property('safe_mode');
