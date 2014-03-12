@@ -24,7 +24,7 @@ No Feature improvements, just test and build improvements
 - Added monModule, removed getSensu* from app.js
 - Moved time format functions to utils
 - Fixed bug where ticketID is set to 'none' when adding event to existing ticket
-- 
+
 ### v0.2.3
 
 - Added sample system-credentials file
