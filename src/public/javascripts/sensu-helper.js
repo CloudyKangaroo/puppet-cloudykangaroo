@@ -194,11 +194,8 @@ var handleTicketForm = function(event) {
           ticketID = response.data.id;
         }
 
-        if (newTicket) {
-          bootbox.alert({ 'message': 'Completed! New ticket: <a href="'+ ticketURL +'">'+ ticketID +'</a>', "className": "small-bootbox"});
-        } else {
-          bootbox.alert({"message": 'Completed! ' + ticketID, "className": "small-bootbox"});
-        }
+        bootbox.alert({ 'message': 'Completed! Ticket Number: <a href="'+ ticketURL +'">'+ ticketID +'</a>', "className": "small-bootbox"});
+
         submitSilenceJSON(sensuEvent.client, sensuEvent.check, true, 96, ticketID, function (success) {
           if (success) {
             $("#" + uuid + "-submit").removeAttr('disabled');

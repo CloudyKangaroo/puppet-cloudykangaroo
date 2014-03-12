@@ -866,6 +866,9 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
+//  {"status":true,"error_code":null,"error_message":"","data":{"id":"1025875","url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=1025875"}}
+//  {"data":{"url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=undefined"}}
+
   app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', app.locals.requireGroup('users'), function (req, res) {
     var ticketID = req.params.ticketid;
     var subject = req.body.subject;
@@ -899,13 +902,18 @@ module.exports = function (app, config, passport, redisClient) {
       {
         if (err.code === 'ETIMEDOUT')
         {
+          app.locals.logger.log('warn', 'Got timeout while trying to create support ticket');
           res.send(504);
         } else {
+          app.locals.logger.log('error', 'Got err while trying to create support ticket', {err: err});
           res.send(500);
         }
       } else {
-        var ticketID = response['data'];
-        var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}};
+        if (Object.prototype.toString.call(response) === '[object String]') {
+          response = JSON.parse(response);
+        }
+        var ticketID = req.params.ticketid;
+        var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}}
         res.type('application/json');
         res.send(JSON.stringify(responseObj));
       }
@@ -917,6 +925,7 @@ module.exports = function (app, config, passport, redisClient) {
 
     app.locals.crmModule.getAdminByEmail(req.user.email, function (err, adminList) {
       if (err) {
+        app.locals.logger.log('error', 'Got err while trying to get admin by email', {email: req.user.email, err: err});
         res.send(500);
       } else {
         var _ = require('underscore');
@@ -934,6 +943,7 @@ module.exports = function (app, config, passport, redisClient) {
 
         app.locals.crmModule.getContactsbyClientID(clientID, function (err, contactList) {
           if (err) {
+            app.locals.logger.log('error', 'Got err while trying to get contacts by client it', {clientID: clientID, err: err});
             res.send(500);
           } else {
             var toList = [];
@@ -957,12 +967,16 @@ module.exports = function (app, config, passport, redisClient) {
               {
                 if (err.code === 'ETIMEDOUT')
                 {
+                  app.locals.logger.log('warn', 'Got timeout while trying to create support ticket');
                   res.send(504);
                 } else {
+                  app.locals.logger.log('error', 'Got err while trying to create support ticket', {err: err});
                   res.send(500);
                 }
               } else {
-                response = JSON.parse(response);
+                if (Object.prototype.toString.call(response) === '[object String]') {
+                  response = JSON.parse(response);
+                }
                 var ticketID = response['data'];
                 var responseObj = {status: response.status, error_code: response.error_code, error_message: response.error_message, data: {id: ticketID, url: 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + ticketID}};
                 res.type('application/json');
