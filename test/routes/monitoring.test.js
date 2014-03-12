@@ -101,11 +101,11 @@ var isTheCorrectList = function(res) {
   "use strict";
   var clientList = res.body.aaData;
   var client = clientList[0];
-  clientList.length.should.equal(719);
+  clientList.length.should.equal(5135);
   client.should.have.property('address');
   client.should.have.property('name');
   client.should.have.property('safe_mode');
-  client.address.should.equal('10.50.60.38');
+  client.address.should.equal('10.50.2.63');
 };
 
 describe('GET /monitoring/list/clients', function(){
