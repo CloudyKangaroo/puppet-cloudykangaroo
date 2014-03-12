@@ -79,12 +79,11 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   app.get('/monitoring/clients', app.locals.requireGroup('users'), function (req, res) {
-    var url = sensuURI + '/clients';
-    request({ url: url, json: true }, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: url});
+    app.locals.monModule.getDevices(function (error, clients) {
+      if (!error) {
+        app.locals.logger.log('debug', 'fetched data from Sensu');
         var renderParams = {
-          clients: body,
+          clients: clients,
           user:req.user,
           section: 'clients',
           navLinks: config.navLinks.monitoring
@@ -98,11 +97,9 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   app.get('/monitoring/list/clients', app.locals.requireGroup('users'), function (req, res) {
-    request({ url: sensuURI + '/clients', json: true}, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        app.locals.logger.log('debug', 'fetched data from PuppetDB', { uri: sensuURI + '/clients'});
-        var clients = body;
-
+    app.locals.monModule.getDevices(function (error, clients) {
+      if (!error) {
+        app.locals.logger.log('debug', 'fetched data from Sensu');
         for (var i=0; i<clients.length; i++)
         {
           var utils = require('../lib/utils');
@@ -111,7 +108,7 @@ module.exports = function (app, config, passport, redisClient) {
         res.type('application/json');
         res.send(JSON.stringify({ aaData: clients }));
       } else {
-        app.locals.logger.log('error', 'Error processing request', { error: error, uri: sensuURI + '/clients'});
+        app.locals.logger.log('error', 'Error processing request', { error: error });
         res.send(500);
       }
     });
