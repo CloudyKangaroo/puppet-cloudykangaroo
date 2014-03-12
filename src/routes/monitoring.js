@@ -1,7 +1,6 @@
 /* jshint unused: false */
 module.exports = function (app, config, passport, redisClient) {
   "use strict";
-  var sensuURI = app.get('sensu_uri');
   var request = require('request');
 
   app.get('/monitoring', app.locals.requireGroup('users'), function (req, res) {
@@ -89,7 +88,7 @@ module.exports = function (app, config, passport, redisClient) {
         };
         res.render('monitoring/clients', renderParams);
       } else {
-        app.locals.logger.log('error', 'Error processing request', { error: error, uri: url});
+        app.locals.logger.log('error', 'Error processing request', { error: error});
         res.send(500);
       }
     });
