@@ -49,8 +49,8 @@ config.log.level = 'debug';
 config.log.screen = 'info';
 config.development.log.level = 'info';
 config.development.log.screen = 'debug';
-config.production.log.level = 'warn';
-config.production.log.screen = 'hide';
+config.production.log.level = 'hide';
+config.production.log.screen = 'debug';
 
 config.sensu.host = process.env.SENSU_HOST || 'sensu-server01.contegix.com';
 config.sensu.port = process.env.SENSU_PORT || 4567;
