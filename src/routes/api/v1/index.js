@@ -407,22 +407,13 @@ module.exports = function (app, config, passport, redisClient) {
 
   app.get('/api/v1/sensu/events/device/:device', app.locals.requireGroup('users'), function (req, res) {
     var uri = '';
-    var request = require('request');
-
-    if (req.params.device && req.params.device !== '')
-    {
-      uri = '/events/' + req.params.device;
-    } else {
-      uri = '/events';
-    }
-
-    request({ url: app.get('sensu_uri') + uri, json: true }, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        app.locals.logger.log('debug', 'fetched data from Sensu', { uri: app.get('sensu_uri') + uri});
+    app.locals.monModule.getDeviceEvents(req.params.device, function(error, body){
+      if (!error) {
+        app.locals.logger.log('debug', 'fetched data from Sensu');
         res.type('application/json');
         res.send(JSON.stringify(body));
       } else {
-        app.locals.logger.log('error', 'Error processing request', { error: error, uri: app.get('sensu_uri') + uri});
+        app.locals.logger.log('error', 'Error processing request');
         res.send(500);
       }
     });
