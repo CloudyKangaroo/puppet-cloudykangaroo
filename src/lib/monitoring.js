@@ -230,14 +230,12 @@ module.exports = function (config, logger, crmModule, redisClient) {
 
   var mocksilenceCheck = function(user, client, check, expires, ticketID, callback) {
     silenceCheck(user, client, check, expires, ticketID, function (err, reply) {
-      console.log({function: 'silenceCheck', reply: JSON.stringify(reply)});
       callback(err, reply);
     });
   };
 
   var mocksilenceClient = function(user, client, check, expires, ticketID, callback) {
     silenceClient(user, client, check, expires, ticketID, function (err, reply) {
-      console.log({function: 'silenceClient', reply: JSON.stringify(reply)});
       callback(err, reply);
     });
   };
@@ -266,7 +264,24 @@ module.exports = function (config, logger, crmModule, redisClient) {
     });
   };
 
+  var mockgetInfo = function(callback) {
+    var bodyJSON = "{\"sensu\":{\"version\":\"0.12.1\"},\"rabbitmq\":{\"keepalives\":{\"messages\":0,\"consumers\":2},\"results\":{\"messages\":0,\"consumers\":2},\"connected\":true},\"redis\":{\"connected\":true}}";
+    var body = JSON.parse(bodyJSON);
+    callback(null, body);
+  };
+
+  var getInfo = function(callback) {
+    request({url: config.sensu.uri + '/info', json: true}, function (error, response, body) {
+      if (error) {
+        callback(error);
+      } else {
+        callback(null, body);
+      }
+    });
+  };
+
   if (process.env.NODE_ENV === 'test') {
+    module.getInfo = mockgetInfo;
     module.getEvents = mockgetEvents;
     module.getDeviceEvents = mockgetDeviceEvents;
     module.getStashes = mockgetStashes;
@@ -275,6 +290,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
     module.getDevice = mockgetDevice;
     module.getDevices = mockgetDevices;
   } else {
+    module.getInfo = getInfo;
     module.getDevices = getDevices;
     module.getEvents = getEvents;
     module.getDeviceEvents = getDeviceEvents;

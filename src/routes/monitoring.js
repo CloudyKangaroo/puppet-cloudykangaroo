@@ -1,14 +1,13 @@
 /* jshint unused: false */
 module.exports = function (app, config, passport, redisClient) {
   "use strict";
-  var sensuURI = app.get('sensu_uri');
   var request = require('request');
 
   app.get('/monitoring', app.locals.requireGroup('users'), function (req, res) {
-    request({ url: sensuURI + '/info', json: true }, function (error, response, body) {
+    app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
-      if (!error && response.statusCode === 200) {
-        app.locals.logger.log('debug', 'fetched data from Sensu', { uri: sensuURI + '/info'});
+      if (!error) {
+        app.locals.logger.log('debug', 'fetched data from Sensu');
         var sinceLastIncident = moment().diff(moment('01/01/2014 00:00:00',"DD/MM/YYYY HH:mm:ss"), 'days');
         var renderParams = {
           sinceLastIncident:  sinceLastIncident,
@@ -19,16 +18,16 @@ module.exports = function (app, config, passport, redisClient) {
         };
         res.render('monitoring', renderParams);
       } else {
-        app.locals.logger.log('error', 'error processing request', { error: error, uri: sensuURI + '/info'});
+        app.locals.logger.log('error', 'error processing request');
         res.send(500);
       }
     });
   });
 
   app.get('/monitoring/events', app.locals.requireGroup('users'), function (req, res) {
-    request({ url: sensuURI + '/events', json: true }, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        app.locals.logger.log('debug', 'fetched data from Sensu', { uri: sensuURI + '/events'});
+    app.locals.monModule.getEvents(function(error, body) {
+      if (!error) {
+        app.locals.logger.log('debug', 'fetched data from Sensu');
         var renderParams = {
           events: body,
           user:req.user,
@@ -37,7 +36,7 @@ module.exports = function (app, config, passport, redisClient) {
         };
         res.render('monitoring/events', renderParams);
       } else {
-        app.locals.logger.log('error', 'error processing request', { error: error, uri: sensuURI + '/events'});
+        app.locals.logger.log('error', 'error processing request');
         res.send(500);
       }
     });
@@ -45,10 +44,9 @@ module.exports = function (app, config, passport, redisClient) {
 
   app.get('/monitoring/events/device/:hostname', app.locals.requireGroup('users'), function (req, res) {
     var hostname = req.params.hostname;
-    var url = sensuURI + '/events/' + hostname;
-    request({ url: url, json: true }, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        app.locals.logger.log('debug', 'fetched data from Sensu', { uri: url});
+    app.locals.monModule.getDeviceEvents(hostname, function(error, body) {
+      if (!error) {
+        app.locals.logger.log('debug', 'fetched data from Sensu');
         var renderParams = {
           events: body,
           user:req.user,
@@ -57,7 +55,7 @@ module.exports = function (app, config, passport, redisClient) {
         };
         res.render('monitoring/events', renderParams);
       } else {
-        app.locals.logger.log('error', 'error processing request', { error: error, uri: url});
+        app.locals.logger.log('error', 'error processing request', { error: error});
         res.send(500);
       }
     });
@@ -90,7 +88,7 @@ module.exports = function (app, config, passport, redisClient) {
         };
         res.render('monitoring/clients', renderParams);
       } else {
-        app.locals.logger.log('error', 'Error processing request', { error: error, uri: url});
+        app.locals.logger.log('error', 'Error processing request', { error: error});
         res.send(500);
       }
     });
