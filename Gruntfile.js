@@ -1,5 +1,10 @@
 module.exports = function(grunt) {
   grunt.initConfig({
+    githooks: {
+      all: {
+        'pre-commit': 'test',
+      }
+    },
     jshint: {
       all: ['Gruntfile.js', 'src/app.js', 'src/routes/**/*.js', 'src/lib/**/*.js', 'src/public/javasripts/newTicketWizard.js', 'src/public/javascripts/sensu-helper.js', 'src/public/javascripts/puppet_gauges.js' ]
     },
@@ -35,11 +40,13 @@ module.exports = function(grunt) {
   });
   
   grunt.loadNpmTasks('grunt-env');
+  grunt.loadNpmTasks('grunt-githooks');
   grunt.loadNpmTasks('grunt-blanket');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-mocha-cov');
 
+  grunt.registerTask('hooks', 'githooks');
   grunt.registerTask('test', ['env:test', 'mochaTest', 'mochacov:test', 'jshint']);
   grunt.registerTask('default', ['env:development', 'mochaTest']);
 };

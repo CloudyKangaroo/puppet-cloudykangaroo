@@ -185,6 +185,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
   };
 
   var mockgetDeviceEvents = function(hostname, callback) {
+
     crmModule.getDeviceByHostname(hostname, function (error, device) {
       if (error) {
         logger.log('error', 'Could not get device by hostname', {error: error.message});
@@ -193,7 +194,16 @@ module.exports = function (config, logger, crmModule, redisClient) {
         logger.log('error', 'No device found for that hostname', {hostname: hostname});
         callback({code: 404, message: 'No device found for: ' + hostname}, null);
       } else {
-        crmModule.getEvents(2, device.deviceID, callback);
+        logger.log('debug', 'Got device ' + device.deviceID, {device: device});
+        crmModule.getSensuEvents(2, device.deviceID, function(error, deviceEvents) {
+          if (error) {
+            logger.log('error', 'Could not get device events', {deviceID: device.deviceID});
+            callback(err);
+          } else {
+            logger.log('debug', 'Got Device Events', {deviceEvents: deviceEvents});
+            callback(null, deviceEvents);
+          }
+        });
       }
     });
   };
