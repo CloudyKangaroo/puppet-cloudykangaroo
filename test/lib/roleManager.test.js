@@ -27,7 +27,7 @@ config.roles.super.groups = ['devops'];
 config.roles.users.users = [];
 config.roles.sales.users = [];
 config.roles.support.users = [];
-config.roles.admin.users = [];
+config.roles.admin.users = ['oneOffAdmin'];
 config.roles.super.users = [];
 
 var roleManager = require('../../src/lib/roleManager')(app, config.roles);
@@ -92,6 +92,16 @@ describe("roleManager isUsers", function (){
   });
   it('should NOT find user engineers in the super role', function () {
     var fakeUser = {username: 'fake', groups: ['engineers'] };
+    var req = {currentUser: fakeUser};
+    assert.equal(false, roleManager.isSuper(req));
+  });
+  it('should find user oneoffAdmin in the admin role', function () {
+    var fakeUser = {username: 'oneOffAdmin', groups: ['leads'] };
+    var req = {currentUser: fakeUser};
+    assert.equal(true, roleManager.isAdmin(req));
+  });
+  it('should NOT find user oneoffAdmin in the super role', function () {
+    var fakeUser = {username: 'oneOffAdmin', groups: ['leads'] };
     var req = {currentUser: fakeUser};
     assert.equal(false, roleManager.isSuper(req));
   });
