@@ -200,7 +200,9 @@ app.use(express.session({
 
 app.use(flash());
 
+var roleManager = require('./lib/roleManager')(app, config.roles);
 var authenticator = require('./lib/auth')(app, credentials, config, redisClient);
+authenticator.roleManager = roleManager.roleManager;
 
 if (process.env.NODE_ENV === 'test') {
   app.use(authenticator.mockPassport.initialize({ userProperty: 'currentUser' }));
@@ -209,7 +211,7 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 app.use(authenticator.passport.session());
-app.use(authenticator.roles.middleware());
+app.use(authenticator.roleManager.middleware());
 
 /*
   End User Authentication

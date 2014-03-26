@@ -3,7 +3,7 @@ module.exports = function (app, config, authenticator, redisClient) {
   "use strict";
   var passport = authenticator.passport;
 
-  app.get('/monitoring', authenticator.roles.can('view monitoring'), function (req, res) {
+  app.get('/monitoring', authenticator.roleManager.can('view monitoring'), function (req, res) {
     app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
       if (!error) {
@@ -25,7 +25,7 @@ module.exports = function (app, config, authenticator, redisClient) {
     });
   });
 
-  app.get('/monitoring/events', authenticator.roles.can('view monitoring events'), function (req, res) {
+  app.get('/monitoring/events', authenticator.roleManager.can('view monitoring events'), function (req, res) {
     app.locals.monModule.getEvents(function(error, body) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
@@ -44,7 +44,7 @@ module.exports = function (app, config, authenticator, redisClient) {
     });
   });
 
-  app.get('/monitoring/events/device/:hostname', authenticator.roles.can('view devices'), authenticator.roles.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/events/device/:hostname', authenticator.roleManager.can('view devices'), authenticator.roleManager.can('view monitoring'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.monModule.getDeviceEvents(hostname, function(error, body) {
       if (!error) {

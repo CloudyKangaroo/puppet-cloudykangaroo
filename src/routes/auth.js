@@ -35,8 +35,8 @@ module.exports = function (app, config, authenticator, redisClient) {
     res.redirect('/account');
   });
 
-  app.get('/account/credentials.js', authenticator.roles.is('user'), function (req, res) {
-    res.render('account/auth', { roles: authenticator.roles, user: req.currentUser, });
+  app.get('/account/credentials.js', authenticator.roleManager.is('user'), function (req, res) {
+    res.render('account/auth', { roles: authenticator.roleManager, user: req.currentUser, });
   });
 
   app.locals.ensureAuthenticated = function (req, res, next) {
