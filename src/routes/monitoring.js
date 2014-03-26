@@ -19,8 +19,6 @@ module.exports = function (app, config, authenticator, redisClient) {
         res.render('monitoring', renderParams);
       } else {
         res.send(500);
-        var stackTrace = require('stack-trace');
-        var trace = stackTrace.parse(error)
         app.locals.logger.log('error', 'error processing request', { error: error});
         app.locals.logger.trace(error);
       }
