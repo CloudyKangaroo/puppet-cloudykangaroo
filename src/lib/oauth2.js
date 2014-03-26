@@ -125,7 +125,7 @@ module.exports = function(app, config, passport, login) {
       });
     }),
     function(req, res){
-      res.render('oauth/approval', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
+      res.render('oauth/approval', { transactionID: req.oauth2.transactionID, user: req.currentUser, client: req.oauth2.client });
     }
   ];
 

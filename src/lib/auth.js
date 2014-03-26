@@ -7,6 +7,7 @@ module.exports = function(app, credentials, config, redisClient) {
   var BasicStrategy = require('passport-http').BasicStrategy;
   var ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy;
   var BearerStrategy = require('passport-http-bearer').Strategy;
+  var ConnectRoles = require('connect-roles');
   var login = require('connect-ensure-login');
   var db = require('./db');
 
@@ -205,6 +206,66 @@ module.exports = function(app, credentials, config, redisClient) {
     }
   ));
 
+  var authFailureHandler = function (req, res, action) {
+    var accept = req.headers.accept || '';
+    if (~accept.indexOf('html')) {
+      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
+      res.send(403);
+    } else {
+      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
+      res.send(403);
+    }
+  };
+
+  var roles = new ConnectRoles({
+    failureHandler: authFailureHandler
+  });
+
+  var isUser = function (user) {
+    return hasAccess(user, config.roles.users);
+  };
+
+  var hasAccess = function (user, role) {
+    var _ = require('underscore');
+    app.locals.logger.log('silly', 'checking user', { user: user.username, users: role.users});
+    if (_.contains(role.users, user.username)) {
+      return true;
+    }
+    var groups = user.groups;
+    for (var i=0; i<groups.length; i++) {
+      app.locals.logger.log('silly', 'checking group', { group: groups[i], groups: role.groups});
+      if (_.contains(role.groups, groups[i])) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  roles.use('view customers', function (req) {
+    return hasAccess(req.currentUser, config.roles.support);
+  });
+
+  roles.use('user', function (req) {
+    return isUser(req.currentUser);
+  });
+
+  roles.use('view devices', function (req) {
+    return isUser(req.currentUser) && hasAccess(req.currentUser, config.roles.users);
+  });
+
+  roles.use('view monitoring events', function (req) {
+    return isUser(req.currentUser) && hasAccess(req.currentUser, config.roles.users);
+  });
+
+  roles.use('silence monitoring events', function (req) {
+    return isUser(req.currentUser) && hasAccess(req.currentUser, config.roles.support);
+  });
+
+  roles.use('view monitoring', function (req) {
+    return isUser(req.currentUser) && hasAccess(req.currentUser, config.roles.users);
+  });
+
+  module.roles = roles;
   module.oauth2 = oauth2;
   module.mockPassport = require('./mockPassport');
   module.passport = passport;

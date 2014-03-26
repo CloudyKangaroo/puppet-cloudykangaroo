@@ -1,6 +1,8 @@
 /* jshint unused: false */
-module.exports = function (app, config, passport, redisClient) {
+module.exports = function (app, config, authenticator, redisClient) {
   "use strict";
+  var passport = authenticator.passport;
+
   app.get('/ubersmith', app.locals.ensureAuthenticated, function (req, res) {
     var ticketLow = 0;
     var ticketNormal = 0;
@@ -17,7 +19,7 @@ module.exports = function (app, config, passport, redisClient) {
         total: ticketTotal
       },
       event_list: eventList,
-      user: req.user,
+      user: req.currentUser,
       section: 'dashboard',
       navLinks: config.navLinks.ubersmith
     };
@@ -36,7 +38,7 @@ module.exports = function (app, config, passport, redisClient) {
       } else {
         var renderParams = {
           device_types: deviceTypeList,
-          user:req.user,
+          user:req.currentUser,
           section: 'devices',
           navLinks: config.navLinks.ubersmith
         };
@@ -149,7 +151,7 @@ module.exports = function (app, config, passport, redisClient) {
                 puppetDevice: puppetDevice,
                 uberDevice: uberDevice,
                 sensuDevice: sensuDevice,
-                user:req.user,
+                user:req.currentUser,
                 section: 'devices',
                 navLinks: config.navLinks.ubersmith
               };
@@ -178,7 +180,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   app.get('/ubersmith/clients', app.locals.requireGroup('users'), function (req, res) {
-    res.render('ubersmith/clients', { user:req.user, section: 'clients', navLinks: config.navLinks.ubersmith });
+    res.render('ubersmith/clients', { user:req.currentUser, section: 'clients', navLinks: config.navLinks.ubersmith });
   });
 
   app.get('/ubersmith/clients/clientid/:clientid', app.locals.requireGroup('users'), function (req, res) {
@@ -201,7 +203,7 @@ module.exports = function (app, config, passport, redisClient) {
           var renderParams = {
             clientid: req.params.clientid,
             client: client,
-            user:req.user,
+            user:req.currentUser,
             section: 'clients',
             navLinks: config.navLinks.ubersmith
           };

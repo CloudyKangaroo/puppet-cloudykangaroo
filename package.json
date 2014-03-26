@@ -74,7 +74,9 @@
     "underscore": "1.6.x",
     "cache-manager": "0.3.x",
     "sol-redis-pool": "0.1.x",
-    "jade": "1.3.0"
+    "jade": "1.3.0",
+    "stack-trace": "0.0.9",
+    "connect-roles": "~3.0.2"
   },
   "config": {
     "travis-cov": {

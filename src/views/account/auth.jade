@@ -1,0 +1,13 @@
+script(lang=javascript).
+  function userCan(action) {
+    switch (action) {
+      case 'user':
+        return #{roles.is('user')};
+        break;
+      case 'silence events':
+        return canSilence;
+        break;
+      default:
+        return false;
+    }
+  }

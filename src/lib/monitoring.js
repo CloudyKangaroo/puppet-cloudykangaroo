@@ -198,7 +198,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
         crmModule.getSensuEvents(2, device.deviceID, function(error, deviceEvents) {
           if (error) {
             logger.log('error', 'Could not get device events', {deviceID: device.deviceID});
-            callback(err);
+            callback(error);
           } else {
             logger.log('debug', 'Got Device Events', {deviceEvents: deviceEvents});
             callback(null, deviceEvents);
@@ -271,6 +271,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
   };
 
   var getInfo = function(callback) {
+    var request = require('request');
     request({url: config.sensu.uri + '/info', json: true}, function (error, response, body) {
       if (error) {
         callback(error);
@@ -280,7 +281,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
     });
   };
 
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV == 'development') {
     module.getInfo = mockgetInfo;
     module.getEvents = mockgetEvents;
     module.getDeviceEvents = mockgetDeviceEvents;
