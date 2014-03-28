@@ -53,6 +53,7 @@
     "express-useragent": "0.0.11",
     "connect-requestid": "1.1.x",
     "connect-ensure-login": "0.1.1",
+    "connect-roles": "~3.0.2",
     "express-request-logger": "0.0.x",
     "express-session": "1.0.x",
     "metrics": "0.1.x",
@@ -78,7 +79,7 @@
   },
   "config": {
     "travis-cov": {
-      "threshold": 39,
+      "threshold": 41,
       "pattern": "src",
       "data-cover-never": "node_modules"
     },

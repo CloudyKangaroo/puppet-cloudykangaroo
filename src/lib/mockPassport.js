@@ -6,7 +6,7 @@
         var passport;
         passport = this;
         passport._key = 'passport';
-        passport._userProperty = 'user';
+        passport._userProperty = 'currentUser';
         passport.serializeUser = function(user, ptp, done) {
           return done(null, user);
         };

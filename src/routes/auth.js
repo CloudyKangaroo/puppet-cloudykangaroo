@@ -7,8 +7,8 @@ module.exports = function (app, config, authenticator, redisClient) {
 
   var logData = function(req) {
     var username = 'none';
-    if (req.user && req.user.username) {
-      username = req.user.username;
+    if (req.currentUser && req.currentUser.username) {
+      username = req.currentUser.username;
     }
     return { username: username, requestID: req.id, sessionID: req.sessionID };
   };
@@ -25,14 +25,18 @@ module.exports = function (app, config, authenticator, redisClient) {
 
   // TODO: Deprecate this and "ensureAuthenticated" to move to connect-ensure-login
   app.post('/account/login', authenticator.passport.authenticate(authStrategy, authConfig),  function (req, res) {
-    app.locals.app.locals.logger.log('debug', 'User Login:' + req.user.username, logData(req));
+    app.locals.app.locals.logger.log('debug', 'User Login:' + req.currentUser.username, logData(req));
     res.redirect(req.header('Referer') || '/account');
   });
 
   app.get('/account/logout', function (req, res) {
-    app.locals.app.locals.logger.log('debug', 'User Logout:' + req.user.username, logData(req));
+    app.locals.app.locals.logger.log('debug', 'User Logout:' + req.currentUser.username, logData(req));
     req.logout();
     res.redirect('/account');
+  });
+
+  app.get('/account/credentials.js', authenticator.roleManager.is('user'), function (req, res) {
+    res.render('account/auth', { roles: authenticator.roleManager, user: req.currentUser, });
   });
 
   app.locals.ensureAuthenticated = function (req, res, next) {
@@ -40,8 +44,8 @@ module.exports = function (app, config, authenticator, redisClient) {
       return next();
     } else {
       app.locals.logger.log('debug', 'user is not authenticated',  logData(req));
-      res.render('account/login', { user: req.user, message: req.flash('error') });
-      //res.render('account/login', { user: req.user, message: undefined });
+      res.render('account/login', { user: req.currentUser, message: req.flash('error') });
+      //res.render('account/login', { user: req.currentUser, message: undefined });
     }
   };
 
@@ -56,16 +60,16 @@ module.exports = function (app, config, authenticator, redisClient) {
 
   app.locals.requireGroup = function (group) {
     return function (req, res, next) {
-      if (req.isAuthenticated() && req.user && req.user.groups.indexOf(group) > -1) {
+      if (req.isAuthenticated() && req.currentUser && req.currentUser.groups.indexOf(group) > -1) {
         next();
       } else {
 
-        if (req.user) {
-          app.locals.logger.log('debug', req.user + ' is not a member of ' + group, logData(req));
+        if (req.currentUser) {
+          app.locals.logger.log('debug', req.currentUser + ' is not a member of ' + group, logData(req));
         } else {
           app.locals.logger.log('debug', 'this request requires authentication',  logData(req));
         }
-        res.render('account/login', { user: req.user, message: req.flash('error') });
+        res.render('account/login', { user: req.currentUser, message: req.flash('error') });
       }
     };
   };

@@ -1,3 +1,5 @@
+/*global it:false */
+/*global describe:false */
 process.env.NODE_ENV = 'test';
 process.env.LOG_DIR = './';
 
@@ -8,6 +10,7 @@ var assert = require('assert');
 require('should');
 
 describe("db.users", function (){
+  "use strict";
   it('should find user bob', function () {
     var bobUser = db.users.syncfindByUsername('bob');
     bobUser.should.have.property('username');

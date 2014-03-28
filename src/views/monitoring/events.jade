@@ -176,14 +176,23 @@ block footer
             "mData": "client",
             "sWidth": "140px",
             "mRender": function (client, type, row) {
-              return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + client.replace('#{config.mgmtDomain}', '') + '</a>';
+              var text = client.replace('#{config.mgmtDomain}', '');
+              if (#{userCan('silence monitoring events')}) {
+                return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + text + '</a>';
+              } else {
+                return text;
+              }
             }
           }, {
             "mData": "check",
             "mData": "client",
             "sWidth": "220px",
             "mRender": function(client, type, row) {
-              return renderButton(row['silenced'], row['silence_stash'], row['client'], row['check']) + row['check'];
+              if (#{userCan('silence monitoring events')}) {
+                return renderButton(row['silenced'], row['silence_stash'], row['client'], row['check']) + row['check'];
+              } else {
+                return row['check'];
+              }
             },
           }, {
             "mData": "flapping",
@@ -226,8 +235,13 @@ block footer
             "mData": "output",
             "mRender": function (output, type, row) {
               var dispOutput = output.slice(0,75).replace(/["']/g, "");
-              var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
-              return "<a onclick=\"displayEventDetails('" + txtBoxText + "');\">" + dispOutput + "</a>";
+              if (#{userCan('silence monitoring events')}) {
+                var dispOutput = output.slice(0,75).replace(/["']/g, "");
+                var txtBoxText = encodeURI(JSON.stringify(row, null, 2));
+                return "<a onclick=\"displayEventDetails('" + txtBoxText + "');\">" + dispOutput + "</a>";
+              } else {
+                return dispOutput;
+              }
             }
           }],
         "aaSorting": [[1,'desc']],

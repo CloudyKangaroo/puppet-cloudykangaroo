@@ -71,6 +71,25 @@ config.http.port = process.env.PORT || 3000;
 config.cookie.secret = 'securit3333!!';
 config.support = {};
 
+config.roles = {};
+config.roles.users = {};
+config.roles.sales = {};
+config.roles.support = {};
+config.roles.admin = {};
+config.roles.super = {};
+
+config.roles.users.groups = ['users'];
+config.roles.sales.groups = ['users'];
+config.roles.support.groups = ['engineers'];
+config.roles.admin.groups = ['leads'];
+config.roles.super.groups = ['devops'];
+
+config.roles.users.users = [];
+config.roles.sales.users = [];
+config.roles.support.users = [];
+config.roles.admin.users = [];
+config.roles.super.users = [];
+
 var signatureTemplate = "Contegix | Technical Support\n";
 signatureTemplate += "(314) 622-6200 ext. 3\n";
 signatureTemplate += "https://portal.contegix.com\n";

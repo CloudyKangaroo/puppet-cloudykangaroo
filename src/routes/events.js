@@ -1,6 +1,7 @@
 /* jshint unused: false, sub: true */
-module.exports = function (app, config, passport, redisClient) {
+module.exports = function (app, config, authenticator, redisClient) {
   "use strict";
+  var passport = authenticator.passport;
   var formidable = require('formidable');
   var _ = require('underscore');
 

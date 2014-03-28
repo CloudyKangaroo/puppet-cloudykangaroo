@@ -464,7 +464,7 @@ module.exports = function (app, config, passport, redisClient) {
 
   // SILENCE a CLIENT
   app.post('/api/v1/sensu/silence/client/:client', app.locals.requireGroup('users'), function (req, res) {
-    app.locals.monModule.silenceClient(req.user.username, req.params.client, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
+    app.locals.monModule.silenceClient(req.currentUser.username, req.params.client, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
       } else {
@@ -476,7 +476,7 @@ module.exports = function (app, config, passport, redisClient) {
 
   // SILENCE a CHECK
   app.post('/api/v1/sensu/silence/client/:client/check/:check', app.locals.requireGroup('users'), function (req, res) {
-    app.locals.monModule.silenceCheck(req.user.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
+    app.locals.monModule.silenceCheck(req.currentUser.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
       } else {
@@ -864,7 +864,7 @@ module.exports = function (app, config, passport, redisClient) {
     var ticketID = req.params.ticketid;
     var subject = req.body.subject;
     var visible = req.body.comment || 0;
-    var from = req.user.email;
+    var from = req.currentUser.email;
     var time_spent = req.body.time_spent || 1;
     var documentation = req.body.documentation || '';
     var sensuEventData = req.body.sensuEvent || '';
@@ -914,22 +914,22 @@ module.exports = function (app, config, passport, redisClient) {
   app.post('/api/v1/ubersmith/tickets/ticket', app.locals.requireGroup('users'), function (req, res) {
     var clientID = req.body.clientID;
 
-    app.locals.crmModule.getAdminByEmail(req.user.email, function (err, adminList) {
+    app.locals.crmModule.getAdminByEmail(req.currentUser.email, function (err, adminList) {
       if (err) {
-        app.locals.logger.log('error', 'Got err while trying to get admin by email', {email: req.user.email, err: err});
+        app.locals.logger.log('error', 'Got err while trying to get admin by email', {email: req.currentUser.email, err: err});
         res.send(500);
       } else {
         var _ = require('underscore');
         adminList = _.values(adminList);
 
         _.each(adminList, function(admin) {
-          if (admin.email === req.user.email) {
-            req.user.adminID = admin.id;
+          if (admin.email === req.currentUser.email) {
+            req.currentUser.adminID = admin.id;
           }
         });
 
-        if (!req.user.adminID) {
-          req.user.adminID = 0;
+        if (!req.currentUser.adminID) {
+          req.currentUser.adminID = 0;
         }
 
         app.locals.crmModule.getContactsbyClientID(clientID, function (err, contactList) {
@@ -983,8 +983,8 @@ module.exports = function (app, config, passport, redisClient) {
   var createSupportTicket = function(req, res, callback) {
     var subject = req.body.subject;
     var recipient = req.body.recipient;
-    var user_id = req.user.adminID;
-    var author = req.user.email;
+    var user_id = req.currentUser.adminID;
+    var author = req.currentUser.email;
     var ccList = req.body.ccList;
     var toList = req.body.toList;
     var priority = req.body.priority || 1;

@@ -5,7 +5,7 @@ module.exports =
     (req, res, next) ->
       passport = @
       passport._key = 'passport'
-      passport._userProperty = 'user'
+      passport._userProperty = 'currentUser'
       passport.serializeUser = (user, ptp, done) -> done null, user
       passport.deserializeUser = (user, ptp, done) -> done null, user
 

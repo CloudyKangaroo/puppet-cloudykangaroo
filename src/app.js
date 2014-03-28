@@ -31,19 +31,6 @@ if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
   throw new Error(process.env.NODE_ENV +  ' is not a known environment, cannot proceed');
 }
 
-// Generic Requirements
-var redis = {};
-
-if (process.env.NODE_ENV === 'test') {
-  redis = require("fakeredis");
-} else {
-  redis = require('redis');
-}
-
-if (process.env.NODE_ENV === 'test') {
-  require('./lib/nock')(config, logger);
-}
-
 /*
  Initialize the Logging Framework
  */
@@ -56,6 +43,19 @@ var logger = ctxlog('main', config.log.level, config.log.directory, { level: con
 var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.accessLog, {flags: 'a'});
+
+// Generic Requirements
+var redis = {};
+
+if (process.env.NODE_ENV === 'test') {
+  redis = require("fakeredis");
+} else {
+  redis = require('redis');
+}
+
+if (process.env.NODE_ENV === 'test') {
+  require('./lib/nock')(config, logger);
+}
 
 /* Connect to Redis */
 var redisClient = redis.createClient(config.redis.port, config.redis.host);
@@ -200,15 +200,18 @@ app.use(express.session({
 
 app.use(flash());
 
+var roleManager = require('./lib/roleManager')(app, config.roles);
 var authenticator = require('./lib/auth')(app, credentials, config, redisClient);
+authenticator.roleManager = roleManager.roleManager;
 
 if (process.env.NODE_ENV === 'test') {
-  app.use(authenticator.mockPassport.initialize());
+  app.use(authenticator.mockPassport.initialize({ userProperty: 'currentUser' }));
 } else {
-  app.use(authenticator.passport.initialize());
+  app.use(authenticator.passport.initialize({ userProperty: 'currentUser' }));
 }
 
 app.use(authenticator.passport.session());
+app.use(authenticator.roleManager.middleware());
 
 /*
   End User Authentication

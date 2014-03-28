@@ -1,12 +1,13 @@
 /* jshint unused: false */
-module.exports = function (app, config, passport, redisClient) {
+module.exports = function (app, config, authenticator, redisClient) {
   "use strict";
+  var passport = authenticator.passport;
   app.get('/tickets', function (req, res) {
-    res.render('tickets',{ user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+    res.render('tickets',{ user: req.currentUser, section: 'tickets', navLinks: config.navLinks.ubersmith });
   });
 
   app.get('/tickets/list', app.locals.ensureAuthenticated, function (req, res) {
-    res.render('tickets/list',{ user: req.user, section: 'tickets', navLinks: config.navLinks.ubersmith });
+    res.render('tickets/list',{ user: req.currentUser, section: 'tickets', navLinks: config.navLinks.ubersmith });
   });
 
   app.get('/tickets/new', app.locals.ensureAuthenticated, function (req, res) {
@@ -18,7 +19,7 @@ module.exports = function (app, config, passport, redisClient) {
         var clients = _.values(clientList);
         var renderParams = {
           clients: clients,
-          user: req.user,
+          user: req.currentUser,
           section: 'tickets',
           navLinks: config.navLinks.ubersmith
         };
@@ -41,7 +42,7 @@ module.exports = function (app, config, passport, redisClient) {
             var renderParams = {
               ticket: ticket,
               client: client,
-              user: req.user,
+              user: req.currentUser,
               section: 'tickets',
               navLinks: config.navLinks.ubersmith
             };

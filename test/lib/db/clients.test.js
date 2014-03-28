@@ -1,3 +1,5 @@
+/*global it:false */
+/*global describe:false */
 process.env.NODE_ENV = 'test';
 process.env.LOG_DIR = './';
 
