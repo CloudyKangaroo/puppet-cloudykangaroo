@@ -5,8 +5,12 @@ module.exports = function(app, roles) {
   var authFailureHandler = function (req, res, action) {
     var accept = req.headers.accept || '';
     if (~accept.indexOf('html')) {
-      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
-      res.send(403);
+      if (req.currentUser) {
+        app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
+      } else {
+        app.locals.logger.log('debug', 'user is not authenticated',  logData(req));
+      }
+      res.render('account/login', { message: req.flash('error') });
     } else {
       app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
       res.send(403);
@@ -61,15 +65,24 @@ module.exports = function(app, roles) {
     return isUser(req.currentUser);
   });
 
+  roleManager.use('user', isUsers);
+  roleManager.use('use api', isUsers);
   roleManager.use('view customers', isSupport);
   roleManager.use('view leads', isSales);
   roleManager.use('edit leads', isSales);
   roleManager.use('view devices', isUsers);
+  roleManager.use('view accounts', isUsers);
+  roleManager.use('view tickets', isUsers);
   roleManager.use('view monitoring', isUsers);
   roleManager.use('deactivate customers', isSuper);
   roleManager.use('decommission device', isSupport);
   roleManager.use('issue credit', isSuper);
   roleManager.use('view monitoring events', isUsers);
+  roleManager.use('view helpdesk tickets', isSupport);
+  roleManager.use('view helpdesk devices', isSupport);
+  roleManager.use('view helpdesk device detail', isSupport);
+  roleManager.use('view helpdesk clients', isSupport);
+  roleManager.use('view helpdesk client details', isSupport);
   roleManager.use('silence monitoring events',isSupport);
 
 

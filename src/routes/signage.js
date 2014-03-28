@@ -1,8 +1,6 @@
-/* jshint unused: false */
-module.exports = function (app, config, authenticator, redisClient) {
+module.exports = function (app, config, authenticator) {
   "use strict";
-  var passport = authenticator.passport;
-  app.get('/signage', app.locals.ensureAuthenticated, function (req, res) {
+  app.get('/signage', authenticator.roleManager.can('user'), function (req, res) {
     res.render('signage', { user:req.currentUser, title: 'Signage' });
   });
 };

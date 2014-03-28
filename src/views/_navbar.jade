@@ -1,40 +1,45 @@
 div(role='navigation').navbar.navbar-default.navbar-fixed-top
   .container
-    .nav.navbar-nav
-      ul.nav.navbar-nav
-        - navLinks.forEach(function(link){
-          - var isActive = (link.key == section ? 'active' : '')
-          li(class=isActive)
-            a(href=link.path)= link.label
-        - })
-    if !user
-      form(action='/account/login',method='post').navbar-form.navbar-right
-        .form-group
-          input(type="text", name="username", placeholder="Username").form-control
-        .form-group
-          input(type="password", name="password", placeholder="Password").form-control
-        button(type="submit").btn.btn-active Sign In
-    else
-      .btn-group.navbar-right
-        button(type="button").btn.btn-default.nav-button
-          a(href="/account",title="Back to Account Home").ionicons.ion-home
-        button(type="button").btn.btn-default.nav-button
-          a(href="/account/chat", target="_blank", title="Open Chat Console").ionicons.ion-ios7-chatboxes-outline
-        .btn-group
-          button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.nav-button
-            span.caret
-          ul.dropdown-menu
-            li
-              a(href="/account").ionicons.ion-home &nbsp; My Profile
-            li
-              a(href="/monitoring").ionicons.ion-ios7-eye-outline &nbsp; Monitoring
-            li
-              a(href="/ubersmith").ionicons.ion-ios7-cog-outline Ubersmith
-            li
-              a(href="/account/chat", target="_blank", title="Open Chat Console").ionicons.ion-ios7-chatboxes-outline &nbsp;Chat Console
-            li.disabled
-              a(href="/instrumentation").ionicons.ion-stats-bars.disabled &nbsp;Graphs
-            li.disabled
-              a(href="/tickets").disabled.ionicons.ion-ios7-copy-outline &nbsp;Tickets
-            li
-              a(href="/account/logout").ionicons.ion-log-out &nbsp;Logout
+    .collapse.navbar-collapse(id="navbar-collapse1")
+      .btn-group.navbar
+        each navSection in navSections
+          - var isActive = (navSection.key == section ? 'active' : '')
+          .btn-group
+            button(class="#{isActive} btn btn-default dropdown-toggle nav-button", type="button", id="#{navSection.label}", data-toggle="dropdown") #{navSection.label}&nbsp;
+              span.caret
+            ul.dropdown-menu
+              each link in navSection.content
+                - var isLinkActive = (link.key == key ? 'active' : '')
+                li(class=isLinkActive)
+                  a(href=link.path)= link.label
+      if !user
+        form(action='/account/login',method='post').navbar-form.navbar-right
+          .form-group
+            input(type="text", name="username", placeholder="Username").form-control
+          .form-group
+            input(type="password", name="password", placeholder="Password").form-control
+          button(type="submit").btn.btn-active Sign In
+      else
+        .btn-group.navbar-right
+          button(type="button").btn.btn-default.nav-button
+            a(href="/account",title="Back to Account Home").ionicons.ion-home
+          button(type="button").btn.btn-default.nav-button
+            a(href="/account/chat", target="_blank", title="Open Chat Console").ionicons.ion-ios7-chatboxes-outline
+          .btn-group
+            button(type="button", data-toggle="dropdown").btn.btn-default.dropdown-toggle.nav-button
+              span.caret
+            ul.dropdown-menu
+              li
+                a(href="/account").ionicons.ion-home &nbsp; My Profile
+              li
+                a(href="/monitoring").ionicons.ion-ios7-eye-outline &nbsp; Monitoring
+              li
+                a(href="/ubersmith").ionicons.ion-ios7-cog-outline Ubersmith
+              li
+                a(href="/account/chat", target="_blank", title="Open Chat Console").ionicons.ion-ios7-chatboxes-outline &nbsp;Chat Console
+              li.disabled
+                a(href="/instrumentation").ionicons.ion-stats-bars.disabled &nbsp;Graphs
+              li.disabled
+                a(href="/tickets").disabled.ionicons.ion-ios7-copy-outline &nbsp;Tickets
+              li
+                a(href="/account/logout").ionicons.ion-log-out &nbsp;Logout

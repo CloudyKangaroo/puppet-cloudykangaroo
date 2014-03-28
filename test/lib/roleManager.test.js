@@ -55,6 +55,9 @@ describe("roleManager isUsers", function (){
     var req = {currentUser: fakeUser};
     assert.equal(false, roleManager.isUsers(req));
   });
+});
+describe("roleManager isSupport", function (){
+  "use strict";
   it('should find user engineer in the support role', function () {
     var testUser = {username: 'test', groups: ['engineers'] };
     var req = {currentUser: testUser};
@@ -65,6 +68,9 @@ describe("roleManager isUsers", function (){
     var req = {currentUser: fakeUser};
     assert.equal(false, roleManager.isSupport(req));
   });
+});
+describe("roleManager isSales", function (){
+  "use strict";
   it('should find user sales in the sales role', function () {
     var testUser = {username: 'test', groups: ['sales'] };
     var req = {currentUser: testUser};
@@ -75,6 +81,9 @@ describe("roleManager isUsers", function (){
     var req = {currentUser: fakeUser};
     assert.equal(false, roleManager.isSales(req));
   });
+});
+describe("roleManager isAdmin", function (){
+  "use strict";
   it('should find user admin in the admin role', function () {
     var testUser = {username: 'test', groups: ['leads'] };
     var req = {currentUser: testUser};
@@ -85,6 +94,9 @@ describe("roleManager isUsers", function (){
     var req = {currentUser: fakeUser};
     assert.equal(false, roleManager.isAdmin(req));
   });
+});
+describe("roleManager isSuper", function (){
+  "use strict";
   it('should find user devops in the super role', function () {
     var testUser = {username: 'test', groups: ['devops'] };
     var req = {currentUser: testUser};
@@ -95,6 +107,9 @@ describe("roleManager isUsers", function (){
     var req = {currentUser: fakeUser};
     assert.equal(false, roleManager.isSuper(req));
   });
+});
+describe("roleManager one off users", function (){
+  "use strict";
   it('should find user oneoffAdmin in the admin role', function () {
     var fakeUser = {username: 'oneOffAdmin', groups: ['leads'] };
     var req = {currentUser: fakeUser};
