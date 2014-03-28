@@ -1,5 +1,4 @@
-/* jshint unused: false */
-module.exports = function (app, config, authenticator, redisClient) {
+module.exports = function (app, config, authenticator) {
   "use strict";
 
   var authConfig = { successReturnToOrRedirect: '/', failureRedirect:'/account', failureFlash:"Invalid username or password."};
@@ -36,41 +35,6 @@ module.exports = function (app, config, authenticator, redisClient) {
   });
 
   app.get('/account/credentials.js', authenticator.roleManager.is('user'), function (req, res) {
-    res.render('account/auth', { roles: authenticator.roleManager, user: req.currentUser, });
+    res.render('account/auth', { roles: authenticator.roleManager, user: req.currentUser});
   });
-
-  app.locals.ensureAuthenticated = function (req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    } else {
-      app.locals.logger.log('debug', 'user is not authenticated',  logData(req));
-      res.render('account/login', { user: req.currentUser, message: req.flash('error') });
-      //res.render('account/login', { user: req.currentUser, message: undefined });
-    }
-  };
-
-  app.locals.ensureAPIAuthenticated = function (req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    } else {
-      app.locals.logger.log('debug', 'API client is not authenticated', logData(req));
-      res.send(403);
-    }
-  };
-
-  app.locals.requireGroup = function (group) {
-    return function (req, res, next) {
-      if (req.isAuthenticated() && req.currentUser && req.currentUser.groups.indexOf(group) > -1) {
-        next();
-      } else {
-
-        if (req.currentUser) {
-          app.locals.logger.log('debug', req.currentUser + ' is not a member of ' + group, logData(req));
-        } else {
-          app.locals.logger.log('debug', 'this request requires authentication',  logData(req));
-        }
-        res.render('account/login', { user: req.currentUser, message: req.flash('error') });
-      }
-    };
-  };
 };

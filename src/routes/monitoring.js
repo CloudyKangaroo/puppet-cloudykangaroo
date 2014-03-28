@@ -1,7 +1,5 @@
-/* jshint unused: false */
-module.exports = function (app, config, authenticator, redisClient) {
+module.exports = function (app, config, authenticator) {
   "use strict";
-  var passport = authenticator.passport;
 
   app.get('/monitoring', authenticator.roleManager.can('view monitoring'), function (req, res) {
     app.locals.monModule.getInfo(function(error, body) {
@@ -13,8 +11,9 @@ module.exports = function (app, config, authenticator, redisClient) {
           sinceLastIncident:  sinceLastIncident,
           info: body,
           user:req.currentUser,
-          section: 'info',
-          navLinks: config.navLinks.monitoring
+          section: 'monitoring',
+          key:  'dashboard',
+          navSections: config.navSections
         };
         res.render('monitoring', renderParams);
       } else {
@@ -32,8 +31,9 @@ module.exports = function (app, config, authenticator, redisClient) {
         var renderParams = {
           events: body,
           user:req.currentUser,
-          section: 'events',
-          navLinks: config.navLinks.monitoring
+          section: 'monitoring',
+          key:  'events',
+          navSections: config.navSections
         };
         res.render('monitoring/events', renderParams);
       } else {
@@ -52,8 +52,9 @@ module.exports = function (app, config, authenticator, redisClient) {
         var renderParams = {
           events: body,
           user:req.currentUser,
-          section: 'events',
-          navLinks: config.navLinks.monitoring
+          section: 'monitoring',
+          key:  'events',
+          navSections: config.navSections
         };
         res.render('monitoring/events', renderParams);
       } else {
@@ -64,30 +65,32 @@ module.exports = function (app, config, authenticator, redisClient) {
     });
   });
 
-  app.get('/monitoring/stashes', app.locals.requireGroup('users'), function (req, res) {
-    res.render('monitoring/stashes', {user:req.currentUser, section: 'stashes', navLinks: config.navLinks.monitoring });
+  app.get('/monitoring/stashes',authenticator.roleManager.can('view monitoring'), function (req, res) {
+    res.render('monitoring/stashes', {user:req.currentUser, section: 'monitoring', key:  'stashes', navSections: config.navSections  });
   });
 
-  app.get('/monitoring/puppet', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/monitoring/puppet',authenticator.roleManager.can('view monitoring'), function (req, res) {
     var hoursAgo = 10;
     var renderParams = {
       hoursAgo: hoursAgo,
       user:req.currentUser,
-      section: 'puppet',
-      navLinks: config.navLinks.monitoring
+      section: 'monitoring',
+      key:  'puppet',
+      navSections: config.navSections
     };
     res.render('monitoring/puppet', renderParams);
   });
 
-  app.get('/monitoring/clients', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/monitoring/clients',authenticator.roleManager.can('view monitoring'), function (req, res) {
     app.locals.monModule.getDevices(function (error, clients) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
         var renderParams = {
           clients: clients,
           user:req.currentUser,
-          section: 'clients',
-          navLinks: config.navLinks.monitoring
+          section: 'monitoring',
+          key:  'clients',
+          navSections: config.navSections
         };
         res.render('monitoring/clients', renderParams);
       } else {
@@ -98,7 +101,7 @@ module.exports = function (app, config, authenticator, redisClient) {
     });
   });
 
-  app.get('/monitoring/list/clients', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/monitoring/list/clients',authenticator.roleManager.can('view monitoring'), function (req, res) {
     app.locals.monModule.getDevices(function (error, clients) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
@@ -118,7 +121,7 @@ module.exports = function (app, config, authenticator, redisClient) {
     });
   });
 
-  app.get('/monitoring/devices', app.locals.requireGroup('users'), function (req, res) {
-    res.render('monitoring/devices', {user:req.currentUser, section: 'clients', navLinks: config.navLinks.monitoring });
+  app.get('/monitoring/devices',authenticator.roleManager.can('view monitoring'), function (req, res) {
+    res.render('monitoring/devices', {user:req.currentUser, section: 'monitoring', key:  'clients', navSections: config.navSections });
   });
 };

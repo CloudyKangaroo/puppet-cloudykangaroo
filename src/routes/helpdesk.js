@@ -1,9 +1,7 @@
-/* jshint unused: false */
-module.exports = function (app, config, authenticator, redisClient) {
+module.exports = function (app, config, authenticator) {
   "use strict";
-  var passport = authenticator.passport;
 
-  app.get('/ubersmith', app.locals.ensureAuthenticated, function (req, res) {
+  app.get('/helpdesk', authenticator.roleManager.can('view helpdesk'), function (req, res) {
     var ticketLow = 0;
     var ticketNormal = 0;
     var ticketHigh = 0;
@@ -26,12 +24,12 @@ module.exports = function (app, config, authenticator, redisClient) {
     res.render('ubersmith', renderParams);
   });
 
-  app.get('/ubersmith/tickets', app.locals.ensureAuthenticated, function (req, res) {
+  app.get('/helpdesk/tickets',  authenticator.roleManager.can('view helpdesk tickets'), function (req, res) {
     res.redirect('/tickets');
   });
 
   // Device Browser
-  app.get('/ubersmith/devices', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/helpdesk/devices',  authenticator.roleManager.can('view helpdesk devices'), function (req, res) {
     app.locals.crmModule.getDeviceTypeList(function(err, deviceTypeList) {
       if (err) {
         res.send(500);
@@ -48,7 +46,7 @@ module.exports = function (app, config, authenticator, redisClient) {
   });
 
   // Used to view a single device
-  app.get('/ubersmith/devices/deviceid/:deviceid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/helpdesk/devices/deviceid/:deviceid',  authenticator.roleManager.can('view helpdesk device detail'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, uberDevice) {
       if (!uberDevice)
       {
@@ -167,23 +165,23 @@ module.exports = function (app, config, authenticator, redisClient) {
     });
   });
 
-  app.get('/ubersmith/devices/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/helpdesk/devices/hostname/:hostname',  authenticator.roleManager.can('view helpdesk device detail'), function (req, res) {
     app.locals.crmModule.getDeviceByHostname(req.params.hostname, function (error, uberDevice) {
       if (!uberDevice)
       {
         app.locals.logger.log('error', 'Failed to retrieve device from Ubersmith', { error: error, deviceid: req.params.deviceid });
         res.send(404);
       } else {
-        res.redirect('/ubersmith/devices/deviceid/' + uberDevice.dev);
+        res.redirect('/helpdesk/devices/deviceid/' + uberDevice.dev);
       }
     });
   });
 
-  app.get('/ubersmith/clients', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/helpdesk/clients', authenticator.roleManager.can('view helpdesk clients'), function (req, res) {
     res.render('ubersmith/clients', { user:req.currentUser, section: 'clients', navLinks: config.navLinks.ubersmith });
   });
 
-  app.get('/ubersmith/clients/clientid/:clientid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/helpdesk/clients/clientid/:clientid', authenticator.roleManager.can('view helpdesk client detail'), function (req, res) {
     var async = require('async');
     async.parallel([
       function(callback){

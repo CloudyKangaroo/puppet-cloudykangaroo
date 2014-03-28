@@ -1,17 +1,14 @@
-/* jshint unused: false */
-module.exports = function (app, config, authenticator, redisClient) {
+module.exports = function (app, config, authenticator) {
   "use strict";
-  var passport = authenticator.passport;
-  app.get('/account', app.locals.ensureAuthenticated, function (req, res) {
-      res.render('account', { user:req.currentUser, section: 'profile', navLinks: config.navLinks.account });
-    }
-  );
+  app.get('/account', authenticator.roleManager.can('user'), function (req, res) {
+    res.render('account', { user:req.currentUser, section: 'account', key: 'profile', navSections: config.navSections });
+  });
 
-  app.get('/account/chat', function (req, res) {
-      res.render('account/chat', { user:req.currentUser, section: 'chat', navLinks: config.navLinks.account });
-    });
+  app.get('/account/chat', authenticator.roleManager.can('user'), function (req, res) {
+    res.render('account/chat', { user:req.currentUser, section: 'account', key: 'chat', navSections: config.navSections });
+  });
 
-  app.post('/account/chat', function (req, res) {
-      res.render('account/chat', { user:req.currentUser, section: 'chat', navLinks: config.navLinks.account });
-    });
+  app.post('/account/chat', authenticator.roleManager.can('user'), function (req, res) {
+    res.render('account/chat', { user:req.currentUser, section: 'account', key: 'chat', navSections: config.navSections });
+  });
 };

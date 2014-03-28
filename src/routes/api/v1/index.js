@@ -1,9 +1,9 @@
 /* jshint unused: false, sub: true */
-module.exports = function (app, config, passport, redisClient) {
+module.exports = function (app, config, authenticator) {
   "use strict";
   var utils = require('../../../lib/utils');
 
-  app.get('/api/v1/puppet/devices/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.puppetModule.getDevice(req.params.hostname, function (err, device) {
       if (err) {
         res.send(500);
@@ -15,7 +15,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/puppet/metrics/population', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/metrics/population', authenticator.roleManager.can('use api'), function (req, res) {
 
     var request = require('request');
     var async = require('async');
@@ -96,7 +96,7 @@ module.exports = function (app, config, passport, redisClient) {
     ], handleResults);
   });
 
-  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', authenticator.roleManager.can('use api'), function (req, res) {
     var moment = require('moment');
     var hoursAgo = req.params.hours;
     var request = require('request');
@@ -117,7 +117,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', authenticator.roleManager.can('use api'), function (req, res) {
     var moment = require('moment');
     var hoursAgo = req.params.hours;
     var request = require('request');
@@ -143,7 +143,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/puppet/failures/hours/:hours', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/failures/hours/:hours', authenticator.roleManager.can('use api'), function (req, res) {
     var moment = require('moment');
     var hoursAgo = req.params.hours;
     var request = require('request');
@@ -165,7 +165,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/puppet/devices/hostname/:hostname/facts', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/devices/hostname/:hostname/facts', authenticator.roleManager.can('use api'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.puppetModule.getDevice(hostname, function (err, device) {
       if (err) {
@@ -178,7 +178,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/puppet/catalog/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/puppet/catalog/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     var hostname = req.params.hostname;
     var url = app.get('puppetdb_uri') + '/catalogs/' + hostname;
@@ -208,7 +208,7 @@ module.exports = function (app, config, passport, redisClient) {
     }
   };
 
-  app.get('/api/v1/sensu/checks/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/checks/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     var _ = require('underscore');
     var request = require('request');
     var hostname = req.params.hostname;
@@ -251,7 +251,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/sensu/events', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/events', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getEvents(function(err, events) {
       if (err) {
         res.send(500);
@@ -262,7 +262,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/sensu/events/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/events/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.monModule.getDeviceEvents(hostname, function (err, events) {
       if (err) {
@@ -275,7 +275,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/sensu/events/filtered', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/events/filtered', authenticator.roleManager.can('use api'), function (req, res) {
     var async = require('async');
 
     var getEvents = function(callback) {
@@ -405,7 +405,7 @@ module.exports = function (app, config, passport, redisClient) {
     async.parallel(seriesObj, handleResults);
   });
 
-  app.get('/api/v1/sensu/events/device/:device', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/events/device/:device', authenticator.roleManager.can('use api'), function (req, res) {
     var uri = '';
     app.locals.monModule.getDeviceEvents(req.params.device, function(error, body){
       if (!error) {
@@ -420,7 +420,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // UNSILENCE an CLIENT
-  app.delete('/api/v1/sensu/silence/client/:client', app.locals.requireGroup('users'), function (req, res) {
+  app.delete('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     var path = 'silence/' + req.params.client;
     request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
@@ -434,7 +434,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // GET STASHES THAT MATCH ^stash
-  app.get('/api/v1/sensu/stashes/:stash', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/stashes/:stash', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getStashes(req.params.stash, function (err, response) {
       if (err) {
         res.send(500);
@@ -445,7 +445,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/sensu/stashes', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/stashes', authenticator.roleManager.can('use api'), function (req, res) {
     var _ = require('underscore');
     app.locals.monModule.getStashes('.*', function (err, response) {
       if (err) {
@@ -463,7 +463,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // SILENCE a CLIENT
-  app.post('/api/v1/sensu/silence/client/:client', app.locals.requireGroup('users'), function (req, res) {
+  app.post('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.silenceClient(req.currentUser.username, req.params.client, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
@@ -475,7 +475,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // SILENCE a CHECK
-  app.post('/api/v1/sensu/silence/client/:client/check/:check', app.locals.requireGroup('users'), function (req, res) {
+  app.post('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.silenceCheck(req.currentUser.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
@@ -487,7 +487,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // GET SILENCED CLIENTS
-  app.get('/api/v1/sensu/silence/client/:client', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     var path = 'silence/' + req.params.client;
     request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
@@ -501,7 +501,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // UNSILENCE A CHECK
-  app.delete('/api/v1/sensu/silence/client/:client/check/:check', app.locals.requireGroup('users'), function (req, res) {
+  app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     var path = 'silence/' + req.params.client + '/' + req.params.check;
     request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
@@ -515,7 +515,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // GET SILENCED CHECKS
-  app.get('/api/v1/sensu/silence/client/:client/check/:check', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     var path = 'silence/' + req.params.client + '/' + req.params.check;
     request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
@@ -529,7 +529,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // GET A STASH
-  app.get('/api/v1/sensu/silence/:path', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/silence/:path', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }, function (error, response) {
       if(error){
@@ -542,7 +542,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // GET ALL STASHES
-  app.get('/api/v1/sensu/silence', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/silence', authenticator.roleManager.can('use api'), function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response) {
       if(error){
@@ -555,7 +555,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
   // GET ALL DEVICES
-  app.get('/api/v1/sensu/devices', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/devices', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
       if (deviceHostnames === null)
       {
@@ -589,7 +589,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/sensu/devices/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getDevice(req.params.hostname, function (err, device) {
       if (err) {
         res.send(500);
@@ -600,7 +600,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/sensu/devices/hostname/:hostname/events', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/sensu/devices/hostname/:hostname/events', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getDevice(req.params.hostname, function (err, device) {
       if (err) {
         res.send(500);
@@ -611,7 +611,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/devgroupid/:devgroupid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/devgroupid/:devgroupid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesbyTypeGroupID(req.params.devgroupid, function (err, deviceList){
       if (deviceList === null)
       {
@@ -628,7 +628,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/devgroups', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/devgroups', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceTypeList(function (err, deviceGroupList){
       if (deviceGroupList === null)
       {
@@ -648,7 +648,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/hostname', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
       if (deviceHostnames === null)
       {
@@ -663,7 +663,7 @@ module.exports = function (app, config, passport, redisClient) {
   });
 
 
-  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketsbyDeviceID(req.params.deviceid, function (err, ticketList){
       if (err)
       {
@@ -682,7 +682,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/rack/:rack', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/rack/:rack', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesByRack(req.params.rack, function (error, device) {
       if (error !== null)
       {
@@ -699,7 +699,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByHostname(req.params.hostname, function (error, device) {
       if (error !== null)
       {
@@ -716,7 +716,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, device) {
       if (error !== null)
       {
@@ -733,7 +733,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/contacts/search', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/contacts/search', authenticator.roleManager.can('use api'), function (req, res) {
     var results = [];
     var query = req.query.q;
     app.locals.logger.log('debug', 'Search Query', {query: query});
@@ -743,7 +743,7 @@ module.exports = function (app, config, passport, redisClient) {
     res.send(results);
   });
 
-  app.get('/api/v1/ubersmith/clients', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/clients', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getClients(function(err, clientList) {
       if (err)
       {
@@ -757,7 +757,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid', authenticator.roleManager.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
     app.locals.crmModule.getClientByID(clientID, function(err, client) {
       if (err) {
@@ -769,7 +769,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/contacts', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/contacts', authenticator.roleManager.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
     app.locals.crmModule.getContactsbyClientID(clientID, function(err, contactList) {
       if (err) {
@@ -783,7 +783,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
       if (err) {
         res.send(500);
@@ -796,7 +796,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
       if (err)
       {
@@ -815,7 +815,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/api/methods', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/api/methods', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getAPIMethods(function(err, client) {
       if (err) {
         res.send(500);
@@ -826,7 +826,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/tickets', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/tickets', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTickets(function(err, ticketList) {
       if (err)
       {
@@ -845,7 +845,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
       if (err)
       {
@@ -860,7 +860,7 @@ module.exports = function (app, config, passport, redisClient) {
 //  {"status":true,"error_code":null,"error_message":"","data":{"id":"1025875","url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=1025875"}}
 //  {"data":{"url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=undefined"}}
 
-  app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', app.locals.requireGroup('users'), function (req, res) {
+  app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
     var ticketID = req.params.ticketid;
     var subject = req.body.subject;
     var visible = req.body.comment || 0;
@@ -911,7 +911,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.post('/api/v1/ubersmith/tickets/ticket', app.locals.requireGroup('users'), function (req, res) {
+  app.post('/api/v1/ubersmith/tickets/ticket', authenticator.roleManager.can('use api'), function (req, res) {
     var clientID = req.body.clientID;
 
     app.locals.crmModule.getAdminByEmail(req.currentUser.email, function (err, adminList) {
@@ -1017,7 +1017,7 @@ module.exports = function (app, config, passport, redisClient) {
     app.locals.crmModule.createNewTicket(msgBody, subject, recipient, user_id, author, ccList, toList, priority, clientID, contactID, deviceID, callback);
   };
 
-  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
       if (err)
       {
@@ -1035,7 +1035,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/global/devices/deviceid/:deviceid', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/global/devices/deviceid/:deviceid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, uberDevice) {
       if (error !== null)
       {
@@ -1071,7 +1071,7 @@ module.exports = function (app, config, passport, redisClient) {
     });
   });
 
-  app.get('/api/v1/global/devices/hostname/:hostname', app.locals.requireGroup('users'), function (req, res) {
+  app.get('/api/v1/global/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     var async = require('async');
     var hostname =  req.params.hostname;
     async.parallel([

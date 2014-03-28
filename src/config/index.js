@@ -1,29 +1,38 @@
 var config = {};
 
-config.navLinks = {
-  account: [
-    { label: 'Home', key: 'profile', path: '/account' },
-    { label: 'Monitoring', key: 'monitoring', path: '/monitoring' },
-    { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' },
-    { label: 'Chat', key: 'chat', path: '/account/chat' },
-    { label: 'Logout', key: 'logout', path: '/account/logout' }
-  ],
-  ubersmith: [
-    { label: 'Dashboard', key: 'dashboard', path: '/ubersmith' },
-    { label: 'Customers', key: 'clients', path: '/ubersmith/clients' },
-    { label: 'Devices', key: 'devices', path: '/ubersmith/devices' },
-    { label: 'Tickets', key: 'tickets', path: '/ubersmith/tickets' },
-    { label: 'Monitoring', key: 'monitoring', path: '/monitoring' }
-  ],
-  monitoring: [
-    { label: 'Home', key: 'info', path: '/monitoring' },
-    { label: 'Puppet', key: 'puppet', path: '/monitoring/puppet' },
-    { label: 'Events', key: 'events', path: '/monitoring/events' },
-    { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
-    { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
-    { label: 'Ubersmith', key: 'ubersmith', path: '/ubersmith' }
-  ]
-};
+config.navSections = [
+  {
+    label: 'sales',
+    key: 'sales',
+    content: [
+      { label: 'Dashboard', key: 'dashboard', path: '/sales' },
+      { label: 'New Activity', key: 'activity', path: '/sales/activity' },
+      { label: 'My Accounts', key: 'accounts', path: '/sales/accounts' }
+    ]
+  },
+  {
+    label: 'helpdesk',
+    key: 'helpdesk',
+    content: [
+      { label: 'Dashboard', key: 'dashboard', path: '/helpdesk' },
+      { label: 'Tickets', key: 'tickets', path: '/helpdesk/tickets' },
+      { label: 'Customers', key: 'clients', path: '/helpdesk/clients' },
+      { label: 'Devices', key: 'devices', path: '/helpdesk/devices' }
+
+    ]
+  },
+  {
+    label: 'monitoring',
+    key: 'monitoring',
+    content: [
+      { label: 'Dashboard', key: 'dashboard', path: '/monitoring' },
+      { label: 'Puppet', key: 'puppet', path: '/monitoring/puppet' },
+      { label: 'Events', key: 'events', path: '/monitoring/events' },
+      { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
+      { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }
+    ]
+  }
+];
 
 config.sensu = {};
 config.redis = {};
