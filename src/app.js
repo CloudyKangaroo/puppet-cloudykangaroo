@@ -3,6 +3,9 @@
  */
 
 var config = require('./config');
+
+var userPropertyConfig = { userProperty: 'currentUser' };
+var menus = require('./lib/menus')(userPropertyConfig);
 var utils = require('./lib/utils');
 var express = require('express');
 var path = require('path');
@@ -200,18 +203,21 @@ app.use(express.session({
 
 app.use(flash());
 
-var roleManager = require('./lib/roleManager')(app, config.roles);
 var authenticator = require('./lib/auth')(app, credentials, config, redisClient);
-authenticator.roleManager = roleManager.roleManager;
+var roleManager = require('./lib/roleManager')(app, config.roles);
+var roleHandler = roleManager.roleHandler;
+authenticator.roleManager = roleHandler;
 
 if (process.env.NODE_ENV === 'test') {
-  app.use(authenticator.mockPassport.initialize({ userProperty: 'currentUser' }));
+  app.use(authenticator.mockPassport.initialize(userPropertyConfig));
 } else {
-  app.use(authenticator.passport.initialize({ userProperty: 'currentUser' }));
+  app.use(authenticator.passport.initialize(userPropertyConfig));
 }
 
 app.use(authenticator.passport.session());
-app.use(authenticator.roleManager.middleware());
+app.use(roleHandler.middleware());
+app.use(roleManager);
+app.use(menus);
 
 /*
   End User Authentication

@@ -108,7 +108,7 @@ var populateContactLists = function (clientID) {
   $('#toList').html('');
   $('#ccList').html('');
   $('#sourceList').html('');
-  $.getJSON('/api/v1/ubersmith/clients/clientid/' + clientID + '/contacts', function(data){
+  $.getJSON('/api/v1/helpdesk/clients/clientid/' + clientID + '/contacts', function(data){
     var options = '';
     for (var x = 0; x < data.length; x++) {
       var contact = data[x];
@@ -153,7 +153,7 @@ var populateContactLists = function (clientID) {
 var populateDeviceList = function (clientID) {
   "use strict";
   $('#deviceID').html('');
-  $.getJSON('/api/v1/ubersmith/clients/clientid/' + clientID + '/devices', function(data){
+  $.getJSON('/api/v1/helpdesk/clients/clientid/' + clientID + '/devices', function(data){
     var options = '';
     var aaData = data.aaData;
     for (var x = 0; x < aaData.length; x++) {

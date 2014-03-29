@@ -1,4 +1,4 @@
-extends ../layout
+/extends ../layout
 block head
   include ../datatables_css
   link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
@@ -105,7 +105,7 @@ block footer
         hintText: null,
         animateDropdown: false
       };
-      $("#inputEmail12").tokenInput("/api/v1/ubersmith/contacts/search/", tokenConfig);
+      $("#inputEmail12").tokenInput("/api/v1/helpdesk/contacts/search/", tokenConfig);
     });
     $(document).ready(function(){
       // Add prettyprint class to pre elements
@@ -116,7 +116,7 @@ block footer
       $('#table_posts').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/ubersmith/tickets/ticketid/#{ticket.ticket_id}/posts',
+        "sAjaxSource": '/api/v1/helpdesk/tickets/ticketid/#{ticket.ticket_id}/posts',
         "iDisplayLength": 10,
         "bSortClasses": false,
         "bDeferRender": true,

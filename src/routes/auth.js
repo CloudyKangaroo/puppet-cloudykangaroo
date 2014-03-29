@@ -33,8 +33,4 @@ module.exports = function (app, config, authenticator) {
     req.logout();
     res.redirect('/account');
   });
-
-  app.get('/account/credentials.js', authenticator.roleManager.is('user'), function (req, res) {
-    res.render('account/auth', { roles: authenticator.roleManager, user: req.currentUser});
-  });
 };

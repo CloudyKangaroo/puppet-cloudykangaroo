@@ -5,7 +5,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/tickets/list', authenticator.roleManager.can('view tickets'), function (req, res) {
-    res.render('tickets/list',{ user: req.currentUser, section: 'tickets', key: 'list', navSections: config.navSections });
+    res.render('tickets/list',{ user: req.currentUser, section: 'helpdesk', key: 'list', navSections: config.navSections });
   });
 
   app.get('/tickets/new', authenticator.roleManager.can('view tickets'), function (req, res) {
@@ -18,7 +18,7 @@ module.exports = function (app, config, authenticator) {
         var renderParams = {
           clients: clients,
           user: req.currentUser,
-          section: 'tickets',
+          section: 'helpdesk',
           key: 'new',
           navSections: config.navSections
         };
@@ -42,7 +42,7 @@ module.exports = function (app, config, authenticator) {
               ticket: ticket,
               client: client,
               user: req.currentUser,
-              section: 'tickets',
+              section: 'helpdesk',
               key: 'tickets',
               navSections: config.navSections
             };

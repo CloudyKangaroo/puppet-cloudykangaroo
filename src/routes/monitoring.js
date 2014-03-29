@@ -1,6 +1,6 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
-
+  
   app.get('/monitoring', authenticator.roleManager.can('view monitoring'), function (req, res) {
     app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
@@ -13,7 +13,7 @@ module.exports = function (app, config, authenticator) {
           user:req.currentUser,
           section: 'monitoring',
           key:  'dashboard',
-          navSections: config.navSections
+          navSections: req.navSections
         };
         res.render('monitoring', renderParams);
       } else {
@@ -33,7 +33,7 @@ module.exports = function (app, config, authenticator) {
           user:req.currentUser,
           section: 'monitoring',
           key:  'events',
-          navSections: config.navSections
+          navSections: req.navSections
         };
         res.render('monitoring/events', renderParams);
       } else {
@@ -54,7 +54,7 @@ module.exports = function (app, config, authenticator) {
           user:req.currentUser,
           section: 'monitoring',
           key:  'events',
-          navSections: config.navSections
+          navSections: req.navSections
         };
         res.render('monitoring/events', renderParams);
       } else {
@@ -66,7 +66,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/monitoring/stashes',authenticator.roleManager.can('view monitoring'), function (req, res) {
-    res.render('monitoring/stashes', {user:req.currentUser, section: 'monitoring', key:  'stashes', navSections: config.navSections  });
+    res.render('monitoring/stashes', {user:req.currentUser, section: 'monitoring', key:  'stashes', navSections: req.navSections });
   });
 
   app.get('/monitoring/puppet',authenticator.roleManager.can('view monitoring'), function (req, res) {
@@ -76,7 +76,7 @@ module.exports = function (app, config, authenticator) {
       user:req.currentUser,
       section: 'monitoring',
       key:  'puppet',
-      navSections: config.navSections
+      navSections: req.navSections
     };
     res.render('monitoring/puppet', renderParams);
   });
@@ -90,7 +90,7 @@ module.exports = function (app, config, authenticator) {
           user:req.currentUser,
           section: 'monitoring',
           key:  'clients',
-          navSections: config.navSections
+          navSections: req.navSections
         };
         res.render('monitoring/clients', renderParams);
       } else {
@@ -122,6 +122,6 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/monitoring/devices',authenticator.roleManager.can('view monitoring'), function (req, res) {
-    res.render('monitoring/devices', {user:req.currentUser, section: 'monitoring', key:  'clients', navSections: config.navSections });
+    res.render('monitoring/devices', {user:req.currentUser, section: 'monitoring', key:  'clients', navSections: req.navSections });
   });
 };

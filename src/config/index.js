@@ -1,39 +1,5 @@
 var config = {};
 
-config.navSections = [
-  {
-    label: 'sales',
-    key: 'sales',
-    content: [
-      { label: 'Dashboard', key: 'dashboard', path: '/sales' },
-      { label: 'New Activity', key: 'activity', path: '/sales/activity' },
-      { label: 'My Accounts', key: 'accounts', path: '/sales/accounts' }
-    ]
-  },
-  {
-    label: 'helpdesk',
-    key: 'helpdesk',
-    content: [
-      { label: 'Dashboard', key: 'dashboard', path: '/helpdesk' },
-      { label: 'Tickets', key: 'tickets', path: '/helpdesk/tickets' },
-      { label: 'Customers', key: 'clients', path: '/helpdesk/clients' },
-      { label: 'Devices', key: 'devices', path: '/helpdesk/devices' }
-
-    ]
-  },
-  {
-    label: 'monitoring',
-    key: 'monitoring',
-    content: [
-      { label: 'Dashboard', key: 'dashboard', path: '/monitoring' },
-      { label: 'Puppet', key: 'puppet', path: '/monitoring/puppet' },
-      { label: 'Events', key: 'events', path: '/monitoring/events' },
-      { label: 'Hosts', key: 'clients', path: '/monitoring/clients' },
-      { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' }
-    ]
-  }
-];
-
 config.sensu = {};
 config.redis = {};
 config.puppetdb = {};
@@ -80,24 +46,44 @@ config.http.port = process.env.PORT || 3000;
 config.cookie.secret = 'securit3333!!';
 config.support = {};
 
-config.roles = {};
-config.roles.users = {};
-config.roles.sales = {};
-config.roles.support = {};
-config.roles.admin = {};
-config.roles.super = {};
-
-config.roles.users.groups = ['users'];
-config.roles.sales.groups = ['users'];
-config.roles.support.groups = ['engineers'];
-config.roles.admin.groups = ['leads'];
-config.roles.super.groups = ['devops'];
-
-config.roles.users.users = [];
-config.roles.sales.users = [];
-config.roles.support.users = [];
-config.roles.admin.users = [];
-config.roles.super.users = [];
+config.roles = {
+  users: {
+    name: 'users',
+    description: 'Minimum access, required to login',
+    groups: ['users'],
+    users: []
+  },
+  sales: {
+    name: 'sales',
+    description: 'Provides access to lead and account management functionality. Also provides read-only access to monitoring.',
+    groups: ['users'],
+    users: []
+  },
+  helpdesk: {
+    name: 'helpdesk',
+    description: 'Provides access to helpdesk functionality. Also provides read-only access to monitoring.',
+    groups: ['engineers'],
+    users: []
+  },
+  monitoring: {
+    name: 'Monitoring',
+    description: 'Provides additional access to monitoring systems.',
+    groups: ['engineers'],
+    users: []
+  },
+  admin: {
+    name: 'admin',
+    description: 'Provides full access to sales, monitoring and helpdesk functionality.',
+    groups: ['leads'],
+    users: []
+  },
+  super: {
+    name: 'super',
+    description: 'Provides access to administrative functions.',
+    groups: ['devops'],
+    users: []
+  }
+};
 
 var signatureTemplate = "Contegix | Technical Support\n";
 signatureTemplate += "(314) 622-6200 ext. 3\n";

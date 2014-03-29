@@ -83,7 +83,7 @@ block content
                 span.pull-right #{uberDevice.metadata.management_level}
               p Company:
                 span.pull-right
-                  a(href="/ubersmith/clients/clientid/#{uberDevice.clientid}") #{uberDevice.company}
+                  a(href="/helpdesk/clients/clientid/#{uberDevice.clientid}") #{uberDevice.company}
               p Contact Information:
                 ul.list-group
                   li.list-group-item Email:
@@ -127,7 +127,7 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/ubersmith/devices/deviceid/#{uberDevice.dev}/tickets',
+        "sAjaxSource": '/api/v1/helpdesk/devices/deviceid/#{uberDevice.dev}/tickets',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
@@ -144,7 +144,7 @@ block footer
           }, {
             "mData": "subject",
             "mRender": function (subject, type, row) {
-              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
+              return '<a href="/helpdesk/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
             }
           }, {
             "mData": "activity"

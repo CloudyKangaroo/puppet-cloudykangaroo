@@ -9,63 +9,63 @@ var request = require('supertest');
 // https://github.com/visionmedia/supertest
 // https://github.com/visionmedia/express/tree/master/test
 
-describe('GET /api/v1/ubersmith/devices/deviceid/10020', function(){
+describe('GET /api/v1/helpdesk/devices/deviceid/10020', function(){
   "use strict";
   it('should return code 200', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/deviceid/10020')
+      .get('/api/v1/helpdesk/devices/deviceid/10020')
       .expect(200, done);
   });
   it('should respond with json', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/deviceid/10020')
+      .get('/api/v1/helpdesk/devices/deviceid/10020')
       .expect('Content-Type', /json/, done);
   });
 });
 
-describe('GET /api/v1/ubersmith/devices/deviceid/10020/tickets', function(){
+describe('GET /api/v1/helpdesk/devices/deviceid/10020/tickets', function(){
   "use strict";
   it('should return code 200', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/deviceid/10020/tickets')
+      .get('/api/v1/helpdesk/devices/deviceid/10020/tickets')
       .expect(200, done);
   });
   it('should respond with json', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/deviceid/10020/tickets')
+      .get('/api/v1/helpdesk/devices/deviceid/10020/tickets')
       .expect('Content-Type', /json/, done);
   });
 });
 
-describe('GET /api/v1/ubersmith/devices/hostname', function(){
+describe('GET /api/v1/helpdesk/devices/hostname', function(){
   "use strict";
   it('should return code 200', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/hostname')
+      .get('/api/v1/helpdesk/devices/hostname')
       .expect(200, done);
   });
   it('should respond with json', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/hostname')
+      .get('/api/v1/helpdesk/devices/hostname')
       .expect('Content-Type', /json/, done);
   });
 });
 
-describe('GET /api/v1/ubersmith/devices/hostname/jsklskwtrs-engage05.unittest.us', function(){
+describe('GET /api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us', function(){
   "use strict";
   it('should return code 200', function(done) {
     request(app)
-      .get('/api/v1/ubersmith/devices/hostname/jsklskwtrs-engage05.unittest.us')
+      .get('/api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us')
       .expect(200, done);
   });
   it('should respond with json', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/hostname/jsklskwtrs-engage05.unittest.us')
+      .get('/api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us')
       .expect('Content-Type', /json/, done);
   });
   it('should return jsklskwtrs-engage05', function(done) {
     request(app)
-      .get('/api/v1/ubersmith/devices/hostname/jsklskwtrs-engage05.unittest.us')
+      .get('/api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us')
       .expect(200, {
         "aaData":[
           {
@@ -104,30 +104,30 @@ var isTheCorrectDevice = function(res) {
   device.dev_desc.should.equal('vndrvrt-recontextualize01');
 };
 */
-describe('GET /api/v1/ubersmith/clients/clientid/1022', function(){
+describe('GET /api/v1/helpdesk/clients/clientid/1022', function(){
   "use strict";
   it('should return code 200', function(done){
     request(app)
-      .get('/api/v1/ubersmith/clients/clientid/1022')
+      .get('/api/v1/helpdesk/clients/clientid/1022')
       .expect(200, done);
   });
   it('should respond with json', function(done){
     request(app)
-      .get('/api/v1/ubersmith/clients/clientid/1022')
+      .get('/api/v1/helpdesk/clients/clientid/1022')
       .expect('Content-Type', /json/, done);
   });
 });
 
-describe('GET /api/v1/ubersmith/devices/devgroupid/1', function(){
+describe('GET /api/v1/helpdesk/devices/devgroupid/1', function(){
   "use strict";
   it('should return code 200', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/devgroupid/1')
+      .get('/api/v1/helpdesk/devices/devgroupid/1')
       .expect(200, done);
   });
   it('should respond with json', function(done){
     request(app)
-      .get('/api/v1/ubersmith/devices/devgroupid/1')
+      .get('/api/v1/helpdesk/devices/devgroupid/1')
       .expect('Content-Type', /json/, done);
   });
 });

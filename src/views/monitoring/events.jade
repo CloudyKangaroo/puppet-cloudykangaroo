@@ -178,7 +178,7 @@ block footer
             "mRender": function (client, type, row) {
               var text = client.replace('#{config.mgmtDomain}', '');
               if (#{userCan('silence monitoring events')}) {
-                return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + text + '</a>';
+                return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/helpdesk/devices/deviceid/'+row['dev'] + '">' + text + '</a>';
               } else {
                 return text;
               }

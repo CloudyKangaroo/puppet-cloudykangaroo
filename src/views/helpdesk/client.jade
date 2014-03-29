@@ -98,7 +98,7 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/tickets',
+        "sAjaxSource": '/api/v1/helpdesk/clients/clientid/#{clientid}/tickets',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bSortClasses": false,
@@ -112,14 +112,14 @@ block footer
           }, {
             "mData": "device_id",
             "mRender": function (device_id, type, row) {
-              return '<a href="/ubersmith/devices/deviceid/' + device_id + '">' + row['dev_desc'] + '</a>';
+              return '<a href="/helpdesk/devices/deviceid/' + device_id + '">' + row['dev_desc'] + '</a>';
             }
           }, {
             "mData": "admin_username"
           }, {
             "mData": "subject",
             "mRender": function (subject, type, row) {
-              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
+              return '<a href="/helpdesk/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
             }
           }, {
             "mData": "activity"
@@ -136,7 +136,7 @@ block footer
       $('#table_devices').dataTable( {
       "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
       "sPaginationType": "bootstrap",
-      "sAjaxSource": '/api/v1/ubersmith/clients/clientid/#{clientid}/devices',
+      "sAjaxSource": '/api/v1/helpdesk/clients/clientid/#{clientid}/devices',
       "iDisplayLength": 15,
       "bStateSave": true,
       "bDeferRender": true,
@@ -147,7 +147,7 @@ block footer
         }, {
           "mData": "dev",
           "mRender": function (dev, type, row) {
-            return '<a href="/ubersmith/devices/deviceid/' + dev + '">' + row['dev_desc'] + '</a>';
+            return '<a href="/helpdesk/devices/deviceid/' + dev + '">' + row['dev_desc'] + '</a>';
           }
         }, {
           "mData": "label"
