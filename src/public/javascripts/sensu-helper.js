@@ -168,7 +168,7 @@ var handleTicketForm = function(event) {
 
   $("#" + uuid + "-submit").attr('disabled','disabled');
 
-  var url = '/api/v1/ubersmith/tickets/';
+  var url = '/api/v1/helpdesk/tickets/';
 
   var data;
   if (newTicket) {

@@ -611,7 +611,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/devgroupid/:devgroupid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/devgroupid/:devgroupid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesbyTypeGroupID(req.params.devgroupid, function (err, deviceList){
       if (deviceList === null)
       {
@@ -628,7 +628,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/devgroups', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/devgroups', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceTypeList(function (err, deviceGroupList){
       if (deviceGroupList === null)
       {
@@ -648,7 +648,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/hostname', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
       if (deviceHostnames === null)
       {
@@ -663,7 +663,7 @@ module.exports = function (app, config, authenticator) {
   });
 
 
-  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/deviceid/:deviceid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketsbyDeviceID(req.params.deviceid, function (err, ticketList){
       if (err)
       {
@@ -682,7 +682,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/rack/:rack', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/rack/:rack', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesByRack(req.params.rack, function (error, device) {
       if (error !== null)
       {
@@ -699,7 +699,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByHostname(req.params.hostname, function (error, device) {
       if (error !== null)
       {
@@ -716,7 +716,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/devices/deviceid/:deviceid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/deviceid/:deviceid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, device) {
       if (error !== null)
       {
@@ -733,7 +733,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/contacts/search', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/contacts/search', authenticator.roleManager.can('use api'), function (req, res) {
     var results = [];
     var query = req.query.q;
     app.locals.logger.log('debug', 'Search Query', {query: query});
@@ -743,7 +743,7 @@ module.exports = function (app, config, authenticator) {
     res.send(results);
   });
 
-  app.get('/api/v1/ubersmith/clients', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getClients(function(err, clientList) {
       if (err)
       {
@@ -757,7 +757,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid', authenticator.roleManager.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
     app.locals.crmModule.getClientByID(clientID, function(err, client) {
       if (err) {
@@ -769,7 +769,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/contacts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid/contacts', authenticator.roleManager.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
     app.locals.crmModule.getContactsbyClientID(clientID, function(err, contactList) {
       if (err) {
@@ -783,7 +783,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/devices', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid/devices', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
       if (err) {
         res.send(500);
@@ -796,7 +796,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/clients/clientid/:clientid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
       if (err)
       {
@@ -815,7 +815,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/api/methods', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/api/methods', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getAPIMethods(function(err, client) {
       if (err) {
         res.send(500);
@@ -826,7 +826,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/tickets', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/tickets', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTickets(function(err, ticketList) {
       if (err)
       {
@@ -845,7 +845,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
       if (err)
       {
@@ -860,7 +860,7 @@ module.exports = function (app, config, authenticator) {
 //  {"status":true,"error_code":null,"error_message":"","data":{"id":"1025875","url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=1025875"}}
 //  {"data":{"url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=undefined"}}
 
-  app.post('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.post('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
     var ticketID = req.params.ticketid;
     var subject = req.body.subject;
     var visible = req.body.comment || 0;
@@ -911,7 +911,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.post('/api/v1/ubersmith/tickets/ticket', authenticator.roleManager.can('use api'), function (req, res) {
+  app.post('/api/v1/helpdesk/tickets/ticket', authenticator.roleManager.can('use api'), function (req, res) {
     var clientID = req.body.clientID;
 
     app.locals.crmModule.getAdminByEmail(req.currentUser.email, function (err, adminList) {
@@ -1017,7 +1017,7 @@ module.exports = function (app, config, authenticator) {
     app.locals.crmModule.createNewTicket(msgBody, subject, recipient, user_id, author, ccList, toList, priority, clientID, contactID, deviceID, callback);
   };
 
-  app.get('/api/v1/ubersmith/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
       if (err)
       {

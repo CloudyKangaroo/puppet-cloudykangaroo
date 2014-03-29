@@ -42,7 +42,7 @@ block footer
             $('#tableid_#{group.devtype_group_id}').dataTable( {
               "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
               "sPaginationType": "bootstrap",
-              "sAjaxSource": '/api/v1/ubersmith/devices/devgroupid/#{group.devtype_group_id}',
+              "sAjaxSource": '/api/v1/helpdesk/devices/devgroupid/#{group.devtype_group_id}',
               "iDisplayLength": 10,
               "bStateSave": true,
               "bDeferRender": true,
@@ -51,19 +51,19 @@ block footer
               {
                 "mData": "dev",
                 "mRender": function (dev) {
-                            return '<a href="/ubersmith/devices/deviceid/'+dev+'">' + dev + '</a>';
+                            return '<a href="/helpdesk/devices/deviceid/'+dev+'">' + dev + '</a>';
                           }
               }, {
                 "mData": "type"
               }, {
                 "mData": "dev_desc",
                 "mRender": function (dev_desc, type, row) {
-                  return '<a href="/ubersmith/devices/deviceid/' + row['dev'] + '">' + dev_desc + '</a>';
+                  return '<a href="/helpdesk/devices/deviceid/' + row['dev'] + '">' + dev_desc + '</a>';
                 }
               }, {
                 "mData": "company",
                 "mRender": function (company, type, row) {
-                  return '<a href="/ubersmith/clients/clientid/'+row['clientid']+'">' + company + '</a>';
+                  return '<a href="/helpdesk/clients/clientid/'+row['clientid']+'">' + company + '</a>';
                 }
               }, {
                 "mData": "location"

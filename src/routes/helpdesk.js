@@ -18,10 +18,11 @@ module.exports = function (app, config, authenticator) {
       },
       event_list: eventList,
       user: req.currentUser,
-      section: 'dashboard',
-      navLinks: config.navLinks.ubersmith
+      section: 'helpdesk',
+      key: 'dashboard',
+      navSections: req.navSections
     };
-    res.render('ubersmith', renderParams);
+    res.render('helpdesk', renderParams);
   });
 
   app.get('/helpdesk/tickets',  authenticator.roleManager.can('view helpdesk tickets'), function (req, res) {
@@ -37,10 +38,11 @@ module.exports = function (app, config, authenticator) {
         var renderParams = {
           device_types: deviceTypeList,
           user:req.currentUser,
-          section: 'devices',
-          navLinks: config.navLinks.ubersmith
+          section: 'helpdesk',
+          key: 'devices',
+          navSections: req.navSections
         };
-        res.render('ubersmith/devices', renderParams);
+        res.render('helpdesk/devices', renderParams);
       }
     });
   });
@@ -150,11 +152,12 @@ module.exports = function (app, config, authenticator) {
                 uberDevice: uberDevice,
                 sensuDevice: sensuDevice,
                 user:req.currentUser,
-                section: 'devices',
-                navLinks: config.navLinks.ubersmith
+                section: 'helpdesk',
+                key: 'devices',
+                navSections: req.navSections
               };
 
-              res.render('ubersmith/device', renderParams);
+              res.render('helpdesk/device', renderParams);
             } else {
               app.locals.logger.log('error', 'failed to retrieve device data', {results: JSON.stringify(results)});
               res.send(500);
@@ -178,7 +181,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/helpdesk/clients', authenticator.roleManager.can('view helpdesk clients'), function (req, res) {
-    res.render('ubersmith/clients', { user:req.currentUser, section: 'clients', navLinks: config.navLinks.ubersmith });
+    res.render('helpdesk/clients', { user:req.currentUser, section: 'helpdesk', key: 'clients', navSections: req.navSections  });
   });
 
   app.get('/helpdesk/clients/clientid/:clientid', authenticator.roleManager.can('view helpdesk client detail'), function (req, res) {
@@ -202,10 +205,11 @@ module.exports = function (app, config, authenticator) {
             clientid: req.params.clientid,
             client: client,
             user:req.currentUser,
-            section: 'clients',
-            navLinks: config.navLinks.ubersmith
+            section: 'helpdesk',
+            key: 'clients',
+            navSections: req.navSections
           };
-          res.render('ubersmith/client', renderParams);
+          res.render('helpdesk/client', renderParams);
         }
       });
   });

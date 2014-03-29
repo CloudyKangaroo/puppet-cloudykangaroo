@@ -45,7 +45,7 @@ block footer
             "mData": "name",
             "sWidth": "120px",
             "mRender": function (name, type, row) {
-              return '<a href="/ubersmith/devices/deviceid/'+row['dev'] + '">' + name.replace('#{config.mgmtDomain}', '') + '</a>';
+              return '<a href="/helpdesk/devices/deviceid/'+row['dev'] + '">' + name.replace('#{config.mgmtDomain}', '') + '</a>';
             }
           }, {
             "mData": "address",
@@ -59,7 +59,7 @@ block footer
           }, {
             "mData": "company",
             "mRender": function(company, type, row) {
-              return '<a href="/ubersmith/clients/clientid/' + row['clientid'] + '">' + company + '</a>';
+              return '<a href="/helpdesk/clients/clientid/' + row['clientid'] + '">' + company + '</a>';
             }
           }, {
             "mData": "full_name"

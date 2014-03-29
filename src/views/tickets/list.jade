@@ -40,7 +40,7 @@ block footer
       $('#table_tickets').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         "sPaginationType": "bootstrap",
-        "sAjaxSource": '/api/v1/ubersmith/tickets',
+        "sAjaxSource": '/api/v1/helpdesk/tickets',
         "iDisplayLength": 10,
         "bStateSave": true,
         "bDeferRender": true,
@@ -62,7 +62,7 @@ block footer
             "mRender": function (listed_company, type, row) {
               if (listed_company)
               {
-                return '<a href="/ubersmith/clients/clientid/' + row['client_id'] + '">' + listed_company.slice(0,15) + '</a>';
+                return '<a href="/helpdesk/clients/clientid/' + row['client_id'] + '">' + listed_company.slice(0,15) + '</a>';
               } else {
                 return '-';
               }
@@ -72,7 +72,7 @@ block footer
           }, {
             "mData": "subject",
             "mRender": function (subject, type, row) {
-              return '<a href="/ubersmith/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
+              return '<a href="/helpdesk/tickets/ticketid/' + row['ticket_id'] + '">' + subject.slice(0,65) + '</a>';
             }
           }, {
             "mData": "activity"
