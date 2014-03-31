@@ -66,7 +66,7 @@ config.roles = {
     users: []
   },
   monitoring: {
-    name: 'Monitoring',
+    name: 'monitoring',
     description: 'Provides additional access to monitoring systems.',
     groups: ['engineers'],
     users: []

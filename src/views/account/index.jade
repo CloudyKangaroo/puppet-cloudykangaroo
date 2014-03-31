@@ -38,11 +38,21 @@ block content
                 li #{email.value}
               else
                 li No additional Addresses
-        .panel.panel-default
-          .panel-heading Account Groups
-          .panel-body
-            ul
-              for group in user.groups
-                li= group
-              else
-                li No Groups Memberships
+        .col-md-6
+          .panel.panel-default
+            .panel-heading Account Groups
+            .panel-body
+              ul
+                for group in user.groups
+                  li= group
+                else
+                  li No Groups Memberships
+        .col-md-6
+          .panel.panel-default
+            .panel-heading Account Roles
+            .panel-body
+              ul
+                for role in user.roles
+                  li= role
+                else
+                  li No Role Memberships

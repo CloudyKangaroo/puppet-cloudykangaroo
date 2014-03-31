@@ -93,17 +93,6 @@ describe('GET /api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us'
       }, done);
   });
 });
-/*
-var isTheCorrectDevice = function(res) {
-  "use strict";
-  console.log(res);
-  var device = res.body.aaData[0];
-  device.should.have.property('dev_desc');
-  device.should.have.property('management_level');
-  device.should.have.property('label');
-  device.dev_desc.should.equal('vndrvrt-recontextualize01');
-};
-*/
 describe('GET /api/v1/helpdesk/clients/clientid/1022', function(){
   "use strict";
   it('should return code 200', function(done){

@@ -7,7 +7,9 @@ module.exports = function(config, logger) {
   nock.recorder.rec({
     output_objects: true
   });
-  //nock.disableNetConnect();
+
+  nock.disableNetConnect();
+  nock.enableNetConnect('127.0.0.1');
 
   var options = {allowUnmocked: true};
 
