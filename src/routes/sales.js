@@ -5,6 +5,8 @@ module.exports = function (app, config, authenticator) {
   app.locals.addMenuContent({ section: 'sales', label: 'New Activity', key: 'activity', path: '/sales/activity' });
   app.locals.addMenuContent({ section: 'sales', label: 'My Accounts', key: 'accounts', path: '/sales/accounts' });
 
+  app.locals.leadActivity = [];
+
   app.get('/sales', authenticator.roleManager.can('view accounts'), function (req, res) {
     var renderParams = {
       user:req.currentUser,
@@ -26,12 +28,9 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.post('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    var renderParams = {
-      user:req.currentUser,
-      section: 'sales',
-      key:  'activity',
-      navSections: req.navSections
-    };
-    res.render('monitoring', renderParams);
+    console.log(req.body);
+    console.log(req.currentUser);
+    app.locals.leadActivity.push({ formData: req.body, user: req.currentUser});
+    res.redirect('/sales/activity/view');
   });
 };
