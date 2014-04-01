@@ -18,6 +18,24 @@ module.exports = function (app, config, authenticator) {
     res.render('sales', renderParams);
   });
 
+  app.get('/sales/accounts', authenticator.roleManager.can('view accounts'), function (req, res) {
+    app.locals.crmModule.getClientByKeyword('innovate', function (err, clients) {
+      if (err) {
+        res.send(500);
+      } else {
+        console.log(clients);
+        var renderParams = {
+          user:req.currentUser,
+          section: 'sales',
+          key:  'activity',
+          clients: clients,
+          navSections: req.navSections
+        };
+        res.render('sales/accounts', renderParams);
+      }
+    });
+  });
+
   app.get('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
     app.locals.crmModule.getClients(function (err, leads) {
       if (err) {
