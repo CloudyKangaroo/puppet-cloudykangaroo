@@ -1,7 +1,7 @@
 {
   "name": "cloudy-kangaroo",
   "description": "Service Provider Management w/Sensu, Puppet and Ubersmith",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "homepage": "http://cloudykangaroo.github.io/cloudykangaroo",
   "author": {
