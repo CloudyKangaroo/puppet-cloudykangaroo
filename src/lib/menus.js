@@ -7,7 +7,7 @@ module.exports = function(params) {
     params = {};
   }
 
-  if (params.userProperty) {
+  if (params.hasOwnProperty('userProperty')) {
     userProperty = params.userProperty;
   }
 
@@ -27,12 +27,7 @@ module.exports = function(params) {
     {
       label: 'Sales',
       key: 'sales',
-      roles: ['sales', 'super'],
-      content: [
-        { label: 'Dashboard', key: 'dashboard', path: '/sales' },
-        { label: 'New Activity', key: 'activity', path: '/sales/activity' },
-        { label: 'My Accounts', key: 'accounts', path: '/sales/accounts' }
-      ]
+      roles: ['sales', 'admin', 'super']
     },
     'helpdesk':
     {
@@ -41,7 +36,7 @@ module.exports = function(params) {
       roles: ['support', 'admin', 'super'],
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/helpdesk' },
-        { label: 'Tickets', key: 'list', path: '/tickets/list' },
+        //{ label: 'Tickets', key: 'list', path: '/tickets/list' },
         { label: 'Customers', key: 'clients', path: '/helpdesk/clients' },
         { label: 'Devices', key: 'devices', path: '/helpdesk/devices' }
 
@@ -54,7 +49,8 @@ module.exports = function(params) {
       roles: ['sales', 'support', 'admin', 'super'],
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/monitoring' },
-        { label: 'Alarms', key: 'events', path: '/monitoring/events' },
+        { label: 'Events', key: 'events', path: '/monitoring/events' },
+        { label: 'Alarms', key: 'events', path: '/monitoring/alarms' },
         { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
         { label: 'Puppet', key: 'puppet', path: '/monitoring/puppet' },
         { label: 'Hosts', key: 'clients', path: '/monitoring/clients' }
@@ -64,19 +60,19 @@ module.exports = function(params) {
     {
       label: 'Instrumentation',
       key: 'instrumentation',
-      roles: ['sales', 'support', 'admin', 'super'],
+      roles: ['super'],
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/monitoring' },
         { label: 'Graphs', key: 'graphs', path: '/instrumentation/graphs' },
         { label: 'Log Viewer', key: 'logviewer', path: '/instrumentation/logs' },
-        { label: 'Signage', key: 'signage', path: '/instrumentation/graphs' }
+        { label: 'Signage', key: 'signage', path: '/instrumentation/signage' }
       ]
     },
     'admin':
     {
       label: 'Admin',
       key: 'admin',
-      roles: ['admin', 'super'],
+      roles: ['super'],
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/admin' },
         { label: 'Access Control', key: 'security', path: '/admin/security' },
@@ -85,18 +81,28 @@ module.exports = function(params) {
     }
   };
 
-  module.addMenuItem = function (section, label, key, path) {
-    var _ = require('underscore');
-    var menuItem = {label: label, key: key, path: path};
-    if (_.contains(section[section].content, menuItem)) {
-      return false;
+  var addMenuContent = function (menuItem) {
+    if (menuItem.hasOwnProperty('section')) {
+      if (navSections.hasOwnProperty(menuItem.section)) {
+        if (!navSections[menuItem.section].hasOwnProperty('content')) {
+          navSections[menuItem.section].content = [];
+        }
+        navSections[menuItem.section].content.push(menuItem);
+        return true;
+      } else {
+        throw new Error('could not add menu item section not found: ' + menuItem.section);
+      }
     } else {
-      navSections[section].content.push(menuItem);
-      return true;
+      throw new Error('could not add menu item no section defined');
     }
   };
 
-  module.handle = function(req, res, next) {
+  var addMenuItem = function (section, label, key, path, roles) {
+    var menuItem = {section: section, label: label, key: key, path: path, roles: roles};
+    addMenuContent(menuItem);
+  };
+
+  var buildMenu = function(req, next) {
     var _ = require('underscore');
 
     var matchedSections = {};
@@ -109,9 +115,41 @@ module.exports = function(params) {
       for (var sectionName in navSections) {
         if (navSections.hasOwnProperty(sectionName)) {
           section = navSections[sectionName];
-          matches = _.intersection(user.roles, section.roles);
-          if (matches.length) {
-            matchedSections[sectionName] = section;
+          if (section.hasOwnProperty('roles')) {
+            matches = _.intersection(user.roles, section.roles);
+            if (matches.length) {
+              var newSection = {
+                label: section.label,
+                key: section.key,
+                roles: section.roles,
+                content: []
+              };
+              var content = section.content;
+              for(var i=0; i<content.length; i++) {
+                var menuItem = content[i];
+                if (menuItem) {
+                  if (!menuItem.hasOwnProperty('roles')) {
+                    menuItem.roles = section.roles;
+                  }
+                  var menuItemRoles = menuItem.roles;
+                  menuItemRolesLoop:
+                  for (var j=0; j<menuItemRoles.length; j++) {
+                    var menuItemRole = menuItemRoles[j];
+                    if (user.hasOwnProperty('roles')) {
+                      if (_.contains(user.roles, menuItemRole)) {
+                        newSection.content.push(menuItem);
+                        break menuItemRolesLoop;
+                      } // else user does not have any roles for this menuItem
+                    } //else user has no roles
+                  }
+                }
+              }
+              if (newSection.content.length >= 1) {
+                matchedSections[sectionName] = newSection;
+              }
+            }
+          } else {
+            throw new Error('section has no roles defined: ' + sectionName);
           }
         }
       }
@@ -121,6 +159,12 @@ module.exports = function(params) {
 
     req.navSections = matchedSections;
     next();
+  };
+
+  module.addMenuContent = addMenuContent;
+  module.addMenuItem = addMenuItem;
+  module.handle = function(req, res, next) {
+    buildMenu(req, next);
   };
 
   return module;

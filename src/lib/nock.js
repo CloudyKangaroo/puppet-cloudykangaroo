@@ -93,15 +93,6 @@ module.exports = function(config, logger) {
       'content-type': 'application/json; charset=utf-8',
       'content-length': '13422',
       server: 'Jetty(7.x.y-SNAPSHOT)' });
-//
-//  nock('http://' + config.puppetdb.host + ':' + config.puppetdb.port)
-//    .filteringPath(/catalogs\/[a-zA-Z0-9].*/g, 'catalogs/vndrvrt-recontextualize01.unittest.us')
-//    .get('/v3/catalogs/vndrvrt-recontextualize01.unittest.us')
-//    .reply(404, "{\n  \"error\" : \"Could not find catalog for vndrvrt-recontextualize01.unittest.us\"\n}", { date: 'Wed, 12 Mar 2014 15:50:31 GMT',
-//      'content-type': 'application/json; charset=utf-8',
-//      'content-length': '75',
-//      server: 'Jetty(7.x.y-SNAPSHOT)' });
-
 
   module.play = nock.recorder.play();
   return module;
