@@ -1,13 +1,23 @@
 module.exports = function(app, roles) {
   "use strict";
 
+  var cacheManager = require('cache-manager');
+  var memoryCache = cacheManager.caching({store: 'memory', max: 2048, ttl: 10/*seconds*/});
   var ConnectRoles = require('connect-roles');
 
   function initializeRoles() {
-    if (!roles.users) {
+    if (!roles.hasOwnProperty('users')) {
       throw new Error('Required role users is not defined');
     }
-    if (!roles.sales) {
+    if (!roles.hasOwnProperty('guest')) {
+      roles.guest = {
+        name: 'guest',
+        description: 'Built-In Role for unauthenticated Users',
+        groups: [],
+        users: []
+      };
+    }
+    if (!roles.hasOwnProperty('sales')) {
       roles.sales = {
         name: 'sales',
         description: 'Provides access to lead and account management functionality. Also provides read-only access to monitoring.',
@@ -15,7 +25,7 @@ module.exports = function(app, roles) {
         users: []
       };
     }
-    if (!roles.helpdesk) {
+    if (!roles.hasOwnProperty('helpdesk')) {
       roles.helpdesk = {
         name: 'helpdesk',
         description: 'Provides access to helpdesk functionality. Also provides read-only access to monitoring.',
@@ -23,7 +33,7 @@ module.exports = function(app, roles) {
         users: []
       };
     }
-    if (!roles.monitoring) {
+    if (!roles.hasOwnProperty('monitoring')) {
       roles.monitoring = {
         monitoring: {
           name: 'monitoring',
@@ -33,7 +43,7 @@ module.exports = function(app, roles) {
         }
       };
     }
-    if (!roles.admin) {
+    if (!roles.hasOwnProperty('admin')) {
       roles.admin = {
         monitoring: {
           name: 'admin',
@@ -43,7 +53,7 @@ module.exports = function(app, roles) {
         }
       };
     }
-    if (!roles.super) {
+    if (!roles.hasOwnProperty('super')) {
       roles.super = {
         super: {
           name: 'super',
@@ -57,15 +67,14 @@ module.exports = function(app, roles) {
 
   var authFailureHandler = function (req, res, action) {
     var accept = req.headers.accept || '';
+    if (req.currentUser) {
+      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
+    } else {
+      app.locals.logger.log('debug', 'user is not authenticated', {action: action, groups: []});
+    }
     if (~accept.indexOf('html')) {
-      if (req.currentUser) {
-        app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
-      } else {
-        app.locals.logger.log('debug', 'user is not authenticated', {action: action, groups: []});
-      }
       res.render('account/login', { message: req.flash('error') });
     } else {
-      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
       res.send(403);
     }
   };
@@ -76,24 +85,62 @@ module.exports = function(app, roles) {
 
   function hasRoleGroups(userGroups, role) {
     var _ = require('underscore');
+    var roleGroups = role.groups;
+
     for (var i=0; i<userGroups.length; i++) {
-      var group = userGroups[i];
-      app.locals.logger.log('silly', 'checking group', { group: group, groups: role.groups});
-      if (_.contains(role.groups, group)) {
+      var userGroup = userGroups[i];
+
+      app.locals.logger.log('silly', 'hasRoleGroups: checking userGroup', { roleGroups: roleGroups, userGroup: userGroup});
+
+      if (_.contains(roleGroups, userGroup)) {
+        app.locals.logger.log('silly', 'hasRoleGroups: returning true', {roleName: role.name, userGroups: userGroups, roleGroups: roleGroups});
         return true;
       }
     }
+    app.locals.logger.log('silly', 'hasRoleGroups: returning false', {roleName: role.name, userGroups: userGroups, roleGroups: roleGroups});
     return false;
   }
 
   var hasAccess = function (user, role) {
     var _ = require('underscore');
-    app.locals.logger.log('silly', 'checking user', { user: user.username, users: role.users});
+    app.locals.logger.log('silly', 'hasAccess: checking user', { role: role.name, user: user.username, roleUsers: role.users});
     if (_.contains(role.users, user.username)) {
       return true;
     } else {
       return hasRoleGroups(user.groups, role);
     }
+  };
+
+  /* Placeholder for When I make this Async */
+  var cachedUserRoles = function(user, requiredRoles, join) {
+    return authorizeUserRoles(user, requiredRoles, join);
+  };
+
+  var authorizeUserRoles = function (user, requiredRoles, join) {
+    var accessGranted = false;
+    app.locals.logger.log('silly', 'authorizeUserRoles: checking user', {user: user, requiredRoles:  requiredRoles});
+    for (var i=0; i<requiredRoles.length;i++) {
+      var roleName = requiredRoles[i];
+      if (roles.hasOwnProperty(roleName)) {
+        var role = roles[roleName];
+        var roleGranted = hasAccess(user, role);
+        if (roleGranted === true && join === 'OR') {
+          app.locals.logger.log('silly', 'returning true role granted with join OR', {roleName: roleName, username:user.username, roleGroups: role.groups, roleUser: role.users});
+          return true;
+        } else if (roleGranted === true && join === 'AND') {
+          app.locals.logger.log('silly', 'returning true, role granted', {roleName: roleName, username:user.username, roleGroups: role.groups, roleUser: role.users});
+          accessGranted = true;
+        } else if (roleGranted === false && join === 'AND') {
+          app.locals.logger.log('silly', 'returning false role not granted with join AND', {roleName: roleName, username:user.username, roleGroups: role.groups, roleUser: role.users});
+          return false;
+        }
+      } else {
+        app.locals.logger.log('silly', 'returning false (no property)', {roleName: roleName});
+        return false;
+      }
+    }
+
+    return accessGranted;
   };
 
   var hasRequiredRoles = function(user, requiredRoles, join) {
@@ -110,30 +157,55 @@ module.exports = function(app, roles) {
     }
 
     var accessGranted = false;
+    var _ = require('underscore');
 
-    for (var i=0; i<requiredRoles.length;i++) {
-      var roleName = requiredRoles[i];
-      if (roles.hasOwnProperty(roleName)) {
-        var role = roles[roleName];
-        var roleGranted = hasAccess(user, role);
-        if (roleGranted === true && join === 'OR') {
-          app.locals.logger.log('debug', 'returning true role granted with join OR ' + roleName);
-          return true;
-        } else if (roleGranted === true && join === 'AND') {
-          app.locals.logger.log('debug', 'returning true, role granted: ' + roleName);
-          accessGranted = true;
-        } else if (roleGranted === false && join === 'AND') {
-          app.locals.logger.log('debug', 'returning false role not granted with join AND: ' + roleName);
-          return false;
-        }
-      } else {
-        app.locals.logger.log('debug', 'returning false (no property) ' + roleName);
-        return false;
-      }
+    if (user) {
+      accessGranted = cachedUserRoles(user, requiredRoles, join);
+      app.locals.logger.log('debug', 'returning ' + accessGranted, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
+    } else if (_.contains(requiredRoles, 'guest')) {
+      accessGranted = true;
+      app.locals.logger.log('debug', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
+    } else {
+      accessGranted = false;
+      app.locals.logger.log('debug', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
     }
 
-    app.locals.logger.log('debug', 'returning ' + accessGranted);
     return accessGranted;
+  };
+
+  var getCachedRoles = function(user, getCachedRolesCallback) {
+    memoryCache.wrap('roleManager::getCachedRoles::' + user, function (cb) {
+      getRoles(user, cb);
+    }, function (err, userRoles) {
+      getCachedRolesCallback(err, userRoles);
+    });
+  };
+
+  var getRoles = function (user, getRolesCallback) {
+    var userRoles = [];
+    for (var roleName in roles) {
+      if (roles.hasOwnProperty(roleName)) {
+        var role = roles[roleName];
+        if (hasAccess(user, role)) {
+          if (role.hasOwnProperty('name')) {
+            userRoles.push(role.name);
+          }
+        }
+      }
+    }
+    getRolesCallback(null, userRoles);
+  };
+
+  var handle = function (req, res, next) {
+    if (req.hasOwnProperty('currentUser')) {
+      getCachedRoles(req.currentUser, function (err, userRoles) {
+        req.currentUser.roles = userRoles;
+        next();
+      });
+    } else {
+      app.locals.logger.log('debug', 'no roles added, no user');
+      next();
+    }
   };
 
   var isUsers = function (req) {
@@ -160,27 +232,26 @@ module.exports = function(app, roles) {
     return hasRequiredRoles(req.currentUser, ['users', 'super']);
   };
 
-  var handle = function (req, res, next) {
-    var userRoles = [];
-    for (var roleName in roles) {
-      if (roles.hasOwnProperty(roleName)) {
-        var role = roles[roleName];
-        if (hasAccess(req.currentUser, role)) {
-          if (role.hasOwnProperty('name')) {
-            userRoles.push(role.name);
-          }
-        }
-      }
+  var isGuest = function (req) {
+    if (req.hasOwnProperty('currentUser')) {
+      return hasRequiredRoles(req.currentUser, ['guest']);
+    } else {
+      return hasRequiredRoles(null, ['guest']);
     }
-    req.currentUser.roles = userRoles;
-    next();
+
   };
 
   roleHandler.use('user', isUsers);
+  roleHandler.use('guest', isGuest);
+
   roleHandler.use('use api', isUsers);
 
   roleHandler.use('view customers', function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
+  });
+
+  roleHandler.use('submit lead activity', function (req) {
+    return isSales(req) || isAdmin(req) || isSuper(req);
   });
 
   roleHandler.use('view leads', function (req) {
@@ -190,42 +261,61 @@ module.exports = function(app, roles) {
   roleHandler.use('edit leads', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
+
+  roleHandler.use('edit leads', function (req) {
+    return isSales(req) || isAdmin(req) || isSuper(req);
+  });
+
   roleHandler.use('view devices', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view accounts', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view tickets', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view monitoring', function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('deactivate customers', isSuper);
+
   roleHandler.use('decommission device', function (req) {
     return isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('issue credit', isSuper);
+
   roleHandler.use('view monitoring events',  function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view helpdesk tickets', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view helpdesk devices', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view helpdesk device detail', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view helpdesk clients', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('view helpdesk', isUsers);
+
   roleHandler.use('view helpdesk client detail', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+
   roleHandler.use('silence monitoring events', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
@@ -238,9 +328,13 @@ module.exports = function(app, roles) {
   module.userCan = roleHandler.userCan;
   module.userIs = roleHandler.userIs;
   module.roleHandler = roleHandler;
+  module.authorizeUserRoles = authorizeUserRoles;
+  module.hasRequiredRoles = hasRequiredRoles;
+  module.authFailureHandler = authFailureHandler;
   module.handle = handle;
   module.isUsers = isUsers;
   module.isSales = isSales;
+  module.isGuest = isGuest;
   module.isHelpdesk = isHelpdesk;
   module.isMonitoring = isMonitoring;
   module.isAdmin = isAdmin;

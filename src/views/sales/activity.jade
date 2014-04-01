@@ -1,0 +1,16 @@
+extends ../layout
+block head
+  include ../datatables_css
+block content
+  .page-header
+    h1 Customer List
+  .container
+    table(id="table_clients").table.table-condensed.table-striped
+      thead
+        tr
+          th Name
+          th Company
+          th Email
+          th Phone
+          th Salespserson
+      tbody
