@@ -9,10 +9,18 @@ block content
       .col-md-6
         form.form(role="form", id="form", method="post")
           .form-group
+            label.sr-only(for="leadSelector") Lead Selection
+            .panel.panel-default
+              .panel-heading Lead Selection
+              .panel-body
+                select.form-control(id="leadSelector", name="leadSelector")
+                  each lead in leads
+                    option(value="#{lead.clientID} - #{lead.company} - #{lead.full_name}") #{lead.clientID} - #{lead.company} - #{lead.full_name}
+          .form-group
             .panel.panel-default
               .panel-heading Contact Method
               .panel-body
-                label.sr-only(for="contactMethod") Contact Method
+
                 .radio
                   label
                     input(type="radio" name="contactMethod", id="contactMethod1", value="phone", checked="")

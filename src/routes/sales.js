@@ -3,6 +3,7 @@ module.exports = function (app, config, authenticator) {
 
   app.locals.addMenuContent({ section: 'sales', label: 'Dashboard', key: 'dashboard', path: '/sales' });
   app.locals.addMenuContent({ section: 'sales', label: 'New Activity', key: 'activity', path: '/sales/activity' });
+  app.locals.addMenuContent({ section: 'sales', label: 'Recent Activities', key: 'activityview', path: '/sales/activity/view' });
   app.locals.addMenuContent({ section: 'sales', label: 'My Accounts', key: 'accounts', path: '/sales/accounts' });
 
   app.locals.leadActivity = [];
@@ -18,13 +19,31 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
+    app.locals.crmModule.getClients(function (err, leads) {
+      if (err) {
+        res.send(500);
+      } else {
+        var renderParams = {
+          user:req.currentUser,
+          section: 'sales',
+          key:  'activity',
+          leads: leads,
+          navSections: req.navSections
+        };
+        res.render('sales/activity', renderParams);
+      }
+    });
+  });
+
+  app.get('/sales/activity/view', authenticator.roleManager.can('submit lead activity'), function (req, res) {
     var renderParams = {
       user:req.currentUser,
       section: 'sales',
-      key:  'activity',
+      key:  'activityview',
+      activities: app.locals.leadActivity,
       navSections: req.navSections
     };
-    res.render('sales/activity', renderParams);
+    res.render('sales/activity/view', renderParams);
   });
 
   app.post('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
