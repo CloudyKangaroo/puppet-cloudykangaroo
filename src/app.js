@@ -165,6 +165,9 @@ app.locals.appMetrics = appMetrics;
 app.locals.puppetModule = puppetModule;
 app.locals.title = 'Cloudy Kangaroo';
 
+app.locals.addMenuContent = menus.addMenuContent;
+app.locals.addMenuItem = menus.addMenuItem;
+
 app.enable('trust proxy');
 
 app.set('title', 'Cloudy Kangaroo');

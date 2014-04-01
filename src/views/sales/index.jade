@@ -1,0 +1,110 @@
+extends ../layout
+block head
+  link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+block navbar
+block content
+  .container.col-xs-20.col-md-12
+    .row
+      .page-header
+        h1 Sales Team Dashboard
+    .row
+      .col-md-12
+        .panel.panel-default
+          .panel-heading Current Stats
+          .panel-body
+            .col-md-5
+              .panel.panel-default
+                .panel-heading Opportunities
+                .panel-body
+                  stageOne.tile.short.text-info
+                    .tile-heading.short Stage One<br/>Pending
+                    .tile-text 1525
+                  stageTwo.tile.short.text-info
+                    .tile-heading.short Stage Two
+                    .tile-text 1205
+                  stageThree.tile.short.text-info
+                    .tile-heading.short Stage Three
+                    .tile-text 735
+            .col-md-6
+              .panel.panel-default
+                .panel-heading Revenue Closed
+                .panel-body
+                  montToDate.tile.short
+                    .tile-heading.short Month to Date
+                    .tile-text.short.text-danger $15,251
+                  lastMonth.tile.short
+                    .tile-heading.short Last Month
+                    .tile-text.short.text-warning $35,313
+                  target.tile.short
+                    .tile-heading.short Target MRR
+                    .tile-text.text-primary.short $52,503
+                  AvgPerDay.tile.short
+                    .tile-heading.short Avg Closed per Day
+                    .tile-text.text-warning.short $1,503
+    .row
+      .col-md-12
+        .panel.panel-default
+          .panel-heading Personal Status
+          .panel-body
+            .row
+              .col-md-5
+                .panel.panel-default
+                  .panel-heading Opportunities
+                  .panel-body
+                    stageOne.tile.short.text-info
+                      .tile-heading.short Stage One<br/>Pending
+                      .tile-text 745
+                    stageTwo.tile.short.text-info
+                      .tile-heading.short Stage Two
+                      .tile-text 502
+                    stageThree.tile.short.text-info
+                      .tile-heading.short Stage Three
+                      .tile-text 108
+              .col-md-6
+                .panel.panel-default
+                  .panel-heading Revenue Closed
+                  .panel-body
+                    montToDate.tile.short
+                      .tile-heading.short Month to Date
+                      .tile-text.short.text-danger $15,251
+                    lastMonth.tile.short
+                      .tile-heading.short Last Month
+                      .tile-text.short.text-warning $35,313
+                    target.tile.short
+                      .tile-heading.short Target MRR
+                      .tile-text.text-primary.short $52,503
+                    AvgPerDay.tile.short
+                      .tile-heading.short Avg Closed per Day
+                      .tile-text.text-warning.short $1,503
+    .row
+      .col-md-12
+        .panel.panel-default
+          .panel-heading Leaderboards
+          .panel-body
+            .row
+              .col-md-6
+                .panel.panel-default
+                  .panel-heading MTD Leaders
+                  .panel-body
+                    leaderOne.tile.short
+                      .tile-heading.short Oleg Krakov
+                      .tile-text.text-primary.short $2,609
+                    leaderTwo.tile.short
+                      .tile-heading.short Sam Tillman
+                      .tile-text.text-primary.short $2,322
+                    leaderThree.tile.short
+                      .tile-heading.short Tina Smith
+                      .tile-text.text-primary.short $2,151
+              .col-md-6
+                .panel.panel-default
+                  .panel-heading Last Month Leaders
+                  .panel-body
+                    leaderOne.tile.short
+                      .tile-heading.short Tina Smith
+                      .tile-text.text-primary.short $21,609
+                    leaderTwo.tile.short
+                      .tile-heading.short Sam Tillman
+                      .tile-text.text-primary.short $20,322
+                    leaderThree.tile.short
+                      .tile-heading.short Roger Wilson
+                      .tile-text.text-primary.short $19,151
