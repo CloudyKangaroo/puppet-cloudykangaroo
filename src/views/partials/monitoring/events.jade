@@ -1,0 +1,19 @@
+a.panel-heading
+  .navbar
+    .navbar-header.pull-left
+      p.navbar-brand Monitoring Events
+    .navbar-header.pull-right
+      button(onclick="silenceCheck('" + sensuDevice.node.name + "', 'false');").btn.btn-sm.btn-primary.pull-right
+        span.glyphicon.glyphicon-volume-off.span-event.client
+        span Silence All Checks
+
+  .panel-body
+    table(id='table_events').table.table-condensed.sortable
+      thead
+        tr
+          th Issued
+          th Check
+          th Flapping
+          th Count
+          th.visible-lg Output
+      tbody
