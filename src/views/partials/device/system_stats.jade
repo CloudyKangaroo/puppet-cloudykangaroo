@@ -1,0 +1,17 @@
+.panel.panel-default
+  .panel-heading System Stats
+  .panel-body
+    p Operating System
+      span.pull-right #{puppetDevice.facts.operatingsystem} #{puppetDevice.facts.operatingsystemrelease}
+    p Kernel
+      span.pull-right #{puppetDevice.facts.kernel} #{puppetDevice.facts.kernelrelease}
+    p Uptime
+      span.pull-right #{puppetDevice.facts.uptime}
+    p Manufacturer Information
+      span.pull-right #{puppetDevice.facts.manufacturer} #{puppetDevice.facts.productname} #{puppetDevice.facts.serialnumber}
+    p RAM
+      span.pull-right #{puppetDevice.facts.memoryfree } free / #{puppetDevice.facts.memorytotal} total
+    p CPU
+      span.pull-right #{puppetDevice.facts.physicalprocessorcount} socket (#{puppetDevice.facts.processorcount/puppetDevice.facts.physicalprocessorcount} core) x #{puppetDevice.facts.processor0}
+    p Interfaces
+      span.pull-right Management: #{puppetDevice.facts.interface_mgmt} Public: #{puppetDevice.facts.interface_public}

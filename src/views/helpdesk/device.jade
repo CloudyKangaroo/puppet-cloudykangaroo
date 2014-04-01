@@ -11,111 +11,21 @@ block content
       .row
         .col-md-12
           .panel.panel-default
-            .panel-heading
-              .navbar
-                .navbar-header.pull-left
-                  p.navbar-brand Monitoring Events
-                .navbar-header.pull-right
-                  button(onclick="silenceCheck('" + sensuDevice.node.name + "', 'false');").btn.btn-sm.btn-primary.pull-right
-                    span.glyphicon.glyphicon-volume-off.span-event.client
-                    span Silence All Checks
-
-            .panel-body
-              table(id='table_events').table.table-condensed.sortable
-                thead
-                  tr
-                    th Issued
-                    th Check
-                    th Flapping
-                    th Count
-                    th.visible-lg Output
-                tbody
-
+            include ../partials/monitoring/events
       .row
         .col-md-12
-          .panel.panel-default
-            .panel-heading Ticket List
-            .panel-body
-              table(id="table_tickets").table.table-condensed
-                thead
-                  tr
-                    th Created
-                    th Priority
-                    th Type
-                    th Assignee
-                    th Subject
-                    th Touched
-                tbody
-
+          include ../partials/tickets/list
       .row
         .col-md-6
-          .panel.panel-default
-            .panel-heading System Stats
-            .panel-body
-              p Operating System
-                span.pull-right #{puppetDevice.facts.operatingsystem} #{puppetDevice.facts.operatingsystemrelease}
-              p Kernel
-                span.pull-right #{puppetDevice.facts.kernel} #{puppetDevice.facts.kernelrelease}
-              p Uptime
-                span.pull-right #{puppetDevice.facts.uptime}
-              p Manufacturer Information
-                span.pull-right #{puppetDevice.facts.manufacturer} #{puppetDevice.facts.productname} #{puppetDevice.facts.serialnumber}
-              p RAM
-                span.pull-right #{puppetDevice.facts.memoryfree } free / #{puppetDevice.facts.memorytotal} total
-              p CPU
-                span.pull-right #{puppetDevice.facts.physicalprocessorcount} socket (#{puppetDevice.facts.processorcount/puppetDevice.facts.physicalprocessorcount} core) x #{puppetDevice.facts.processor0}
-              p Interfaces
-                span.pull-right Management: #{puppetDevice.facts.interface_mgmt} Public: #{puppetDevice.facts.interface_public}
-
+          include ../partials/device/system_stats
         .col-md-6
-          .panel.panel-default
-            .panel-heading Ubersmith Information
-            .panel-body
-              p Type:
-                span.pull-right #{uberDevice.devtype_group_name}/#{uberDevice.type}
-              p Active:
-                span.label.label-success.pull-right #{uberDevice.active}
-              p Location:
-                span.pull-right #{uberDevice.location}
-              p Parent:
-                span.pull-right #{uberDevice.parent_desc}
-              p Management:
-                span.pull-right #{uberDevice.metadata.management_level}
-              p Company:
-                span.pull-right
-                  a(href="/helpdesk/clients/clientid/#{uberDevice.clientid}") #{uberDevice.company}
-              p Contact Information:
-                ul.list-group
-                  li.list-group-item Email:
-                    span.pull-right #{uberDevice.email}
-                  li.list-group-item Phone:
-                    span.pull-right #{uberDevice.phone}
+          include ../partials/device/owner_details
       .row
         .col-md-12
-          .panel.panel-default
-            .panel-heading Sensu Checks
-            .panel-body
-              table(id="table_checks").table.table-condensed
-                thead
-                  tr
-                    th Title
-                    th Occurences
-                    th Interval
-                    th Handlers
-                    th Command
-                tbody
-
+          include ../partials/monitoring/checks
       .row
         .col-md-12
-          .panel.panel-default
-            .panel-heading Puppet Facts
-            .panel-body
-              table(id="table_facts").table.table-condensed
-                thead
-                  tr
-                    th Fact
-                    th Value
-                tbody
+          include ../partials/monitoring/facts
 
 block footer
   include ../datatables_js
