@@ -1,0 +1,35 @@
+extends ../layout
+block head
+block content
+  .page-header
+    h1 My Accounts
+  .container
+    .col-md-12
+      .panel
+        .panel-heading Listing
+        .panel-body
+          .row
+            table.table-condensed.table-hover.table-bordered.table-striped
+              thead
+                tr
+                  th ID
+                  th Company
+                  th Domain
+                  th Phone
+                  th Name
+                  th Catch Phrase
+                  th Keywords
+
+              tbody
+                each account in clients
+                  tr
+                    td
+                      a(href="/helpdesk/clients/clientid/#{account.clientID}") #{account.clientID}
+                    td #{account.company}
+                    td #{account.domain}
+                    td #{account.phone}
+                    td #{account.full_name}
+                    td #{account.catch_phrase}
+                    td #{account.keywords}
+
+          .row
