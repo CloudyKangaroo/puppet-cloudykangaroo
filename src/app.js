@@ -128,7 +128,13 @@ try {
 
 /* Load the monitoring module */
 try {
-  var monModule = require('./lib/monitoring')(config, logger, crmModule, redisClient);
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
+  {
+    var monModule = require('./lib/mockMonitoring')(config, logger, crmModule, redisClient);
+  } else {
+    var monModule = require('./lib/monitoring')(config, logger, crmModule, redisClient);
+  }
+
 } catch (e) {
   logger.log('error', 'Could not initialize Monitoring Module', { error: e.message});
   throw e;
