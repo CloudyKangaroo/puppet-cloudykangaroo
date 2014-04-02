@@ -175,84 +175,6 @@ module.exports = function (config, logger, crmModule, redisClient) {
     });
   };
 
-  var mockgetEvents = function (getEventsCallback) {
-    crmModule.getSensuEvents(1, 10023, function(err, deviceEvents) {
-      crmModule.getSensuEvents(15, 0, function(err, events) {
-        events.push(deviceEvents[0]);
-        getEventsCallback(null, events);
-      });
-    });
-  };
-
-  var mockgetDeviceEvents = function(hostname, callback) {
-
-    crmModule.getDeviceByHostname(hostname, function (error, device) {
-      if (error) {
-        logger.log('error', 'Could not get device by hostname', {error: error.message});
-        callback(error, null );
-      } else if (!device || device === [] || device === '') {
-        logger.log('error', 'No device found for that hostname', {hostname: hostname});
-        callback({code: 404, message: 'No device found for: ' + hostname}, null);
-      } else {
-        logger.log('debug', 'Got device ' + device.deviceID, {device: device});
-        crmModule.getSensuEvents(2, device.deviceID, function(error, deviceEvents) {
-          if (error) {
-            logger.log('error', 'Could not get device events', {deviceID: device.deviceID});
-            callback(error);
-          } else {
-            logger.log('debug', 'Got Device Events', {deviceEvents: deviceEvents});
-            callback(null, deviceEvents);
-          }
-        });
-      }
-    });
-  };
-
-  var mockgetStashes = function(stashes, callback) {
-    var ret = [
-      {
-        "path":"silence/jsklskwtrs-engage05.unittest.us/disk",
-        "content":{
-          "timestamp":1394450361,
-          "user":"marta.wiliams",
-          "ticketID":"12001"
-        },
-        "expire":118739
-      }
-    ];
-
-    callback(null, ret);
-    /*getStashes(stashes, function (err, reply) {
-      console.log({function: 'getStashes', reply: JSON.stringify(reply)});
-      callback(err, reply);
-    });*/
-  };
-
-  var mocksilenceCheck = function(user, client, check, expires, ticketID, callback) {
-    silenceCheck(user, client, check, expires, ticketID, function (err, reply) {
-      callback(err, reply);
-    });
-  };
-
-  var mocksilenceClient = function(user, client, check, expires, ticketID, callback) {
-    silenceClient(user, client, check, expires, ticketID, function (err, reply) {
-      callback(err, reply);
-    });
-  };
-
-  var mockgetDevice = function(hostname, callback) {
-    var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
-    var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
-    var sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
-    callback(null, sensuDevice);
-  };
-
-  var mockgetDevices = function(callback) {
-    crmModule.getSensuDevices(function (err, reply) {
-      callback(err, reply);
-    });
-  };
-
   var getDevices = function(callback) {
     var request = require('request');
     request({url: config.sensu.uri + '/clients', json: true}, function (error, response, body) {
@@ -262,12 +184,6 @@ module.exports = function (config, logger, crmModule, redisClient) {
         callback(null, body);
       }
     });
-  };
-
-  var mockgetInfo = function(callback) {
-    var bodyJSON = "{\"sensu\":{\"version\":\"0.12.1\"},\"rabbitmq\":{\"keepalives\":{\"messages\":0,\"consumers\":2},\"results\":{\"messages\":0,\"consumers\":2},\"connected\":true},\"redis\":{\"connected\":true}}";
-    var body = JSON.parse(bodyJSON);
-    callback(null, body);
   };
 
   var getInfo = function(callback) {
@@ -281,25 +197,67 @@ module.exports = function (config, logger, crmModule, redisClient) {
     });
   };
 
-  if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV == 'development') {
-    module.getInfo = mockgetInfo;
-    module.getEvents = mockgetEvents;
-    module.getDeviceEvents = mockgetDeviceEvents;
-    module.getStashes = mockgetStashes;
-    module.silenceCheck = mocksilenceCheck;
-    module.silenceClient = mocksilenceClient;
-    module.getDevice = mockgetDevice;
-    module.getDevices = mockgetDevices;
-  } else {
-    module.getInfo = getInfo;
-    module.getDevices = getDevices;
-    module.getEvents = getEvents;
-    module.getDeviceEvents = getDeviceEvents;
-    module.getStashes = getStashes;
-    module.silenceCheck = silenceCheck;
-    module.silenceClient = silenceClient;
-    module.getDevice = getDevice;
-  }
+  var deleteEvent = function (client, check, deleteEventCallback) {
+    var request = require('request');
+
+    request({ method: 'DELETE', url: config.sensu.uri + '/events/' + client + '/' + check, json: true }, function (error, response) {
+      if (error) {
+        deleteEventCallback(error);
+      } else if (response.statusCode === 200 || response.statusCode === 404) {
+        deleteEventCallback(null, response.statusCode);
+      } else if (response.statuscode === 500) {
+        deleteEventCallback(new Error('failed to delete event'), response.statusCode);
+      } else {
+        deleteEventCallback(new Error('unknown response code ' + response.statusCode), response.statusCode);
+      }
+    });
+  };
+
+  var getSilencedClient = function(client, getSilencedClientsCallback) {
+    var request = require('request');
+    var path = 'silence/' + client;
+    request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, getSilencedClientsCallback);
+  };
+
+  var unSilenceClient = function (client, deleteCheckCallback) {
+    var request = require('request');
+    var path = "/silence/" + client;
+    request({ method: 'DELETE', url: config.sensu.uri + '/stashes' + path, json: true }, function (error, msg, response) {
+        deleteCheckCallback(error, response);
+      }
+    );
+  };
+
+  var unSilenceEvent = function (client, check, deleteCheckCallback) {
+    var request = require('request');
+    var path = "/silence/" + client + "/" + check;
+    request({ method: 'DELETE', url: config.sensu.uri + '/stashes' + path, json: true }, function (error, msg, response) {
+        deleteCheckCallback(error, response);
+      }
+    );
+  };
+
+  var deleteStash = function (path, deleteCheckCallback) {
+    var request = require('request');
+    request({ method: 'DELETE', url: config.sensu.uri + '/stashes' + path, json: true }, function (error, msg, response) {
+        deleteCheckCallback(error, response);
+      }
+    );
+  };
+
+  module.getInfo = getInfo;
+  module.getDevices = getDevices;
+  module.getEvents = getEvents;
+  module.getDeviceEvents = getDeviceEvents;
+  module.getStashes = getStashes;
+  module.getSilencedClient = getSilencedClient;
+  module.silenceCheck = silenceCheck;
+  module.silenceClient = silenceClient;
+  module.unSilenceEvent = unSilenceEvent;
+  module.unSilenceClient = unSilenceClient;
+  module.deleteStash = deleteStash;
+  module.deleteEvent = deleteEvent;
+  module.getDevice = getDevice;
 
   return module;
 };

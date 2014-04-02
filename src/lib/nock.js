@@ -1,5 +1,4 @@
-/* jshint unused: false */
-module.exports = function(config, logger) {
+module.exports = function(config) {
   "use strict";
 
   var nock = require('nock');
