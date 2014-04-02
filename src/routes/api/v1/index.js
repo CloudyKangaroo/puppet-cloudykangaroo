@@ -419,20 +419,6 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  // UNSILENCE an CLIENT
-  app.delete('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
-    var request = require('request');
-    var path = 'silence/' + req.params.client;
-    request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
-      if(error){
-        res.send(500);
-      } else {
-        app.locals.logger.log('debug', 'response', {response: response});
-        res.send(204);
-      }
-    });
-  });
-
   // GET STASHES THAT MATCH ^stash
   app.get('/api/v1/sensu/stashes/:stash', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getStashes(req.params.stash, function (err, response) {
@@ -463,7 +449,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // SILENCE a CLIENT
-  app.post('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
+  app.post('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.silenceClient(req.currentUser.username, req.params.client, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
@@ -475,7 +461,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // SILENCE a CHECK
-  app.post('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('use api'), function (req, res) {
+  app.post('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.silenceCheck(req.currentUser.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
@@ -488,9 +474,7 @@ module.exports = function (app, config, authenticator) {
 
   // GET SILENCED CLIENTS
   app.get('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
-    var request = require('request');
-    var path = 'silence/' + req.params.client;
-    request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
+    app.locals.monModule.getSilencedClient(req.params.client, function (error, response) {
       if(error){
         res.send(500);
       } else {
@@ -500,11 +484,21 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
+  // UNSILENCE A CLIENT
+  app.delete('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+    app.locals.monModule.unSilenceClient(req.params.client, function (error, response) {
+      if(error){
+        res.send(500);
+      } else {
+        app.locals.logger.log('debug', 'response', {response: response});
+        res.send(204);
+      }
+    });
+  });
+
   // UNSILENCE A CHECK
-  app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('use api'), function (req, res) {
-    var request = require('request');
-    var path = 'silence/' + req.params.client + '/' + req.params.check;
-    request.del({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
+  app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+    app.locals.monModule.unSilenceCheck(req.params.client, req.params.check, function (error, response) {
       if(error){
         res.send(500);
       } else {
@@ -540,6 +534,20 @@ module.exports = function (app, config, authenticator) {
       }
     });
   });
+
+  // DELETE A STASH
+  app.del('/api/v1/sensu/silence/:path', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+    var request = require('request');
+    request({ method: "DELETE", url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }, function (error, response) {
+      if(error){
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify({aaData: response.body}));
+      }
+    });
+  });
+
 
   // GET ALL STASHES
   app.get('/api/v1/sensu/silence', authenticator.roleManager.can('use api'), function (req, res) {
