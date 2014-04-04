@@ -51,37 +51,37 @@ config.roles = {
     name: 'users',
     description: 'Minimum access, required to login',
     groups: ['users'],
-    users: []
+    users: ['jonathan.creasy']
   },
   sales: {
     name: 'sales',
     description: 'Provides access to lead and account management functionality. Also provides read-only access to monitoring.',
     groups: ['contegix-sales'],
-    users: []
+    users: ['jonathan.creasy']
   },
   helpdesk: {
     name: 'helpdesk',
     description: 'Provides access to helpdesk functionality. Also provides read-only access to monitoring.',
     groups: ['contegix-engineers'],
-    users: []
+    users: ['jonathan.creasy']
   },
   monitoring: {
     name: 'monitoring',
     description: 'Provides additional access to monitoring systems.',
     groups: ['contegix-engineers'],
-    users: []
+    users: ['jonathan.creasy']
   },
   admin: {
     name: 'admin',
     description: 'Provides full access to sales, monitoring and helpdesk functionality.',
     groups: ['contegix-leads'],
-    users: []
+    users: ['jonathan.creasy']
   },
   super: {
     name: 'super',
     description: 'Provides access to administrative functions.',
     groups: ['contegix-leads'],
-    users: []
+    users: ['jonathan.creasy']
   }
 };
 

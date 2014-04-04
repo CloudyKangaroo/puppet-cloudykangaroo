@@ -33,10 +33,9 @@ module.exports = function(params) {
     {
       label: 'Helpdesk',
       key: 'helpdesk',
-      roles: ['support', 'admin', 'super'],
+      roles: ['helpdesk', 'admin', 'super'],
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/helpdesk' },
-        //{ label: 'Tickets', key: 'list', path: '/tickets/list' },
         { label: 'Customers', key: 'clients', path: '/helpdesk/clients' },
         { label: 'Devices', key: 'devices', path: '/helpdesk/devices' }
 
@@ -46,7 +45,7 @@ module.exports = function(params) {
     {
       label: 'Monitoring',
       key: 'monitoring',
-      roles: ['sales', 'support', 'admin', 'super'],
+      roles: ['sales', 'helpdesk', 'admin', 'super'],
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/monitoring' },
         { label: 'Events', key: 'events', path: '/monitoring/events' },
