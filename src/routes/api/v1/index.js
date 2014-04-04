@@ -743,6 +743,21 @@ module.exports = function (app, config, authenticator) {
     res.send(results);
   });
 
+  app.get('/api/v1/sales/leads', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getLeads(function(err, leadList) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var leads = _.values(leadList);
+        console.log(leads);
+        res.type('application/json');
+        res.send(JSON.stringify({aaData: leads}));
+      }
+    });
+  });
+
   app.get('/api/v1/helpdesk/clients', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getClients(function(err, clientList) {
       if (err)
