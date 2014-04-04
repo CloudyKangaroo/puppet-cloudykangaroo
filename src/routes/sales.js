@@ -51,7 +51,6 @@ module.exports = function (app, config, authenticator) {
         res.redirect('/sales/leads/clientid/' + data.data);
       }
     });
-    console.log(req.body);
   });
 
   app.get('/sales/accounts', authenticator.roleManager.can('view accounts'), function (req, res) {
