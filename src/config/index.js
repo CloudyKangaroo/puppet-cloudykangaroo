@@ -56,31 +56,31 @@ config.roles = {
   sales: {
     name: 'sales',
     description: 'Provides access to lead and account management functionality. Also provides read-only access to monitoring.',
-    groups: ['users'],
+    groups: ['contegix-sales'],
     users: []
   },
   helpdesk: {
     name: 'helpdesk',
     description: 'Provides access to helpdesk functionality. Also provides read-only access to monitoring.',
-    groups: ['engineers'],
+    groups: ['contegix-engineers'],
     users: []
   },
   monitoring: {
     name: 'monitoring',
     description: 'Provides additional access to monitoring systems.',
-    groups: ['engineers'],
+    groups: ['contegix-engineers'],
     users: []
   },
   admin: {
     name: 'admin',
     description: 'Provides full access to sales, monitoring and helpdesk functionality.',
-    groups: ['leads'],
+    groups: ['contegix-leads'],
     users: []
   },
   super: {
     name: 'super',
     description: 'Provides access to administrative functions.',
-    groups: ['devops'],
+    groups: ['contegix-leads'],
     users: []
   }
 };
