@@ -751,7 +751,6 @@ module.exports = function (app, config, authenticator) {
       } else {
         var _ = require('underscore');
         var leads = _.values(leadList);
-        console.log(leads);
         res.type('application/json');
         res.send(JSON.stringify({aaData: leads}));
       }
