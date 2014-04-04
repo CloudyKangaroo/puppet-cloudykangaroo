@@ -1,0 +1,31 @@
+script(type='text/javascript').
+  $(document).ready(function() {
+    $('#table_clients').dataTable( {
+      "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+      "sPaginationType": "bootstrap",
+      "sAjaxSource": '/api/v1/helpdesk/clients',
+      "iDisplayLength": 10,
+      "bStateSave": true,
+      "bDeferRender": true,
+      "bSortClasses": false,
+      "aoColumns": [
+        {
+          "mData": "full_name"
+        }, {
+          "mData": "company",
+          "mRender": function(company, type, row) {
+            return '<a href="/helpdesk/clients/clientid/' + row['clientid'] + '">' + company + '</a>';
+           }
+        }, {
+          "mData": "email"
+        }, {
+          "mData": "phone",
+        }, {
+          "mData": "salesperson_name",
+        }],
+      "aaSorting": [[1,'asc']],
+      "oLanguage": {
+        "sLengthMenu": "_MENU_ records per page"
+      }
+    });
+  });

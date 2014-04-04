@@ -7,20 +7,20 @@ block content
   .container
     .row
       .col-md-6
-        form.form(role="form", id="form", method="post")
+        form(role="form", id="form", method="post").form.form-horizontal
           .form-group
             label.sr-only(for="leadSelector") Lead Selection
             .panel.panel-default
               .panel-heading Lead Selection
               .panel-body
                 select.form-control(id="leadSelector", name="leadSelector")
-                  each lead in leads
-                    option(value="#{lead.clientID} - #{lead.company} - #{lead.full_name}") #{lead.clientID} - #{lead.company} - #{lead.full_name}
+                  each lead,id in leads
+                    option(value="#{lead.clientid}") #{lead.listed_company} - #{lead.full_name} - #{lead.clientid}
+
           .form-group
             .panel.panel-default
               .panel-heading Contact Method
               .panel-body
-
                 .radio
                   label
                     input(type="radio" name="contactMethod", id="contactMethod1", value="phone", checked="")
