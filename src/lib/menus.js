@@ -49,7 +49,6 @@ module.exports = function(params) {
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/monitoring' },
         { label: 'Events', key: 'events', path: '/monitoring/events' },
-        { label: 'Alarms', key: 'events', path: '/monitoring/alarms' },
         { label: 'Stashes', key: 'stashes', path: '/monitoring/stashes' },
         { label: 'Puppet', key: 'puppet', path: '/monitoring/puppet' },
         { label: 'Hosts', key: 'clients', path: '/monitoring/clients' }
