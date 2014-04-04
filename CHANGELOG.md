@@ -1,5 +1,14 @@
 # Cloudykangaroo Changelog
 
+### v0.4.1
+
+- Ubersmith module now called Helpdesk
+- Menu system is now modular
+- Authorization is handled via Actions -> Roles -> Users/Groups
+- Sales module created
+- New Menus
+- Initial partials have been created, first page to be re-built is /helpdesk/device/:device
+
 ### v0.3.1
 
 No Feature improvements, just test and build improvements
