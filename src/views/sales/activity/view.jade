@@ -25,7 +25,8 @@ block content
                 each activity in activities
                   tr
                     td #{activity.user.username}
-                    td #{activity.formData.leadSelector}
+                    td
+                      a(href="/helpdesk/clients/clientid/#{activity.formData.leadSelector}") #{activity.formData.leadSelector}
                     td #{activity.formData.contactMethod}
                     td #{activity.formData.contactMethodNotes}
                     td #{activity.formData.contactDisposition}

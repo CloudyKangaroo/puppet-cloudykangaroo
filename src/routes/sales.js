@@ -92,6 +92,9 @@ module.exports = function (app, config, authenticator) {
     res.render('sales/lead', { user:req.currentUser, section: 'sales', key: 'lead', navSections: req.navSections  });
   });
 
+  /*
+  This function is just bad, it's really really bad. I should feel bad, I do feel bad. I will rewrite it.
+   */
   app.get('/sales/activity/view', authenticator.roleManager.can('submit lead activity'), function (req, res) {
     app.locals.crmModule.getLeads(function (err, leads) {
       var async = require('async');
@@ -104,16 +107,9 @@ module.exports = function (app, config, authenticator) {
         } else {
           async.concat(_.values(leadComments), function(leadComment, callback) {
             var commentIDList = [];
-            var lineSeperator = "\n";
-            var fieldSeperator = "|";
             for(var j=0; j<leadComment.length; j++) {
               var comment = leadComment[j];
               if (comment.comment.substring(0,3) === '###') {
-
-                var commentTextRaw = comment.comment;
-                var commentTextData = commentTextRaw.replace("   " + fieldSeperator + "   ", '^');
-                commentTextData = commentTextData.replace(fieldSeperator + lineSeperator, '|');
-                console.log(commentTextData);
                 commentIDList.push(comment.comment_id);
               }
             }
@@ -121,9 +117,39 @@ module.exports = function (app, config, authenticator) {
           }, function (err, commentIDList) {
             async.map(commentIDList, function(commentID, callback) {
               app.locals.crmModule.getCommentAttachments(commentID, callback);
-            }, function(err, commentAttachments) {
-              res.type('application/json');
-              res.send(JSON.stringify(commentAttachments));
+            }, function(err, attachmentListing) {
+              if (err) {
+                res.send(500);
+              } else {
+                async.map(attachmentListing, function(attachmentObjectList, callback) {
+                  callback(null, _.values(attachmentObjectList));
+                }, function(err, attachmentObjects) {
+                  if (err) {
+                    res.send(500);
+                  } else {
+                    async.concat(attachmentObjects, function(attachmentObject, callback) {
+                      callback(null, attachmentObject);
+                    }, function(err, attachmentObjects) {
+                      async.map(attachmentObjects, function(attachmentItem, callback) {
+                        app.locals.crmModule.getAttachment(attachmentItem.attach_id, callback);
+                      }, function (err, attachments) {
+                        if (err) {
+                          res.send(500);
+                        } else {
+                          var renderParams = {
+                            user:req.currentUser,
+                            section: 'sales',
+                            key:  'activityview',
+                            activities: attachments,
+                            navSections: req.navSections
+                          };
+                          res.render('sales/activity/view', renderParams);
+                        }
+                      });
+                    });
+                  }
+                });
+              }
             });
           });
         }
@@ -143,9 +169,7 @@ module.exports = function (app, config, authenticator) {
   */
 
   app.post('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    console.log(req.body);
-    console.log(req.currentUser);
-    var commentJSON = JSON.stringify({ formData: req.body, user: req.currentUser});
+    var commentJSON = JSON.stringify({ data: { formData: req.body, user: req.currentUser}});
     var lineSeperator = "\n";
     var fieldSeperator = "|";
     var commentData = "###\n" +
@@ -158,7 +182,7 @@ module.exports = function (app, config, authenticator) {
       "Followup Notes   " + fieldSeperator + "   " + req.body.contactFollowupNotes + "   " + fieldSeperator + lineSeperator +
       "Followup Date   " + fieldSeperator + "   " + req.body.followupDate + "   " + fieldSeperator + lineSeperator;
 
-    app.locals.crmModule.submitComment('client', req.body.leadSelector, commentData, req.currentUser.username, commentJSON, function(err, data) {
+    app.locals.crmModule.submitComment('client', req.body.leadSelector, commentData, req.currentUser.username, commentJSON, function(err) {
       if (err) {
         res.send(500);
       } else {

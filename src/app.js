@@ -17,22 +17,22 @@ Configuration
  */
 var credentials;
 
-//if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
-//  config.log.level = config.production.log.level;
-//  config.log.screen = config.production.log.screen;
+if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+  config.log.level = config.production.log.level;
+  config.log.screen = config.production.log.screen;
   credentials = require('./config/system-credentials')();
-//} else if (process.env.NODE_ENV === 'development') {
-//  credentials = require('./config/system-dev-credentials')();
+} else if (process.env.NODE_ENV === 'development') {
+  credentials = require('./config/system-dev-credentials')();
   config.log.level = config.development.log.level;
   config.log.screen = config.development.log.screen;
-//} else if (process.env.NODE_ENV === 'test') {
-//  credentials = require('./config/system-dev-credentials')();
-//  config.log.level = 'hide';
-//  config.log.screen = 'hide';
-//  config.mgmtDomain = '.unittest.us';
-//} else {
-//  throw new Error(process.env.NODE_ENV +  ' is not a known environment, cannot proceed');
-//}
+} else if (process.env.NODE_ENV === 'test') {
+  credentials = require('./config/system-dev-credentials')();
+  config.log.level = 'hide';
+  config.log.screen = 'hide';
+  config.mgmtDomain = '.unittest.us';
+} else {
+  throw new Error(process.env.NODE_ENV +  ' is not a known environment, cannot proceed');
+}
 
 /*
  Initialize the Logging Framework
@@ -113,12 +113,12 @@ try {
 
   var crmModule = {};
 
-  //if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
-  //{
-    //crmModule = require('cloudy-localsmith')(crmModuleConfig);
-  //} else {
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
+  {
+    crmModule = require('cloudy-localsmith')(crmModuleConfig);
+  } else {
     crmModule = require('cloudy-ubersmith')(crmModuleConfig);
-  //}
+  }
 }
   catch (e) {
 
