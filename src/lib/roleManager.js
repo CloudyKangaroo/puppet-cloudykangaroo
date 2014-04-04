@@ -174,11 +174,14 @@ module.exports = function(app, roles) {
   };
 
   var getCachedRoles = function(user, getCachedRolesCallback) {
-    memoryCache.wrap('roleManager::getCachedRoles::' + user, function (cb) {
+    /*
+    memoryCache.wrap('roleManager::getCachedRoles::' + user.username, function (cb) {
       getRoles(user, cb);
     }, function (err, userRoles) {
       getCachedRolesCallback(err, userRoles);
     });
+    */
+    getRoles(user, getCachedRolesCallback);
   };
 
   var getRoles = function (user, getRolesCallback) {
