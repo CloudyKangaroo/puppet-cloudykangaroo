@@ -21,6 +21,7 @@ config.crmModule = {};
 config.crmModule.warmCache = false;
 config.crmModule.ticketingHost = 'localhost';
 config.crmModule.ticketingPath = '/ticketing/ticket_view.php?ticket=';
+
 config.crmModule.class = process.env.CRM_CLASS || 'cloudy-localsmith';
 
 config.instModule = {};
@@ -76,9 +77,8 @@ config.redis.class = process.env.REDIS_CLASS || 'redis';
 config.http.port = process.env.PORT || 3000;
 config.cookie.secret = 'CHANGETHISPLEASE!!!';
 config.USE_NOCK = process.env.USE_NOCK || 'false';
+
 config.support = {};
-
-
 
 config.roles = {
   users: {
