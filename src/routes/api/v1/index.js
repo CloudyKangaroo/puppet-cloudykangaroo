@@ -765,6 +765,445 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
+  app.get('/api/v1/sales/pipeline', authenticator.roleManager.can('view pipeline'), function(req, res) {
+    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
+      if (err) {
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(pipeline));
+      }
+    });
+  });
+
+  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleManager.can('view pipeline'), function(req, res) {
+    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
+      if (err) {
+        res.send(500);
+      } else {
+        var elasticsearch_index = '';
+        for (var x=0;x<pipeline.pipeline.length;x++) {
+          var opportunity = pipeline.pipeline[x];
+          elasticsearch_index += '{ "create": { "index": "' + req.params.index + '", "type":"opportunity", "id":"' + opportunity.opportunity_id + '" }}\n';
+          elasticsearch_index += JSON.stringify(opportunity) + '\n';
+        }
+        res.type('text/plain');
+        res.send(elasticsearch_index);
+      }
+    });
+  });
+
+  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleManager.can('view pipeline'), function(req, res) {
+    var type = function (type) {
+      return { type: type };
+    };
+
+    if (req.params.type === 'opportunity') {
+      var opportunity = {
+        'opportunity': {
+          'properties': {
+            'opportunity_id': type('integer'),
+            'client_id': type('integer'),
+            'contact_id': type('integer'),
+            'ts': type('long'),
+            'activity' : type('long'),
+            'status' : type('integer'),
+            'opportunity_type_id' : type('integer'),
+            'opportunity_stage_id' : type('integer'),
+            'owner' : type('integer'),
+            'owner_name' : type('string'),
+            'closure_ts' : { 'type' : 'long'},
+            'closure_pct' : type('float'),
+            'price_min' : type('float'),
+            'price_max' : type('float'),
+            'value' : type('float'),
+            'last_action' : type('string'),
+            'next_step' : type('string'),
+            'description' : type('string'),
+            'listed_company' : type('string'),
+            'stage' : type('string'),
+            'type' : type('string')
+          }
+        }
+      };
+      res.type('application/json');
+      res.send(JSON.stringify(opportunity));
+    } else {
+      res.send(404);
+    }
+  });
+
+  var createOpportunityIndex = function(client, index, callback) {
+    client.indices.exists({index: index}, function (err, response, status) {
+      if (err) {
+        callback(err);
+      } else if (response !== false || status !== 404) {
+        callback(new Error('index already exists:' + index));
+      } else {
+        client.indices.create({index: index}, function (err, response, status) {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, response);
+          }
+        });
+      }
+    });
+  };
+
+  var createClientMapping = function(client, index, callback) {
+    var type = function (type, store) {
+      if (arguments.length <=1) {
+        store = false;
+      }
+
+      return { type: type, store: store };
+    };
+
+    var uberClient = { clientid: type('integer'),
+      first: type('string'),
+      last: type('string'),
+      checkname: type('string'),
+      company: type('string', true),
+      address: type('string', true),
+      city: type('string', true),
+      state: type('string', true),
+      zip: type('string', true),
+      phone: type('string', true),
+      fax: type('string', true),
+      ss: type('string'),
+      email: type('string', true),
+      comments: type('string'),
+      country: type('string', true),
+      balance: type('float'),
+      credit_balance: type('float'),
+      acct_balance: type('float'),
+      datesend: type('integer'),
+      datepay: type('integer'),
+      password: { type: 'string', store: false, index: 'no', ignore_above: 0 },
+      active: type('integer', true),
+      permnote: type('string'),
+      tempnote: type('string'),
+      priority: type('integer'),
+      class_id: type('integer'),
+      login: type('string', true),
+      access: type('string'),
+      retry_every: type('integer'),
+      referred: type('string'),
+      referred_by: type('integer'),
+      credit_bool: type('integer'),
+      discount: type('float'),
+      latest_inv: type('long'),
+      datedue: type('long'),
+      grace_due: type('integer'),
+      listed_company: type('string'),
+      full_name: type('string'),
+      created: type('long'),
+      password_timeout: type('integer'),
+      password_changed: type('integer'),
+      charge_days: type('integer'),
+      discount_type: type('integer'),
+      qblistid: type('string'),
+      qbeditseq: type('string'),
+      prefer_lang: type('integer'),
+      acctmgr: type('integer'),
+      salesperson: type('integer'),
+      late_fee_scheme_id: type('integer'),
+      invoice_delivery: type('integer'),
+      business: type('integer'),
+      prebill_method: type('integer'),
+      prebill_days: type('integer'),
+      default_renew: type('integer'),
+      extended_prorate_day: type('integer'),
+      prorate_min_days: type('integer'),
+      auto_apply_credit: type('integer'),
+      inv_balance: type('float'),
+      salesperson_name: type('string'),
+      salesperson_email: type('string')
+    };
+    client.indices.putMapping({index: index, type: 'client', body: uberClient, ignoreConflicts: true }, function (err, response, status) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, response);
+      }
+    });
+  };
+
+  var createEventMapping = function(client, index, callback) {
+    var type = function (type, store) {
+      if (arguments.length <=1) {
+        store = false;
+      }
+
+      return { type: type, store: store };
+    };
+    var event = {
+      eventid: type('integer'),
+      action: type('string'),
+      clientid: type('integer'),
+      user: type('string'),
+      time: type('date'),
+      amount: type('float'),
+      balance: type('float'),
+      ledger: type('float'),
+      type: type('integer'),
+      reference_id: type('integer'),
+      event_type: type('integer'),
+      client_viewable: type('boolean'),
+      reference_type: type('string')
+    };
+
+    client.indices.putMapping({index: index, type: 'event', body: event, ignoreConflicts: true }, function (err, response, status) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, response);
+      }
+    });
+  };
+
+  var createOpportunityMapping = function(client, index, callback) {
+    var type = function (type, store) {
+      if (arguments.length <=1) {
+        store = false;
+      }
+
+      return { type: type, store: store };
+    };
+    var opportunity = {
+      'opportunity': {
+        'properties': {
+          'opportunity_id': type('integer'),
+          'client_id': type('integer'),
+          'salesperson_name': type('string'),
+          'salesperson_email': type('string'),
+          'salesperson_id': type('integer'),
+          'contact_id': type('integer'),
+          'ts': type('date'),
+          'activity' : type('date'),
+          'status' : type('integer'),
+          'timestamp' : type('date', true),
+          'opportunity_type_id' : type('integer'),
+          'opportunity_stage_id' : type('integer'),
+          'owner' : type('integer'),
+          'owner_name' : type('string'),
+          'closure_ts' : { 'type' : 'long'},
+          'closure_pct' : type('float'),
+          'price_min' : type('float'),
+          'price_max' : type('float'),
+          'value' : type('float'),
+          'last_action' : type('string'),
+          'next_step' : type('string'),
+          'description' : type('string'),
+          'listed_company' : type('string'),
+          'stage' : type('string'),
+          'type' : type('string')
+        }
+      }
+    };
+    client.indices.putMapping({index: index, type: 'opportunity', body: opportunity, ignoreConflicts: true }, function (err, response, status) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, response);
+      }
+    });
+  };
+
+  var populateOpportunityIndex = function(client, index, callback) {
+    app.locals.crmModule.getClients(function (err, clients) {
+      //console.log(clients);
+      if (err) {
+        callback(err);
+      } else {
+        app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
+          if (err) {
+            callback(err);
+          } else {
+            var async = require('async');
+            async.map(pipeline.pipeline, function(opportunity, mapCallback) {
+              var moment = require('moment');
+              var clientid = opportunity.client_id;
+              opportunity.timestamp = moment.unix(opportunity.activity).format('YYYY-MM-DDTHH:mm:ssZ');
+              opportunity.activity = moment.unix(opportunity.activity).format('YYYY-MM-DDTHH:mm:ssZ');
+              opportunity.ts = moment.unix(opportunity.ts).format('YYYY-MM-DDTHH:mm:ssZ');
+              if (clients.hasOwnProperty(clientid)) {
+                var uberClient = clients[clientid];
+                opportunity.salesperson_name = uberClient.salesperson_name;
+                opportunity.salesperson_email = uberClient.salesperson_email;
+                opportunity.salesperson_id = uberClient.salesperson;
+              } else {
+                console.log('no client for client id ' + clientid);
+              }
+              var opportunityJSON = JSON.stringify(opportunity);
+              client.create({ index: index, type: 'opportunity', timestamp: opportunity.timestamp, id: opportunity.opportunity_id, body: opportunityJSON }, function (err, response, status) {
+                mapCallback(err, response);
+              });
+            }, callback);
+          }
+        });
+      }
+    });
+  };
+
+  var populateClientIndex = function(client, index, callback) {
+    app.locals.crmModule.getClients(function (err, clients) {
+      if (err) {
+        callback(err);
+      } else {
+        var async = require('async');
+        var _ = require('underscore');
+        async.map(_.values(clients), function (uberClient, mapCallback) {
+          console.log(uberClient);
+          var moment = require('moment');
+          uberClient.created = moment.unix(uberClient.created).format('YYYY-MM-DDTHH:mm:ssZ');
+          var uberClientJSON = JSON.stringify(uberClient);
+          client.create({ index: index, type: 'client', timestamp: uberClient.created, id: uberClient.clientid, body: uberClientJSON }, function (err, response, status) {
+            mapCallback(err, response);
+          });
+        },callback);
+      }
+    });
+  };
+
+  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleManager.can('view pipeline'), function(req, res) {
+    var elasticsearch = require('elasticsearch');
+    var client = new elasticsearch.Client({
+      host: 'localhost:9200',
+      log: 'error'
+    });
+    var moment = require('moment');
+    var hour = moment().format('YYYY.MM.DD.HH');
+    var index = 'pipeline-' + hour;
+
+    createOpportunityIndex(client, index, function (err, response) {
+      if (err) {
+        res.send(500);
+      } else {
+        createOpportunityMapping(client, index, function (err, response) {
+          if (err) {
+            res.send(500);
+          } else {
+            createClientMapping(client, index, function(err, response) {
+              if (err) {
+                res.send(500);
+              } else {
+                createEventMapping(client, index, function(err, response) {
+                  if (err) {
+                    res.send(500);
+                  } else {
+                    populateClientIndex(client, index, function (err, response) {
+                      if (err) {
+                        res.send(500);
+                      } else {
+                        populateOpportunityIndex(client, index, function (err, response) {
+                          if (err) {
+                            res.send(500);
+                          } else {
+                            res.type('application/json');
+                            res.send(response);
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleManager.can('view pipeline'), function(req, res) {
+    var query = {
+      "query": {
+        "filtered" : {
+          "query" : {
+            "match_all" : {}
+          },
+          "filter" : {
+            "range" : {
+              "status": { "from" : 1, "to": 1 }
+            }
+          }
+        }
+      },
+      "aggs" : {
+        "stages" : {
+          "terms" : {
+            "field" : "opportunity_stage_id"
+          },
+          "aggs" : {
+            "total_value" : { "sum": { "field" : "value" }},
+            "avg_value" : { "avg": { "field": "value" }}
+          }
+        },
+        "total_value" : { "sum": { "field" : "value" }},
+        "avg_value" : { "avg": { "field": "value" }}
+      }
+    };
+
+    var elasticsearch = require('elasticsearch');
+    var client = new elasticsearch.Client({
+      host: 'localhost:9200',
+      log: 'trace'
+    });
+    var searchParams = {
+      index: '[pipeline-]YYYY.MM.DD.HH',
+      type: 'opportunity',
+      body: query
+    };
+
+    client.search(searchParams, function (err, response, status) {
+      if (err) {
+        res.send(500);
+      } else if (status !== 200) {
+        res.send(status);
+      } else {
+        res.type('application/json');
+        res.send(response.aggregations.stages.buckets);
+      }
+    });
+  });
+/*
+ {
+ "query": {
+ "filtered" : {
+ "query" : {
+ "match_all" : {}
+ },
+ "filter" : {
+ "range" : {
+ "status": { "from" : 1, "to": 1}}
+ }
+ }
+ },
+ "aggs" : {
+ "stages" : { "terms" : { "field" : "stage" }},
+ "total_value" : { "sum": { "field" : "value" }},
+ "avg_value" : { "avg": { "field": "value" }}
+ }
+ }
+ */
+
+
+  app.get('/api/v1/helpdesk/events', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getEventList(function(err, eventList) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var events = _.values(eventList);
+        res.type('application/json');
+        res.send(JSON.stringify({aaData: events}));
+      }
+    });
+  });
+
   app.get('/api/v1/helpdesk/clients', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getClients(function(err, clientList) {
       if (err)

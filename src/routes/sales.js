@@ -10,14 +10,52 @@ module.exports = function (app, config, authenticator) {
 
   app.locals.leadActivity = [];
 
+  var retrieveStageItem = function(stageItem, statusID) {
+    if (stageItem.hasOwnProperty(statusID)) {
+      if (stageItem[statusID].hasOwnProperty('stats')) {
+        return stageItem[statusID].stats;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  };
+
   app.get('/sales', authenticator.roleManager.can('view accounts'), function (req, res) {
-    var renderParams = {
-      user:req.currentUser,
-      section: 'sales',
-      key:  'dashboard',
-      navSections: req.navSections
-    };
-    res.render('sales', renderParams);
+    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
+      if (err) {
+        res.send(500);
+      } else {
+        var stages = {};
+        var stageItems = pipeline.stats.stages;
+        for (var stageID in stageItems) {
+          if (stageItems.hasOwnProperty(stageID)) {
+            var stageItemOpen = retrieveStageItem(stageItems[stageID], '1') || {sum: 0, values: []};
+            var stageItemWon = retrieveStageItem(stageItems[stageID], '2') || {sum: 0, values: []};
+            var stageItemLost = retrieveStageItem(stageItems[stageID], '4') || {sum: 0, values: []};
+            var accounting = require('accounting');
+            accounting.settings.currency.precision = "0";
+            stages[stageID] = {};
+            stages[stageID]['open'] = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
+            stages[stageID]['won'] = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
+            stages[stageID]['lost'] = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
+          }
+        }
+        console.log(JSON.stringify(stages, undefined, 2));
+        var renderParams = {
+          user:req.currentUser,
+          section: 'sales',
+          key:  'dashboard',
+          metadata: pipeline.metadata,
+          pipeline: pipeline.pipeline,
+          summary: pipeline.summarizedStats,
+          stages: stages,
+          navSections: req.navSections
+        };
+        res.render('sales', renderParams);
+      }
+    });
   });
 
   app.get('/sales/lead/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
@@ -48,7 +86,7 @@ module.exports = function (app, config, authenticator) {
       if (err) {
         res.send(500);
       } else {
-        res.redirect('/sales/leads/clientid/' + data.data);
+        res.redirect('/helpdesk/clients/clientid/' + data.data);
       }
     });
   });

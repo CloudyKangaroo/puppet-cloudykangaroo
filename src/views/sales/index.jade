@@ -1,6 +1,6 @@
 extends ../layout
 block head
-  link(rel='stylesheet', href='/stylesheets/bootstrap-sortable.css')
+  link(rel='stylesheet', href='/stylesheets/bootstrap-tile.css')
 block navbar
 block content
   .container.col-xs-20.col-md-12
@@ -12,35 +12,60 @@ block content
         .panel.panel-default
           .panel-heading Current Stats
           .panel-body
-            .col-md-5
-              .panel.panel-default
-                .panel-heading Opportunities
-                .panel-body
-                  stageOne.tile.short.text-info
-                    .tile-heading.short Stage One<br/>Pending
-                    .tile-text 1525
-                  stageTwo.tile.short.text-info
-                    .tile-heading.short Stage Two
-                    .tile-text 1205
-                  stageThree.tile.short.text-info
-                    .tile-heading.short Stage Three
-                    .tile-text 735
-            .col-md-6
-              .panel.panel-default
-                .panel-heading Revenue Closed
-                .panel-body
-                  montToDate.tile.short
-                    .tile-heading.short Month to Date
-                    .tile-text.short.text-danger $15,251
-                  lastMonth.tile.short
-                    .tile-heading.short Last Month
-                    .tile-text.short.text-warning $35,313
-                  target.tile.short
-                    .tile-heading.short Target MRR
-                    .tile-text.text-primary.short $52,503
-                  AvgPerDay.tile.short
-                    .tile-heading.short Avg Closed per Day
-                    .tile-text.text-warning.short $1,503
+            .row
+              .col-md-6
+                .panel.panel-default
+                  .panel-heading Opportunities Values
+                  table.table.table-condensed.table-bordered
+                    thead
+                      tr
+                        td &nbsp;
+                        each stage,stage_id in metadata.stage_list
+                          td #{stage}
+                    tbody
+                      tr
+                        td Open
+                        each stage,stage_id in metadata.stage_list
+                          td #{stages[stage_id]['open']['sum']}
+                      tr
+                        td Won
+                        each stage,stage_id in metadata.stage_list
+                          td #{stages[stage_id]['won']['sum']}
+                      tr
+                        td Lost
+                        each stage,stage_id in metadata.stage_list
+                          td #{stages[stage_id]['lost']['sum']}
+            .row
+              .col.md-4
+                .panel.panel-default
+                  .panel-heading Open Opportunities
+                  .panel-body
+                    each stage,stage_id in metadata.stage_list
+                      div(id="stage#{stage_id}_open").tile.short.text-info
+                        .tile-heading.short
+                          span #{stage}
+                          //span.badge.primary.pull-right &nbsp; #{stages[stage_id]['open']['count']}
+                          .tile-text.text-primary.short #{stages[stage_id]['open']['count']}
+              .col.md-4
+                .panel.panel-default
+                  .panel-heading Won Opportunities
+                  .panel-body
+                    each stage,stage_id in metadata.stage_list
+                      div(id="stage#{stage_id}_won").tile.short.text-info
+                        .tile-heading.short
+                          span #{stage}
+                          //span.badge.primary.pull-right &nbsp; #{stages[stage_id]['won']['count']}
+                          .tile-text.text-primary.short #{stages[stage_id]['won']['count']}
+              .col.md-4
+                .panel.panel-default
+                  .panel-heading Lost Opportunities
+                  .panel-body
+                    each stage,stage_id in metadata.stage_list
+                      div(id="stage#{stage_id}_lost").tile.short.text-info
+                        .tile-heading.short
+                          span #{stage}
+                          //span.badge.primary.pull-right &nbsp; #{stages[stage_id]['lost']['count']}
+                        .tile-text.text-primary.short #{stages[stage_id]['lost']['count']}
     .row
       .col-md-12
         .panel.panel-default
