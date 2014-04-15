@@ -1,12 +1,15 @@
-module.exports = function(app, config, passport, login) {
+module.exports = function(app, config, authenticator) {
   "use strict";
   /**
    * Module dependencies.
    */
 
+  var passport = authenticator.passport;
+  var login = authenticator.login;
+
   var oauth2orize = require('oauth2orize');
   var utils = require('./utils');
-  var db = require('./db');
+  var db = require('./db')();
 
 // create OAuth 2.0 server
   var server = oauth2orize.createServer();
@@ -118,7 +121,7 @@ module.exports = function(app, config, passport, login) {
   module.authorization = [
     login.ensureLoggedIn('/oauth2/login'),
     server.authorization(function(clientID, redirectURI, done) {
-      db.clients.findByClientId(clientID, function(err, client) {
+      db.clients.findByClientID(clientID, function(err, client) {
         if (err) { return done(err); }
         if (client.redirectURI !== redirectURI) { return done(new Error('redirect URI does not match')); }
         return done(null, client, redirectURI);
@@ -135,7 +138,6 @@ module.exports = function(app, config, passport, login) {
 // requested by a client application.  Based on the grant type requested by the
 // client, the above grant middleware configured above will be invoked to send
 // a response.
-
   module.decision = [
     login.ensureLoggedIn('/oauth2/login'),
     server.decision()
@@ -154,5 +156,10 @@ module.exports = function(app, config, passport, login) {
     server.token(),
     server.errorHandler()
   ];
+
+  module.handle = function(req, res, next) {
+    next();
+  };
+
   return module;
 };
