@@ -18,6 +18,7 @@ xunit.xml
 jshint.xml
 logs
 results
+src/config/roleManagerConfig.json
 src/config/system-credentials.js
 src/config/system-credentials.js.tmp
 npm-debug.log

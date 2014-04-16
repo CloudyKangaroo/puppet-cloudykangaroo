@@ -14,11 +14,11 @@ module.exports = function (app, config, authenticator) {
 
   app.locals.leadActivity = [];
 
-  authenticator.roleManager.registerAction(moduleName, moduleName + ': submit activity', 'Submit new Activites related to leads and accounts', ['sales']);
-  authenticator.roleManager.registerAction(moduleName, moduleName + ': submit new lead', 'Create new Leads', ['sales']);
-  authenticator.roleManager.registerAction(moduleName, moduleName + ': view all activity', 'Submit new Activites related to leads and accounts', ['sales']);
-  authenticator.roleManager.registerAction(moduleName, moduleName + ': view all accounts', 'View existing account and lead non-billing information', ['sales']);
-  authenticator.roleManager.registerAction(moduleName, moduleName + ': view dashboard', 'View existing account and lead non-billing information', ['sales']);
+  authenticator.roleManager.registerDefaultAction(moduleName, 'submit activity', 'Submit new Activites related to leads and accounts', ['sales']);
+  authenticator.roleManager.registerDefaultAction(moduleName, 'submit new lead', 'Create new Leads', ['sales']);
+  authenticator.roleManager.registerDefaultAction(moduleName, 'view all activity', 'Submit new Activites related to leads and accounts', ['sales']);
+  authenticator.roleManager.registerDefaultAction(moduleName, 'view all accounts', 'View existing account and lead non-billing information', ['sales']);
+  authenticator.roleManager.registerDefaultAction(moduleName, 'view dashboard', 'View existing account and lead non-billing information', ['sales']);
 
   app.get('/sales', authenticator.roleManager.can('view dashboard'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {

@@ -80,51 +80,6 @@ config.USE_NOCK = process.env.USE_NOCK || 'false';
 
 config.support = {};
 
-config.roles = {
-  users: {
-    name: 'users',
-    description: 'Minimum access, required to login',
-    groups: ['users'],
-    users: ['bob']
-  },
-  sales: {
-    name: 'sales',
-    description: 'Provides access to lead and account management functionality. Also provides read-only access to monitoring.',
-    groups: ['sales'],
-    users: ['bob']
-  },
-  executive: {
-    name: 'executive',
-    description: 'Provides access to executive reporting and dashboards.',
-    groups: ['execs'],
-    users: ['bob']
-  },
-  helpdesk: {
-    name: 'helpdesk',
-    description: 'Provides access to helpdesk functionality. Also provides read-only access to monitoring.',
-    groups: ['engineers'],
-    users: ['bob']
-  },
-  monitoring: {
-    name: 'monitoring',
-    description: 'Provides additional access to monitoring systems.',
-    groups: ['engineers', 'execs'],
-    users: ['bob']
-  },
-  admin: {
-    name: 'admin',
-    description: 'Provides full access to sales, monitoring and helpdesk functionality.',
-    groups: ['admin'],
-    users: ['bob']
-  },
-  super: {
-    name: 'super',
-    description: 'Provides access to administrative functions.',
-    groups: ['ops'],
-    users: ['bob']
-  }
-};
-
 var signatureTemplate = "Ticket submitted via CloudyKangaroo - https://github.com/CloudyKangaroo/CloudyKangaroo";
 
 config.support.signatureTemplate = signatureTemplate;
