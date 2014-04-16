@@ -190,6 +190,9 @@ app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 /*jslint nomen: false*/
 app.set('view engine', 'jade');
+app.set('base_config_dir', __dirname + '/config');
+app.set('base_lib_dir', __dirname + '/lib');
+
 app.set('sensu_uri', config.sensu.uri);
 app.set('puppetdb_uri', config.puppetdb.uri);
 app.use(express.bodyParser());
@@ -225,7 +228,9 @@ var oauth2 = require('./lib/oauth2')(app, config, authenticator);
 var roleManager = require('./lib/roleManager')(app, config.roles);
 var roleHandler = roleManager.roleHandler;
 authenticator.oauth2 = oauth2;
-authenticator.roleManager = roleHandler;
+authenticator.roleManager = roleManager;
+authenticator.roleHandler = roleHandler;
+
 
 if (process.env.NODE_ENV === 'test') {
   app.use(authenticator.mockPassport.initialize(userPropertyConfig));
