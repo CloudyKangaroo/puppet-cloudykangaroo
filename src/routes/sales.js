@@ -108,23 +108,6 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    app.locals.crmModule.getLeads(function (err, leads) {
-      if (err) {
-        res.send(500);
-      } else {
-        var renderParams = {
-          user:req.currentUser,
-          section: 'sales',
-          key:  'activity',
-          leads: leads,
-          navSections: req.navSections
-        };
-        res.render('sales/activity', renderParams);
-      }
-    });
-  });
-
   app.get('/sales/lead', authenticator.roleManager.can('view helpdesk clients'), function (req, res) {
     res.render('sales/lead', { user:req.currentUser, section: 'sales', key: 'lead', navSections: req.navSections  });
   });
@@ -133,7 +116,7 @@ module.exports = function (app, config, authenticator) {
   This function is just bad, it's really really bad. I should feel bad, I do feel bad. I will rewrite it.
    */
   app.get('/sales/activity/view', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    app.locals.crmModule.getLeads(function (err, leads) {
+    app.locals.crmModule.getAllClients(function (err, leads) {
       var async = require('async');
       var _ = require('underscore');
       async.map(_.values(leads), function (lead, callback) {
@@ -173,6 +156,14 @@ module.exports = function (app, config, authenticator) {
                         if (err) {
                           res.send(500);
                         } else {
+                          for(var x=0;x<attachments.length;x++) {
+                            if (!attachments[x].formData.hasOwnProperty('clientID')) {
+                              attachments[x].formData.clientID = attachments[x].formData.leadSelector;
+                            }
+                            if (!attachments[x].formData.hasOwnProperty('clientCompany')) {
+                              attachments[x].formData.clientCompany = attachments[x].formData.leadSelector;
+                            }
+                          }
                           var renderParams = {
                             user:req.currentUser,
                             section: 'sales',
@@ -194,37 +185,55 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  /*
-   var renderParams = {
-   user:req.currentUser,
-   section: 'sales',
-   key:  'activityview',
-   activities: app.locals.leadActivity,
-   navSections: req.navSections
-   };
-   res.render('sales/activity/view', renderParams);
-  */
+  app.get('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
+    var renderParams = {
+      user:req.currentUser,
+      section: 'sales',
+      key:  'activity',
+      navSections: req.navSections
+    };
+    res.render('sales/activity', renderParams);
+  });
 
   app.post('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    var commentJSON = JSON.stringify({ data: { formData: req.body, user: req.currentUser}});
-    var lineSeperator = "\n";
-    var fieldSeperator = "|";
-    var commentData = "###\n" +
-      "Lead Activity By   " + fieldSeperator + "   " + req.currentUser.username + "   " + fieldSeperator + lineSeperator +
-      "Contact Method   " + fieldSeperator + "   " + req.body.contactMethod + "   " + fieldSeperator + lineSeperator +
-      "Contact Notes   " + fieldSeperator + "   " + req.body.contactMethodNotes + "   " + fieldSeperator + lineSeperator +
-      "Disposition   " + fieldSeperator + "   " + req.body.contactDisposition + "   " + fieldSeperator + lineSeperator +
-      "Disposition Notes    " + fieldSeperator + "   " + req.body.contactDispositionNotes + "   " + fieldSeperator + lineSeperator +
-      "Followup   " + fieldSeperator + "   " + req.body.contactFollowup + "   " + fieldSeperator + lineSeperator +
-      "Followup Notes   " + fieldSeperator + "   " + req.body.contactFollowupNotes + "   " + fieldSeperator + lineSeperator +
-      "Followup Date   " + fieldSeperator + "   " + req.body.followupDate + "   " + fieldSeperator + lineSeperator;
-
-    app.locals.crmModule.submitComment('client', req.body.leadSelector, commentData, req.currentUser.username, commentJSON, function(err) {
+    app.locals.crmModule.getAllClients(function (err, clients) {
       if (err) {
         res.send(500);
       } else {
-        app.locals.leadActivity.push(commentJSON);
-        res.redirect('/sales/activity/view');
+        var async = require('async');
+        var _ = require('underscore');
+        async.map(_.values(clients), function(client, done) {
+          if (client.hasOwnProperty('clientid') && client.listed_company === req.body.leadSelector) {
+            done(null, client);
+          } else {
+            done(null, '');
+          }
+        }, function (err, matches) {
+          var client = _.compact(matches)[0]; // first non-falsy result
+          req.body.leadSelector = client.clientid;
+          req.body.clientID = client.clientid;
+          req.body.clientCompany = client.listed_company;
+          var commentJSON = JSON.stringify({ data: { formData: req.body, user: req.currentUser}});
+          var lineSeperator = "\n";
+          var fieldSeperator = "|";
+          var commentData = "###\n" +
+            "Lead Activity By   " + fieldSeperator + "   " + req.currentUser.username + "   " + fieldSeperator + lineSeperator +
+            "Contact Method   " + fieldSeperator + "   " + req.body.contactMethod + "   " + fieldSeperator + lineSeperator +
+            "Contact Notes   " + fieldSeperator + "   " + req.body.contactMethodNotes + "   " + fieldSeperator + lineSeperator +
+            "Disposition   " + fieldSeperator + "   " + req.body.contactDisposition + "   " + fieldSeperator + lineSeperator +
+            "Disposition Notes    " + fieldSeperator + "   " + req.body.contactDispositionNotes + "   " + fieldSeperator + lineSeperator +
+            "Followup   " + fieldSeperator + "   " + req.body.contactFollowup + "   " + fieldSeperator + lineSeperator +
+            "Followup Notes   " + fieldSeperator + "   " + req.body.contactFollowupNotes + "   " + fieldSeperator + lineSeperator +
+            "Followup Date   " + fieldSeperator + "   " + req.body.followupDate + "   " + fieldSeperator + lineSeperator;
+
+          app.locals.crmModule.submitComment('client', client.clientid, commentData, req.currentUser.username, commentJSON, function(err, response) {
+            if (err) {
+              res.send(500);
+            } else {
+              res.redirect('/sales/activity/view');
+            }
+          });
+        });
       }
     });
   });

@@ -765,6 +765,46 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
+  app.get('/api/v1/sales/clients', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getAllClients(function (err, clients) {
+      if (err) {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var async = require('async');
+        async.map(_.values(clients), function (client, done) {
+          done(null, {
+            email: _.pick(client, ['clientid', 'email']),
+            company: _.pick(client, ['clientid', 'listed_company']),
+            name: _.pick(client, ['clientid', 'full_name'])
+          });
+        }, function (err, clientList) {
+          if (err) {
+            res.send(500);
+          } else {
+            var emails = [];
+            var companies = [];
+            var names = [];
+            for (var x=0;x<clientList.length;x++) {
+              var client = clientList[x];
+              if (client.email.email !== '') {
+                emails.push(client.email.email);
+              }
+              if (client.company.listed_company !== '') {
+                companies.push(client.company.listed_company);
+              }
+              if (client.name.full_name !== '') {
+                names.push(client.name.full_name);
+              }
+            }
+            res.type('application/json');
+            res.send({emails: emails, companies: companies, names: names});
+          }
+        });
+      }
+    });
+  });
+
   app.get('/api/v1/sales/pipeline', authenticator.roleManager.can('view pipeline'), function(req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
