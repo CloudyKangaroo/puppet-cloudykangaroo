@@ -1,12 +1,19 @@
-var tokens = {};
+module.exports = function() {
+  "use strict";
 
+  var tokens = {};
 
-exports.find = function(key, done) {
-  var token = tokens[key];
-  return done(null, token);
-};
+  var find = function (key, done) {
+    var token = tokens[key];
+    return done(null, token);
+  };
 
-exports.save = function(token, userID, clientID, done) {
-  tokens[token] = { userID: userID, clientID: clientID };
-  return done(null);
+  var save = function(token, userID, clientID, done) {
+    tokens[token] = { userID: userID, clientID: clientID };
+    return done(null);
+  };
+
+  module.find = find;
+  module.save = save;
+  return module;
 };

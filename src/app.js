@@ -213,8 +213,10 @@ app.use(express.session({
 app.use(flash());
 
 var authenticator = require('./lib/auth')(app, credentials, config, redisClient);
+var oauth2 = require('./lib/oauth2')(app, config, authenticator);
 var roleManager = require('./lib/roleManager')(app, config.roles);
 var roleHandler = roleManager.roleHandler;
+authenticator.oauth2 = oauth2;
 authenticator.roleManager = roleHandler;
 
 if (process.env.NODE_ENV === 'test') {
@@ -225,6 +227,8 @@ if (process.env.NODE_ENV === 'test') {
 
 app.use(authenticator.passport.session());
 app.use(roleHandler.middleware());
+app.use(authenticator);
+app.use(oauth2);
 app.use(roleManager);
 app.use(menus);
 

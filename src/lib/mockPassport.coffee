@@ -10,6 +10,6 @@ module.exports =
       passport.deserializeUser = (user, ptp, done) -> done null, user
 
       req._passport = instance: passport
-      req._passport.session = user: require('./db').users.syncfindByUsername('test')
+      req._passport.session = user: require('./db')().users.syncfindByUsername('test')
 
       next()

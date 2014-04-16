@@ -1,6 +1,7 @@
 extends ../../layout
 block head
   link(rel='stylesheet', href='/stylesheets/datepicker3.css')
+  link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css')
 block content
   .page-header
     h1 Submit Lead Activity
@@ -13,9 +14,9 @@ block content
             .panel.panel-default
               .panel-heading Lead Selection
               .panel-body
-                select.form-control(id="leadSelector", name="leadSelector")
-                  each lead,id in leads
-                    option(value="#{lead.clientid}") #{lead.listed_company} - #{lead.full_name} - #{lead.clientid}
+                div.ui-widget
+                  label(for="leadSelector") Select Client:
+                  input(name="leadSelector", id="leadSelector")
 
           .form-group
             .panel.panel-default
@@ -114,7 +115,7 @@ block content
                 label(for="contactFollowupNotes") Next Step Notes:
                 textarea.form-control(rows=3, id="contactFollowupNotes", name="contactFollowupNotes")
                 label(for='followUpDate') Follow-Up Scheduled On:
-                .input-group.date(name="followUpDate", id="followUpDate")
+                .input-group.date(name="followUpDateGroup", id="followUpDateGroup")
                   input.form-control(type="text", name="followupDate", id="followUpDate")
                   span.input-group-addon
                     i.glyphicon.glyphicon-th
@@ -123,7 +124,20 @@ block content
                 .panel-heading Save Activity
                 .panel-body
                   button.btn.btn-primary(type="submit") Submit
+
 block footer
   script(src='/javascripts/datepicker/bootstrap-datepicker.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js')
   script(type="text/javascript").
-    $('#form .input-group.date').datepicker({});
+    $('#followUpDate').datepicker();
+  script(type="text/javascript").
+    $.get(
+      "/api/v1/sales/clients",
+      function (data) {
+        var emails = data.emails;
+        var companies = data.companies;
+        var names = data.names;
+        $("#leadSelector").autocomplete({
+          source: companies
+        });
+      });

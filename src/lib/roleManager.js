@@ -1,8 +1,6 @@
 module.exports = function(app, roles) {
   "use strict";
 
-  var cacheManager = require('cache-manager');
-  var memoryCache = cacheManager.caching({store: 'memory', max: 2048, ttl: 10/*seconds*/});
   var ConnectRoles = require('connect-roles');
 
   function initializeRoles() {
@@ -73,7 +71,8 @@ module.exports = function(app, roles) {
       app.locals.logger.log('debug', 'user is not authenticated', {action: action, groups: []});
     }
     if (~accept.indexOf('html')) {
-      res.render('account/login', { message: req.flash('error') });
+      req.session.returnTo = req.originalUrl || req.url;
+      res.redirect('/account/login');
     } else {
       res.send(403);
     }
@@ -248,77 +247,67 @@ module.exports = function(app, roles) {
   roleHandler.use('guest', isGuest);
 
   roleHandler.use('use api', isUsers);
-
   roleHandler.use('view customers', function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('submit lead activity', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view leads', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('edit leads', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('edit leads', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view devices', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
+  });
+
+  roleHandler.use('view pipeline', function (req) {
+    return isSales(req) || isAdmin(req) || isSuper(req);
   });
 
   roleHandler.use('view accounts', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view tickets', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view monitoring', function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('deactivate customers', isSuper);
-
   roleHandler.use('decommission device', function (req) {
     return isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('issue credit', isSuper);
+
+  roleHandler.use('view pipeline detail', function(req) {
+    return isSales(req) || isAdmin(req) || isSuper(req);
+  });
 
   roleHandler.use('view monitoring events',  function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view helpdesk tickets', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view helpdesk devices', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view helpdesk device detail', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view helpdesk clients', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('view helpdesk', isUsers);
-
   roleHandler.use('view helpdesk client detail', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
-
   roleHandler.use('silence monitoring events', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
