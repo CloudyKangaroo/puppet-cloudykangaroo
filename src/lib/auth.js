@@ -33,6 +33,7 @@ module.exports = function(app, credentials, config, redisClient) {
       done(null, userID);
     }
   };
+<<<<<<< HEAD
 
   /**
    *
@@ -57,6 +58,31 @@ module.exports = function(app, credentials, config, redisClient) {
         } else {
           done(err, user);
         }
+=======
+
+  /**
+   *
+   * @param id
+   * @param done
+   */
+  var deserializeUser = function(id, done) {
+    redisClient.get("user:"+id, function(err, userJSON) {
+      var user;
+
+      if (err) {
+	done(err, null);
+      } else {
+	try {
+	  user = JSON.parse(userJSON);
+	}
+	catch (e) {
+	  app.locals.logger.log('error', 'uncaught exception');
+	}
+	if (!user) {
+	  err = new Error('could not find user');
+	}
+        done(err, user);
+>>>>>>> reworked authentication module, fixing oauth2 support, adding auth token generation support
       }
     });
   };
@@ -76,6 +102,7 @@ module.exports = function(app, credentials, config, redisClient) {
       var _ = require('underscore');
 
       if (err) {
+<<<<<<< HEAD
         done(err);
       } else {
         var groups = [];
@@ -97,6 +124,29 @@ module.exports = function(app, credentials, config, redisClient) {
           } else {
             done(null, user);
           }
+=======
+	done(err);
+      } else {
+	var groups = [];
+
+	if (userData.auth_roles)
+	{
+	  var auth_roles = _.values(userData.auth_roles);
+	  for (var i=0;i<auth_roles.length; i++)
+	  {
+	    groups.push(auth_roles[i].name);
+	  }
+	}
+
+	var user = { id: userData.id, name: userData.name, fullname: userData.fullname, emails: [{value: userData.email}], type: userData.type, groups: groups, profile: userData };
+	db.users.addUser(user, function(err, user)
+	{
+	  if (err) {
+	    done(err);
+	  } else {
+	    done(null, user);
+	  }
+>>>>>>> reworked authentication module, fixing oauth2 support, adding auth token generation support
         });
       }
     });
@@ -111,11 +161,19 @@ module.exports = function(app, credentials, config, redisClient) {
   var authenticateClientLocally = function(username, password, done) {
     db.clients.findByClientId(username, function(err, client) {
       if (err) {
+<<<<<<< HEAD
         done(err);
       } else if (!client || client.clientSecret !== password) {
         done(null, false);
       } else {
         done(null, client);
+=======
+	done(err);
+      } else if (!client || client.clientSecret !== password) {
+	done(null, false);
+      } else {
+	done(null, client);
+>>>>>>> reworked authentication module, fixing oauth2 support, adding auth token generation support
       }
     });
   };
@@ -143,6 +201,7 @@ module.exports = function(app, credentials, config, redisClient) {
   var authenticateAccessToken = function(accessToken, done) {
     db.accessTokens.find(accessToken, function(err, token) {
       if (err) {
+<<<<<<< HEAD
         done(err);
       } else if (!token) {
         done(null, false);
@@ -159,6 +218,24 @@ module.exports = function(app, credentials, config, redisClient) {
             done(null, user, info);
           }
         });
+=======
+	done(err);
+      } else if (!token) {
+	done(null, false);
+      } else {
+	db.users.find(token.userID, function(err, user) {
+	  if (err) {
+	    app.locals.logger.log('error', 'find returned error');
+	    done(err);
+	  } else if (!user) {
+	    app.locals.logger.log('debug', 'find failed to find');
+	    done(null, false);
+	  } else {
+	    var info = { scope: '*' };
+	    done(null, user, info);
+          }
+	});
+>>>>>>> reworked authentication module, fixing oauth2 support, adding auth token generation support
       }
     });
   };
@@ -180,6 +257,7 @@ module.exports = function(app, credentials, config, redisClient) {
     passport.use(new LocalStrategy(authenticateUserLocally));
   } else if (process.env.NODE_ENV === 'production') {
     authenticationStrategy = 'atlassian-crowd';
+<<<<<<< HEAD
 
     var CrowdOptions = {
       crowdServer: CrowdAuth.server,
@@ -201,6 +279,29 @@ module.exports = function(app, credentials, config, redisClient) {
         }
 
         return done(null, userprofile);
+=======
+
+    var CrowdOptions = {
+      crowdServer: CrowdAuth.server,
+      crowdApplication: CrowdAuth.application,
+      crowdApplicationPassword: CrowdAuth.password,
+      retrieveGroupMemberships: true
+    };
+
+    var CrowdLoginCallback = function (userprofile, done) {
+      // asynchronous verification, for effect...
+      process.nextTick(function () {
+	var _ = require('underscore');
+	var exists = _.any(users, function (user) {
+	  return user.id === userprofile.id;
+        });
+
+	if (!exists) {
+	  users.push(userprofile);
+	}
+
+	return done(null, userprofile);
+>>>>>>> reworked authentication module, fixing oauth2 support, adding auth token generation support
       });
     };
 
@@ -243,9 +344,15 @@ module.exports = function(app, credentials, config, redisClient) {
    * application, which is issued an access token to make requests on behalf of
    * the authorizing user.
    */
+<<<<<<< HEAD
 
   passport.use(new BearerStrategy(authenticateAccessToken));
 
+=======
+
+  passport.use(new BearerStrategy(authenticateAccessToken));
+
+>>>>>>> reworked authentication module, fixing oauth2 support, adding auth token generation support
   module.mockPassport = require('./mockPassport');
   module.passport = passport;
   module.login = login;
