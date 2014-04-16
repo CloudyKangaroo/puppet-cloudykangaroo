@@ -3,7 +3,7 @@
 process.env.NODE_ENV = 'test';
 process.env.LOG_DIR = './';
 
-var db = require('../../../src/lib/db');
+var db = require('../../../src/lib/db')();
 
 require('supertest');
 //var assert = require('assert');

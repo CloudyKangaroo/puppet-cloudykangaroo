@@ -37,9 +37,9 @@ module.exports = function (app, config, authenticator) {
             var accounting = require('accounting');
             accounting.settings.currency.precision = "0";
             stages[stageID] = {};
-            stages[stageID]['open'] = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
-            stages[stageID]['won'] = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
-            stages[stageID]['lost'] = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
+            stages[stageID].open = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
+            stages[stageID].won = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
+            stages[stageID].lost = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
           }
         }
         console.log(JSON.stringify(stages, undefined, 2));

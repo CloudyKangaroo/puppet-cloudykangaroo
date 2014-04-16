@@ -17,7 +17,7 @@
           instance: passport
         };
         req._passport.session = {
-          user: require('./db').users.syncfindByUsername('test')
+          user: require('./db')().users.syncfindByUsername('test')
         };
         return next();
       };

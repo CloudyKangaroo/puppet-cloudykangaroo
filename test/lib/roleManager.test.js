@@ -381,16 +381,29 @@ describe("roleManager authFailureHandler", function (){
     var roleManager = require('../../src/lib/roleManager')(app, roles);
     roleManager.authFailureHandler(req, res, 'test all the things');
   });
-
-  it('should render login page for html clients', function () {
+  it('supply a returnto parameter', function () {
     var fakeUser = {username: 'admin', groups: ['users', 'leads'] };
-    var req = {headers: { accept: 'text/html'}, currentUser: fakeUser};
+    var req = {headers: { accept: 'text/html'}, currentUser: fakeUser, session: {}, url: '/auth/failure/test'};
     req.flash = function(text) {
       assert.equal('error', text);
     };
     var res = {};
-    res.render = function(path) {
-      assert.equal('account/login', path);
+    res.redirect = function(path) {
+      assert.equal('/account/login', path);
+    };
+    var roleManager = require('../../src/lib/roleManager')(app, roles);
+    roleManager.authFailureHandler(req, res, 'test all the things');
+    assert.equal('/auth/failure/test', req.session.returnTo);
+  });
+  it('should redirect to the login page for HTML clients', function () {
+    var fakeUser = {username: 'admin', groups: ['users', 'leads'] };
+    var req = {headers: { accept: 'text/html'}, currentUser: fakeUser, session: {}, url: '/auth/failure/test'};
+    req.flash = function(text) {
+      assert.equal('error', text);
+    };
+    var res = {};
+    res.redirect = function(path) {
+      assert.equal('/account/login', path);
     };
     var roleManager = require('../../src/lib/roleManager')(app, roles);
     roleManager.authFailureHandler(req, res, 'test all the things');
