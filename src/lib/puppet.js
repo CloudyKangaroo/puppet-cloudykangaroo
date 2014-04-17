@@ -44,8 +44,12 @@ module.exports = function(config, logger) {
     var request = require('request');
     var url = config.puppetdb.uri + '/nodes/' + hostname + '/facts';
     request({ url: url, json: true }, function (error, response) {
-      logger.log('verbose', 'response from puppet', {body: response.body, url: url});
-      callback(error, response.body);
+      if (error) {
+        callback(error);
+      } else {
+        logger.log('verbose', 'response from puppet', {body: response.body, url: url});
+        callback(null, response.body);
+      }
     });
   };
 
