@@ -127,23 +127,40 @@ var displayEventDetails = function(text)
       '<input type="email" class="form-control" id="' + uuid + '_recipient" value="monitor@contegix.com">';
   }
 
-  var html = '<container><div class="row"><div class="col-md-7"><pre>' + prettyPrintOne(decodeURI(text)) + '</pre></div><div class="col-md-4"><div class="row">';
-  html +=  '<form role="form" id="' + uuid + '-form">' +
-    '<div class="form-group">' +
-    '<fieldset><legend>Attach this event to a Ticket</legend>' +
-    '<label for="ticketID">Enter an existing Ticket number:</label>' +
-    '<input type="number" class="form-control" id="' + uuid + '-ticketID" placeholder="Enter a valid, existing, Ticket Number">' +
-    '<label>Or:&nbsp;<input id="escalate-' + uuid + '" type="checkbox">&nbsp;Escalate to a NEW ticket</label>' +
-    '</div></fieldset>' +
-    '</div><div class="row"><fieldset><legend>Pass along any relevant documentation: </legend><div class="form-group">' +
-    '<textarea class="form-control" type="text" id="documentation" name="documentation" rows="4""></textarea>' +
-    '</fieldset>' +
-    '<input type="hidden" value="' + uuid + '" id="uuid" name="uuid">' +
-    '<input type="hidden" value="' + text + '" id="event" name="event">' +
-    recipient +
-    '<button type="submit" id="' + uuid + '-submit" class="btn btn-default">Submit Ticket</button>' +
-    '</form>' +
-    '<script type="text/javascript">$("#escalate-' + uuid + '").click(function() { $("#' + uuid + '-ticketID").attr("disabled", this.checked); }); $( "#' + uuid + '-form" ).submit(handleTicketForm)</script></div></div></div>';
+  var html =
+    '<div class="container">' +
+      '<div class="row">' +
+        '<div class="col-md-4">' +
+          '<pre>' + prettyPrintOne(decodeURI(text)) + '</pre>' +
+        '</div>' +
+        '<div class="col-md-6">' +
+          '<form role="form" id="' + uuid + '-form">' +
+            '<div class="row">' +
+              '<div class="form-group">' +
+                '<fieldset>' +
+                  '<legend>Attach this event to a Ticket</legend>' +
+                  '<label for="ticketID">Enter an existing Ticket number:</label>' +
+                  '<input type="number" class="form-control" id="' + uuid + '-ticketID" placeholder="Enter a valid, existing, Ticket Number"/>' +
+                  '<label>Or:&nbsp;<input id="escalate-' + uuid + '" type="checkbox">&nbsp;Escalate to a NEW ticket</label>' +
+                '</fieldset>' +
+              '</div>' +
+            '</div>' +
+            '<div class="row">' +
+              '<fieldset>' +
+                '<legend>Pass along any relevant documentation: </legend>' +
+                '<div class="form-group">' +
+                  '<textarea class="form-control" type="text" id="documentation" name="documentation" rows="4""></textarea>' +
+                '</div>' +
+              '</fieldset>' +
+            '</div>' +
+            '<input type="hidden" value="' + uuid + '" id="uuid" name="uuid">' +
+            '<input type="hidden" value="' + text + '" id="event" name="event">' + recipient +
+            '<button type="submit" id="' + uuid + '-submit" class="btn btn-default">Submit Ticket</button>' +
+          '</form>' +
+          '<script type="text/javascript">$("#escalate-' + uuid + '").click(function() { $("#' + uuid + '-ticketID").attr("disabled", this.checked); }); $( "#' + uuid + '-form" ).submit(handleTicketForm)</script>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   bootbox.alert({"message": html, buttons: { ok: { label: "Back", className: "btn-primary"}}, "className" : "wide-bootbox"});
 };
 
