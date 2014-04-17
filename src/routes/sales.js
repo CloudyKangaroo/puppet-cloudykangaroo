@@ -115,7 +115,7 @@ module.exports = function (app, config, authenticator) {
   /*
   This function is just bad, it's really really bad. I should feel bad, I do feel bad. I will rewrite it.
    */
-  app.get('/sales/activity/view', authenticator.roleManager.can('submit lead activity'), function (req, res) {
+  app.get('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
     app.locals.crmModule.getAllClients(function (err, leads) {
       var async = require('async');
       var _ = require('underscore');
@@ -171,7 +171,7 @@ module.exports = function (app, config, authenticator) {
                             activities: attachments,
                             navSections: req.navSections
                           };
-                          res.render('sales/activity/view', renderParams);
+                          res.render('sales/activity', renderParams);
                         }
                       });
                     });
@@ -185,17 +185,27 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
+  app.get('/sales/activity/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
     var renderParams = {
       user:req.currentUser,
       section: 'sales',
       key:  'activity',
       navSections: req.navSections
     };
-    res.render('sales/activity', renderParams);
+    res.render('sales/activity/new', renderParams);
   });
 
-  app.post('/sales/activity', authenticator.roleManager.can('submit lead activity'), function (req, res) {
+  app.get('/sales/activity/complete', authenticator.roleManager.can('submit lead activity'), function (req, res) {
+    var renderParams = {
+      user:req.currentUser,
+      section: 'sales',
+      key:  'activity',
+      navSections: req.navSections
+    };
+    res.render('sales/activity/complete', renderParams);
+  });
+
+  app.post('/sales/activity/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
     app.locals.crmModule.getAllClients(function (err, clients) {
       if (err) {
         res.send(500);
@@ -230,7 +240,13 @@ module.exports = function (app, config, authenticator) {
             if (err) {
               res.send(500);
             } else {
-              res.redirect('/sales/activity/view');
+              var renderParams = {
+                user:req.currentUser,
+                section: 'sales',
+                key:  'activity',
+                navSections: req.navSections
+              };
+              res.render('sales/activity/complete', renderParams);
             }
           });
         });
