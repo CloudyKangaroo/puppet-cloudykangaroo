@@ -42,7 +42,6 @@ module.exports = function (app, config, authenticator) {
             stages[stageID].lost = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
           }
         }
-        console.log(JSON.stringify(stages, undefined, 2));
         var renderParams = {
           user:req.currentUser,
           section: 'sales',

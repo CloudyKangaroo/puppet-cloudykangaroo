@@ -1053,7 +1053,6 @@ module.exports = function (app, config, authenticator) {
 
   var populateOpportunityIndex = function(client, index, callback) {
     app.locals.crmModule.getClients(function (err, clients) {
-      //console.log(clients);
       if (err) {
         callback(err);
       } else {
@@ -1074,7 +1073,7 @@ module.exports = function (app, config, authenticator) {
                 opportunity.salesperson_email = uberClient.salesperson_email;
                 opportunity.salesperson_id = uberClient.salesperson;
               } else {
-                console.log('no client for client id ' + clientid);
+                // no client
               }
               var opportunityJSON = JSON.stringify(opportunity);
               client.create({ index: index, type: 'opportunity', timestamp: opportunity.timestamp, id: opportunity.opportunity_id, body: opportunityJSON }, function (err, response, status) {
@@ -1095,7 +1094,6 @@ module.exports = function (app, config, authenticator) {
         var async = require('async');
         var _ = require('underscore');
         async.map(_.values(clients), function (uberClient, mapCallback) {
-          console.log(uberClient);
           var moment = require('moment');
           uberClient.created = moment.unix(uberClient.created).format('YYYY-MM-DDTHH:mm:ssZ');
           var uberClientJSON = JSON.stringify(uberClient);
