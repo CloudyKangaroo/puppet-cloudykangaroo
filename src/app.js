@@ -162,6 +162,8 @@ try {
 
 var app = express();
 
+var pjson = require('../package.json');
+
 // all environments
 app.locals.config = config;
 app.locals.logger = logger;
@@ -170,7 +172,7 @@ app.locals.monModule = monModule;
 app.locals.appMetrics = appMetrics;
 app.locals.puppetModule = puppetModule;
 app.locals.title = 'Cloudy Kangaroo';
-
+app.locals.version = pjson.version;
 app.locals.addMenuContent = menus.addMenuContent;
 app.locals.addMenuItem = menus.addMenuItem;
 
