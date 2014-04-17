@@ -1,7 +1,7 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
 
-  app.locals.addMenuContent({ section: 'sales', label: 'Dashboard', key: 'dashboard', path: '/sales' });
+  //app.locals.addMenuContent({ section: 'sales', label: 'Dashboard', key: 'dashboard', path: '/sales' });
   app.locals.addMenuContent({ section: 'sales', label: 'New Activity', key: 'activity', path: '/sales/activity/new' });
   app.locals.addMenuContent({ section: 'sales', label: 'New Lead', key: 'newlead', path: '/sales/lead/new' });
   app.locals.addMenuContent({ section: 'sales', label: 'Lead Listing', key: 'lead', path: '/sales/lead' });
