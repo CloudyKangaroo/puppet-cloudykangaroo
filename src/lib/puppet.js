@@ -1,9 +1,15 @@
-/* jshint unused: false */
-module.exports = function(config, logger, redisClient) {
+module.exports = function(config, logger) {
   "use strict";
+
   var cacheManager = require('cache-manager');
-  var redisStore = require('./redis_store');
-  var redisCache = cacheManager.caching({store: redisStore, db: config.redis.cache, ttl: config.redis.ttl/*seconds*/});
+  var redisCache = {};
+
+  if (process.env.NODE_ENV !== 'production') {
+    redisCache = cacheManager.caching({store: 'memory', max: 1024*64 /*Bytes*/, ttl: 15 /*seconds*/});
+  } else {
+    var redisStore = require('./redis_store');
+    redisCache = cacheManager.caching({store: redisStore, db: config.redis.cache, ttl: config.redis.ttl/*seconds*/});
+  }
 
   var mockGetDevice = function(hostname, getDevCallback) {
     var node = {
@@ -93,11 +99,11 @@ module.exports = function(config, logger, redisClient) {
     });
   };
 
-  //if (process.env.NODE_ENV === 'test') {
-  //  module.getDevice = mockGetDevice;
-  //} else {
-  module.getDevice = getDevice;
-  //}
+  if (process.env.NODE_ENV === 'test') {
+    module.getDevice = mockGetDevice;
+  } else {
+    module.getDevice = getDevice;
+  }
 
   return module;
 };
