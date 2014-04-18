@@ -3,9 +3,9 @@ form(method="post", id="newleadform", accept-charset="utf-8").form-horizontal
     label.control-label(for="name") Name
     .controls.form-inline
       label(for="firstname").sr-only First Name
-      input.input-small(type="text", placeholder="first" id="firstname", name="firstname")
+      input.input-small(type="text", placeholder="first" id="first", name="first")
       label(for="lastname").sr-only Last Name
-      input.input-small(type="text", placeholder="last" id="lastname", name="lastname")
+      input.input-small(type="text", placeholder="last" id="last", name="last")
   .control-group
     label(for="email").control-label Email Address
     .controls
@@ -15,19 +15,18 @@ form(method="post", id="newleadform", accept-charset="utf-8").form-horizontal
     .controls
       input(name="phone", type="tel", placeholder="(555) 555-5555" id="phone")
   .control-group
+    label(for="fax").control-label Fax Number
+    .controls
+      input(name="fax", type="tel", placeholder="(555) 555-5555" id="fax")
+  .control-group
     label(for="company").control-label Company
     .controls
       input(name="company", type="text", placeholder="Acme Megaworks LLC" id="company")
   .control-group
-    label(for="address1").control-label Address Line 1
+    label(for="address").control-label Address Line 1
     .controls
-      input(name="address1", type="text", placeholder="" id="address1")
+      input(name="address", type="text", placeholder="" id="address")
       p.help-block Street Address, P.O. Box, company name, c/o
-  .control-group
-    label(for="address2").control-label Address Line 2
-    .controls
-      input(name="address2", type="text", placeholder="" id="address2")
-      p.help-block Apartment, suite , unit, building, floor, etc.
   .control-group
     label(for="city") City / Town
     .controls
@@ -41,7 +40,7 @@ form(method="post", id="newleadform", accept-charset="utf-8").form-horizontal
     .controls
       input(name="zip", type="text", placeholder="Zip" id="zip")
   .control-group
-    label(for="zip") Country
+    label(for="country") Country
     .controls
       select(id="country", name="country").input-xlarge
         option(value="AF") Afghanistan
@@ -283,30 +282,18 @@ form(method="post", id="newleadform", accept-charset="utf-8").form-horizontal
         option(value="YU") Yugoslavia
         option(value="ZM") Zambia
         option(value="ZW") Zimbabwe
-    .control-group
-      label(for="interests") Interested In
-      .controls
-        select(id="interests", name="interests").input-xlarge
-          option(value="colocation") Colocation
-          option(value="managed_hardware") Managed Hardware
-          option(value="fully_managed") Fully Managed Services
-          option(value="managed_cloud") Managed Private Cloud
-          option(value="unmanaged_cloud") UnManaged Cloud
-          option(value="atlassian") Atlassian Hosting
-          option(value="mail") Mail Hosting
-          option(value="other") Other
-    .control-group
-      label(for="requirements") Business Technology requirements
-      .controls
-        select(id="requirements", name="requirements").input-xlarge
-          option(value="Linux") Linux
-          option(value="Windows") Windows
-          option(value="vmware") vmWare Virtualization
-          option(value="other") Other
+
+    .panel.panel-default
+      .panel-heading Metadata
+      .panel-body
+        each field in fieldSet
+          .control-group
+            != field
     .control-group
       label(for="submit") Save new Lead
       .controls
           button.btn.btn-primary(type="submit", id="submit") Submit
+
 
 block footer
   script(type="text/javascript").

@@ -1227,6 +1227,118 @@ module.exports = function (app, config, authenticator) {
  }
  */
 
+  var createSelectBoxHTML = function (field, multiple) {
+    if (arguments.length <= 1) {
+      multiple = '';
+    }
+
+    var html = '';
+    var name = field.variable;
+    var label = field.label;
+    var options = field.options.split(",");
+
+    html += '<label for="' + name + '">' + label + '</label>';
+    html += '<select class="form-control" ' + multiple + ' id="' + name +'" name="'+ name + '">';
+    for (var y=0; y<options.length;y++) {
+      var option = options[y].replace('"', '').replace('"', '');
+      html += '<option ';
+      if (option === field.default_val) {
+        html += ' selected ';
+      }
+      html += ' value="' + option + '"> ' + option + '</option>';
+    }
+    html += '</select>';
+    return html;
+  };
+
+  var createTextHTML = function (field) {
+    var html = '';
+    var name = field.variable;
+    var label = field.label;
+    var value = field.default_val.replace('"', '').replace('"', '');
+    html += '<label for="' + name + '">' + label + '</label>';
+    html += '<input class="form-control" type="text" value="' + value + '" id="' + name +'" name="'+ name + '">';
+    return html;
+  };
+
+  app.get('/api/v1/crm/metadata/fieldhtml/leads', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var fields = _.values(metadata);
+        var retHTML = '';
+
+        for (var x=0;x<fields.length;x++) {
+          if (fields[x].metagroup_name === 'Lead') {
+            var field = fields[x];
+            switch (field.type) {
+              case 'select':
+                retHTML += createSelectBoxHTML(field);
+                break;
+              case 'text':
+                retHTML += createTextHTML(field);
+                break;
+              case 'select_multiple':
+                retHTML += createSelectBoxHTML(field, 'multiple');
+                break;
+              default:
+            }
+          }
+        }
+
+        res.type('text/html');
+        res.send(retHTML);
+      }
+    });
+  });
+
+  app.get('/api/v1/crm/metadata/fields/lead', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var fields = _.values(metadata);
+        var retFields = [];
+        for (var x=0;x<fields.length;x++) {
+          if (fields[x].metagroup_name === 'Lead') {
+            retFields.push(fields[x]);
+          }
+        }
+
+        res.type('application/json');
+        res.send(JSON.stringify(retFields));
+      }
+    });
+  });
+
+  app.get('/api/v1/crm/metadata/group/:group', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataGroup(req.params.group, function(err, metadata) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(metadata));
+      }
+    });
+  });
+
+  app.get('/api/v1/crm/metadata/fields/:group', authenticator.roleManager.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataFields(req.params.group, function(err, metadata) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(metadata));
+      }
+    });
+  });
 
   app.get('/api/v1/helpdesk/events', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.crmModule.getEventList(function(err, eventList) {

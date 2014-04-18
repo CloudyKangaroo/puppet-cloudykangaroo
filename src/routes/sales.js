@@ -58,30 +58,46 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/sales/lead/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    var renderParams = {
-      user:req.currentUser,
-      section: 'sales',
-      key:  'newlead',
-      navSections: req.navSections
-    };
-    res.render('sales/lead/new', renderParams);
+    app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var fields = _.values(metadata);
+        var fieldSet = [];
+
+        for (var x=0;x<fields.length;x++) {
+          if (fields[x].metagroup_name === 'Lead') {
+            var field = fields[x];
+            switch (field.type) {
+              case 'select':
+                fieldSet.push(createSelectBoxHTML(field));
+                break;
+              case 'text':
+                fieldSet.push(createTextHTML(field));
+                break;
+              case 'select_multiple':
+                fieldSet.push(createSelectBoxHTML(field, 'multiple'));
+                break;
+              default:
+            }
+          }
+        }
+        var renderParams = {
+          user:req.currentUser,
+          section: 'sales',
+          key:  'newlead',
+          fieldSet: fieldSet,
+          navSections: req.navSections
+        };
+        res.render('sales/lead/new', renderParams);
+      }
+    });
   });
 
   app.post('/sales/lead/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-
-    var first= req.body.firstname;
-    var last= req.body.lastname;
-    var company = req.body.company;
-    var email= req.body.email;
-    var phone= req.body.phone;
-    var address1= req.body.address1;
-    var address2= req.body.address2;
-    var city= req.body.city;
-    var state= req.body.state;
-    var zip= req.body.zip;
-    var country= req.body.country;
-
-    app.locals.crmModule.submitNewLead(first, last, company, email, address1 + "\n" + address2, city, state, zip, country, phone, function (err, data) {
+    app.locals.crmModule.submitNewLead(req.body, function (err, data) {
       if (err) {
         res.send(500);
       } else {
@@ -184,14 +200,83 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
+
+  var createSelectBoxHTML = function (field, multiple) {
+    if (arguments.length <= 1) {
+      multiple = '';
+    }
+
+    var html = '';
+    var name = field.variable;
+    var label = field.label;
+    var options = field.options.split(",");
+
+    html += '<label for="' + name + '">' + label + '</label>';
+    html += '<div class="controls">';
+    html += '<select ' + multiple + ' id="' + name +'" name="'+ name + '">';
+    for (var y=0; y<options.length;y++) {
+      var option = options[y].replace('"', '').replace('"', '');
+      html += '<option ';
+      if (option === field.default_val) {
+        html += ' selected ';
+      }
+      html += ' value="' + option + '"> ' + option + '</option>';
+    }
+    html += '</select>';
+    html += '</div>';
+    return html;
+  };
+
+  var createTextHTML = function (field) {
+    var html = '';
+    var name = field.variable;
+    var label = field.label;
+    var value = field.default_val.replace('"', '').replace('"', '');
+    html += '<label for="' + name + '">' + label + '</label>';
+    html += '<div class="controls">';
+    html += '<input type="text" value="' + value + '" id="' + name +'" name="'+ name + '">';
+    html += '</div>';
+    return html;
+  };
+
   app.get('/sales/activity/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
-    var renderParams = {
-      user:req.currentUser,
-      section: 'sales',
-      key:  'activity',
-      navSections: req.navSections
-    };
-    res.render('sales/activity/new', renderParams);
+    app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
+      if (err)
+      {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var fields = _.values(metadata);
+        var retHTML = '';
+
+        for (var x=0;x<fields.length;x++) {
+          if (fields[x].metagroup_name === 'Lead') {
+            var field = fields[x];
+            switch (field.type) {
+              case 'select':
+                retHTML += createSelectBoxHTML(field);
+                break;
+              case 'text':
+                retHTML += createTextHTML(field);
+                break;
+              case 'select_multiple':
+                retHTML += createSelectBoxHTML(field, 'multiple');
+                break;
+              default:
+            }
+          }
+        }
+
+        var renderParams = {
+          user:req.currentUser,
+          section: 'sales',
+          key:  'activity',
+          metadataHTML: retHTML,
+          navSections: req.navSections
+        };
+        res.render('sales/activity/new', renderParams);
+      }
+    });
   });
 
   app.get('/sales/activity/complete', authenticator.roleManager.can('submit lead activity'), function (req, res) {
