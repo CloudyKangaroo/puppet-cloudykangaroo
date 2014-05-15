@@ -1,6 +1,6 @@
 /*global $:false */
 /*global io:false */
-var socket = io.connect('https://sensu-server01.contegix.com');
+var socket = io.connect('https://' + location.hostname);
 
 socket.emit("subscribe", { room: "global" });
 socket.emit("subscribe", { room: "monitoring" });
