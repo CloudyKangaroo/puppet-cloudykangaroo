@@ -33,7 +33,7 @@ module.exports = function (app, config, authenticator) {
       {
         res.send(500);
       } else {
-        app.locals.crmModule.getClientByID(ticket.client_id, function (err, client) {
+        app.locals.crmModule.getClientByID(ticket.clientid, function (err, client) {
           if (err)
           {
             res.send(500);
