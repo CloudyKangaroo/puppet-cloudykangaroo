@@ -1,0 +1,27 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='description', content='Sensu/Ubersmith/Puppet Management Interface')
+    meta(name='author', content='Contegix LLC')
+    title=title
+    if IE
+      script(src='//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js')
+    include _head_css
+    block head
+  body
+    a(href="#content").sr-only Skip to main content
+    .container
+      #alert.container
+        #alert
+      #nav.container
+        block navbar
+      #content.container
+        .row
+          .col-md-14
+            block content
+    include _footer
+    include _head_js
+    block footer
