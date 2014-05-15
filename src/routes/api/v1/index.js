@@ -498,7 +498,7 @@ module.exports = function (app, config, authenticator) {
 
   // UNSILENCE A CHECK
   app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
-    app.locals.monModule.unSilenceCheck(req.params.client, req.params.check, function (error, response) {
+    app.locals.monModule.unSilenceEvent(req.params.client, req.params.check, function (error, response) {
       if(error){
         res.send(500);
       } else {
