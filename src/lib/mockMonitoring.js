@@ -66,6 +66,24 @@ module.exports = function (config, logger, crmModule) {
     });
   };
 
+  var unSilenceClient = function (client, deleteCheckCallback) {
+    var request = require('request');
+    var path = "/silence/" + client;
+    request({ method: 'DELETE', url: config.sensu.uri + '/stashes' + path, json: true }, function (error, msg, response) {
+        deleteCheckCallback(error, response);
+      }
+    );
+  };
+
+  var unSilenceEvent = function (client, check, deleteCheckCallback) {
+    var request = require('request');
+    var path = "/silence/" + client + "/" + check;
+    request({ method: 'DELETE', url: config.sensu.uri + '/stashes' + path, json: true }, function (error, msg, response) {
+        deleteCheckCallback(error, response);
+      }
+    );
+  };
+
   var getDevice = function(hostname, callback) {
     var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
     var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
@@ -91,6 +109,8 @@ module.exports = function (config, logger, crmModule) {
   module.getStashes = getStashes;
   module.silenceCheck = silenceCheck;
   module.silenceClient = silenceClient;
+  module.unSilenceEvent = unSilenceEvent;
+  module.unSilenceClient = unSilenceClient;
   module.getDevice = getDevice;
   module.getDevices = getDevices;
 

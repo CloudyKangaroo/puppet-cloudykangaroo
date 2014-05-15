@@ -24,6 +24,26 @@ block footer
   include ../datatables_js
   script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js")
   script(type='text/javascript').
+    function removeStash(path, callback, errorCallback) {
+      var parts = path.split('/');
+      var callURL = '';
+
+      if (parts.length === 1) {
+        callURL = '/api/v1/sensu/silence/client/' + parts[0];
+      } else if (parts.length === 2) {
+        callURL = '/api/v1/sensu/silence/client/' + parts[0] + '/check/' + parts[1];
+      } else {
+        return false;
+      }
+
+      $.ajax({
+        url: callURL,
+       type: 'DELETE',
+       success: callback || $.noop,
+       error: errorCallback || $.noop
+      });
+    };
+  script(type='text/javascript').
     $(document).ready(function() {
       $('#table_stashes').dataTable( {
         "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -38,7 +58,8 @@ block footer
             "mData": "path",
             "sWidth": "420px",
             "mRender" : function(path) {
-              return path.replace('silence/', '');
+              var newPath = path.replace('silence/', '');
+              return newPath + '&nbsp;<a id="deleteStash" title="Click to Delete Stash" href="#" onclick="removeStash(' + "'" + newPath + "'" + ');return false;"><span class="glyphicon glyphicon-trash"></span></a>'
             }
           }, {
             "mData": "content"
