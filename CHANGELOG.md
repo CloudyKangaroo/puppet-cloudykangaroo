@@ -1,5 +1,14 @@
 # Cloudykangaroo Changelog
 
+### v0.4.2
+
+- Lead creation screen now users metadata fields
+- Updated Cloudy-Ubersmith to 0.2.20
+- Fixed issues in ticket listing screen
+- Corrected issue preventing new ticket from being sent to multiple users ISSUE-167
+- Removed Hardcoded socket.io server hostname
+- Added icon to allow for the deletion of a Stash
+
 ### v0.4.1
 
 - Ubersmith module now called Helpdesk
