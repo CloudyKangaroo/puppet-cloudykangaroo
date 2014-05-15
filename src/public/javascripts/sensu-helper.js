@@ -121,10 +121,10 @@ var displayEventDetails = function(text)
   var recipient;
   if (sensuEvent.email && sensuEvent.company) {
     recipient = '<label for="recipient">Make Sure Recipient is a valid email for: <br/>'+ sensuEvent.company +'</label>' +
-      '<input type="email" class="form-control" id="' + uuid + '-recipient" value="' + sensuEvent.email + '">';
+      '<input class="form-control" id="' + uuid + '-recipient" value="' + sensuEvent.email + '">';
   } else {
     recipient = '<label for="recipient">Make Sure Recipient is a valid email for: <br/>No Company Specified</label>' +
-      '<input type="email" class="form-control" id="' + uuid + '_recipient" value="monitor@contegix.com">';
+      '<input class="form-control" id="' + uuid + '_recipient" value="monitor@contegix.com">';
   }
 
   var html =
