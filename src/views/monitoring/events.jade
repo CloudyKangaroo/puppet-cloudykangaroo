@@ -7,6 +7,8 @@ block content
   .container
     .page-header
       h1 Current Event Status
+    .container(id="rendertime")
+      | Rendered:
     .container(id="silencemenu")
       .dropdown
         a(href='#', id="dLabel", class="dropdown-toggle" data-toggle='dropdown').dropdown-toggle Unsilenced
@@ -303,9 +305,20 @@ block footer
       oTable.fnSetColumnVis(8, showSilenceColumns);
     }
 
+    var setRenderedTime = function() {
+      var timestamp = moment().format('MMM Do YYYY, HH:mm:ss');
+      $("#rendertime").text("Rendered: " + timestamp);
+    }
+
+    var refreshTable = function() {
+      oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
+      setRenderedTime();
+    }
+
+    setRenderedTime();
     var refreshInterval = 30000;
     var intervalId = setInterval(function() {
-      oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
+      refreshTable();
     }, refreshInterval);
     $("#refreshmenu .dropdown .dropdown-menu li a").click(function() {
       var newRefreshInterval = parseInt($(this).text());
@@ -313,6 +326,6 @@ block footer
       clearInterval(intervalId);
       refreshInterval = newRefreshInterval * 1000;
       intervalId = setInterval(function() {
-        oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
+        refreshTable(); 
       }, refreshInterval);
     });
