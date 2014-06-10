@@ -301,14 +301,6 @@ module.exports = function (app, config, authenticator) {
     var stashedContents = {};
     var stashedHashes = {};
 
-    /*
-     { path: 'silence/jsklskwtrs-engage05.unittest.us/disk',
-     content:
-     { timestamp: 1394450361,
-     user: 'marta.wiliams',
-     ticketID: '12001' },
-     expire: 118739 }
-     */
     var handleStash = function(stash, done) {
       var content = stash.content;
       var path = stash.path;
@@ -334,17 +326,6 @@ module.exports = function (app, config, authenticator) {
       }
       done(null, stash);
     };
-
-    /*
-     silence_contents: {
-     timestamp: 1394486532,
-     user: "richard.chatterton",
-     ticketID: "none",
-     ticketUrl: "https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=none"
-     },
-     silenced: 1,
-     silence_stash: "axis02.contegix.mgmt"
-     */
 
     var handleEvent = function(event, done) {
       var client = event.client;
@@ -472,9 +453,34 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
+  // DELETE a CLIENT
+  app.delete('/api/v1/sensu/delete/client/:client', authenticator.roleManager.can('delete monitoring events'), function (req, res) {
+    app.locals.monModule.deleteClient(req.params.client, function (err, response) {
+      if (err) {
+        res.send(500);
+      } else {
+        app.locals.logger.log('debug', 'response', {response: response});
+        res.send(202);
+      }
+    });
+  });
+
+  // DELETE an EVENT
+  app.delete('/api/v1/sensu/delete/client/:client/event/:event', authenticator.roleManager.can('delete monitoring events'), function (req, res) {
+    app.locals.monModule.deleteEvent(req.params.client, req.params.event, function (err, response) {
+      if (err) {
+        res.send(500);
+      } else {
+        app.locals.logger.log('debug', 'response', {response: response});
+        res.send(202);
+      }
+    });
+  });
+
   // GET SILENCED CLIENTS
   app.get('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getSilencedClient(req.params.client, function (error, response) {
+w
       if(error){
         res.send(500);
       } else {

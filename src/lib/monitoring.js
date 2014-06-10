@@ -197,19 +197,19 @@ module.exports = function (config, logger, crmModule, redisClient) {
     });
   };
 
+  var deleteClient = function(client, deleteClientCallback) {
+    var request = require('request');
+    
+    request({ method: 'DELETE', url: config.sensu.uri + '/clients/' + client, json: true }, function(error, response) {
+      deleteClientCallback(error, response);
+    });
+  };
+
   var deleteEvent = function (client, check, deleteEventCallback) {
     var request = require('request');
 
-    request({ method: 'DELETE', url: config.sensu.uri + '/events/' + client + '/' + check, json: true }, function (error, response) {
-      if (error) {
-        deleteEventCallback(error);
-      } else if (response.statusCode === 200 || response.statusCode === 404) {
-        deleteEventCallback(null, response.statusCode);
-      } else if (response.statuscode === 500) {
-        deleteEventCallback(new Error('failed to delete event'), response.statusCode);
-      } else {
-        deleteEventCallback(new Error('unknown response code ' + response.statusCode), response.statusCode);
-      }
+    request({ method: 'DELETE', url: config.sensu.uri + '/events/' + client + '/' + check, json: true }, function (error, msg, response) {
+      deleteEventCallback(error, response);
     });
   };
 
@@ -257,6 +257,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
   module.unSilenceClient = unSilenceClient;
   module.deleteStash = deleteStash;
   module.deleteEvent = deleteEvent;
+  module.deleteClient = deleteClient;
   module.getDevice = getDevice;
 
   return module;
