@@ -258,7 +258,6 @@ app.configure('development', function () {
 require("./routes")(app, config, authenticator, redisClient);
 
 var server = require('http').createServer(app);
-require('./lib/sockets.io')(app, config, server);
 
 if (!module.parent) {
   server.listen(app.get('port'), function () {
