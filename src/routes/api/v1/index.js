@@ -480,7 +480,6 @@ module.exports = function (app, config, authenticator) {
   // GET SILENCED CLIENTS
   app.get('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
     app.locals.monModule.getSilencedClient(req.params.client, function (error, response) {
-w
       if(error){
         res.send(500);
       } else {
