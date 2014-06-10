@@ -256,6 +256,8 @@ block footer
           var row = oSettings.aoData[iDataIndex]._aData
           , silenced = row.silenced, silence_contents = row.silence_contents;
 
+          var display;
+
           if(show === 'All') {
             display = true;
           } else if (show === 'Unsilenced') {
