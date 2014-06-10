@@ -83,35 +83,35 @@ var confirmSilenceOrDelete = function(oTable, client, check, done) {
   "use strict";
   var check_full;
   if (check == 'false') {
-    check_full = client;
+    silenceCheck(oTable, client, check, done);
   } else {
     check_full = client+'/'+check;
+    bootbox.dialog({
+      message: "Would you like to silence or delete the history of "+check_full+"?",
+      title: "Confirm silence or delete",
+      buttons: {
+        silence: {
+          label: "Silence",
+          className: "btn-success",
+          callback: function() { 
+            silenceCheck(oTable, client, check, done);
+          }
+        },
+        delete: {
+          label: "Delete",
+          className: "btn-danger",
+          callback: function() {
+            deleteCheck(oTable, client, check, done);
+          }
+        },
+        cancel: {
+          label: "Cancel",
+          className: "btn-primary",
+          callback: function() {}
+        }
+     } 
+    });
   }
-  bootbox.dialog({
-    message: "Would you like to silence or delete the history of "+check_full+"?",
-    title: "Confirm silence or delete",
-    buttons: {
-      silence: {
-        label: "Silence",
-        className: "btn-success",
-        callback: function() { 
-          silenceCheck(oTable, client, check, done);
-        }
-      },
-      delete: {
-        label: "Delete",
-        className: "btn-danger",
-        callback: function() {
-          deleteCheck(oTable, client, check, done);
-        }
-      },
-      cancel: {
-        label: "Cancel",
-        className: "btn-primary",
-        callback: function() {}
-      }
-    } 
-  });
 };
 
 var deleteCheck = function(oTable, client, check, done) {
