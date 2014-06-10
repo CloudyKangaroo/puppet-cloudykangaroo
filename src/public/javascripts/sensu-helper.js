@@ -87,8 +87,8 @@ var confirmSilenceOrDelete = function(oTable, client, check, done) {
   } else {
     check_full = client+'/'+check;
     bootbox.dialog({
-      message: "Would you like to silence or delete the history of "+check_full+"?",
-      title: "Confirm silence or delete",
+      message: "Would you like to silence or resolve "+check_full+"?",
+      title: "Confirm silence or resolve",
       buttons: {
         silence: {
           label: "Silence",
@@ -98,7 +98,7 @@ var confirmSilenceOrDelete = function(oTable, client, check, done) {
           }
         },
         delete: {
-          label: "Delete",
+          label: "Resolve",
           className: "btn-danger",
           callback: function() {
             deleteCheck(oTable, client, check, done);
