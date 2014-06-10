@@ -79,6 +79,65 @@ var unsilenceCheck = function(oTable, silence_stash, done) {
   bootbox.alert({ message: silence_stash+" unsilenced. Click ok to reload the dashboard.", className: "small-bootbox", callback: function(){ oTable.fnReloadAjax('/api/v1/sensu/events/filtered'); }});
 };
 
+var confirmSilenceOrDelete = function(oTable, client, check, done) {
+  "use strict";
+  var check_full;
+  if (check == 'false') {
+    silenceCheck(oTable, client, check, done);
+  } else {
+    check_full = client+'/'+check;
+    bootbox.dialog({
+      message: "Would you like to silence or delete the history of "+check_full+"?",
+      title: "Confirm silence or delete",
+      buttons: {
+        silence: {
+          label: "Silence",
+          className: "btn-success",
+          callback: function() { 
+            silenceCheck(oTable, client, check, done);
+          }
+        },
+        delete: {
+          label: "Delete",
+          className: "btn-danger",
+          callback: function() {
+            deleteCheck(oTable, client, check, done);
+          }
+        },
+        cancel: {
+          label: "Cancel",
+          className: "btn-primary",
+          callback: function() {}
+        }
+     } 
+    });
+  }
+};
+
+var deleteCheck = function(oTable, client, check, done) {
+  "use strict";
+  console.log(client, check)
+  var url = '/api/v1/sensu/delete/client/' + client;
+  if (check != false && check != 'false') {
+    url = url + '/event/' + check;
+  }
+  $.ajax({
+  url: url,
+  type: 'delete',
+  dataType: 'json',
+  success: function(response) {
+    if (response.status === true) {
+      bootbox.alert({"message": 'Completed!', "className" : "small-bootbox"});
+      done(true);
+    } else {
+      bootbox.alert({"message": 'Failed to delete event: ' + response.error_message, "className" : "small-bootbox"});
+      done(false);
+    }
+  }
+  });
+  oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
+};
+
 var silenceCheck = function(oTable, client, check, done) {
   "use strict";
   bootbox.prompt({ title: "Length of time to silence in hours (<= 72)", message: "Please enter a length of time to silence: in hours, less than 72 hours.", className: "small-bootbox", value: 8, callback: function(duration) {
@@ -98,7 +157,7 @@ var renderButton = function(silenced, silence_stash, client, check) {
   if (silenced === 1) {
     return "<button onclick=\"unsilenceCheck(oTable, '"+silence_stash+"', function(success) {});\" class=\"btn btn-default btn-xs btn-event\"><span class=\"glyphicon glyphicon-volume-up span-event active\"></span></button>";
   } else {
-    return "<button onclick=\"silenceCheck(oTable, '"+client+"', '"+check+"', function(success) {});\" class=\"btn btn-default btn-xs btn-event\"><span class=\"glyphicon glyphicon-volume-off span-event active\"></span></button>";
+    return "<button onclick=\"confirmSilenceOrDelete(oTable, '"+client+"', '"+check+"', function(success) {});\" class=\"btn btn-default btn-xs btn-event\"><span class=\"glyphicon glyphicon-volume-off span-event active\"></span></button>";
   }
 };
 

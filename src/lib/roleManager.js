@@ -311,6 +311,9 @@ module.exports = function(app, roles) {
   roleHandler.use('silence monitoring events', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+  roleHandler.use('delete monitoring events', function (req) {
+    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
+  });
 
   initializeRoles();
 
