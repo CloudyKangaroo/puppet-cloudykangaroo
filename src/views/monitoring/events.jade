@@ -256,17 +256,29 @@ block footer
           var row = oSettings.aoData[iDataIndex]._aData
           , silenced = row.silenced, silence_contents = row.silence_contents;
 
+          var display;
+
           if(show === 'All') {
-            return true;
+            display = true;
           } else if (show === 'Unsilenced') {
-            return (silenced === 0);
+            display = (silenced === 0);
           } else if (show === 'Silenced') {
-            return (silenced === 1);
+            display = (silenced === 1);
           } else if (show === 'Ticketed') {
-            return (typeof(silence_contents.ticketID) !== 'undefined' && silence_contents.ticketID != 'none')
+            display = (typeof(silence_contents.ticketID) !== 'undefined' && silence_contents.ticketID != 'none' && silence_contents.ticketID != '');
           } else {
-            return true;
+            display = true;
           }
+
+          if ((display == true) && show != 'All' && (typeof(row.check_parameters) != "undefined")) {
+            if (row.check_parameters.occurrences <= row.occurrences) {
+              display = true;
+            } else {
+              display = false;
+            }
+          }
+
+         return display;
       });
 
       $("#silencemenu .dropdown .dropdown-menu li a").click(function() {
