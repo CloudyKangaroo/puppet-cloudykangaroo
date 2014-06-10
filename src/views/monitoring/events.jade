@@ -311,8 +311,7 @@ block footer
     }
 
     var refreshTable = function() {
-      oTable.fnReloadAjax('/api/v1/sensu/events/filtered');
-      setRenderedTime();
+      oTable.fnReloadAjax('/api/v1/sensu/events/filtered', setRenderedTime);
     }
 
     setRenderedTime();
