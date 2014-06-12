@@ -30,10 +30,11 @@ module.exports = function (app, config, authenticator) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
         var renderParams = {
           events: body,
-          user:req.currentUser,
+          user: req.currentUser,
           section: 'monitoring',
           key:  'events',
-          navSections: req.navSections
+          navSections: req.navSections,
+          graphConfig: app.locals.config.graphiteEvent
         };
         res.render('monitoring/events', renderParams);
       } else {

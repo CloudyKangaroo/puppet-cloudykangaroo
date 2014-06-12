@@ -56,7 +56,10 @@ block footer
   script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
   script(src='/javascripts/sensu-helper.js')
   script(src='/javascripts/moment.min.js')
+  script(src='/javascripts/graphite-helper.js')
   script(type='text/javascript').
+    var graphConfig = !{JSON.stringify(graphConfig)};
+
     $.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw )
     {
         // DataTables 1.10 compatibility - if 1.10 then versionCheck exists.
@@ -154,22 +157,24 @@ block footer
         "aoColumns": [
           {
             "mData": "status",
-            "sWidth": "50px",
-            "mRender": function (status) {
+            "sWidth": "70px",
+            "mRender": function (status, type, row) {
+              var text;
               switch(status) {
                 case 2:
-                  return "Critical"
+                  text = "Critical"
                   break;
                 case 1:
-                  return "Warning"
+                  text = "Warning"
                   break;
                 case 0:
-                  return "OK"
+                  text = "OK"
                   break;
                 default:
-                  return "Unknown"
+                  text = "Unknown"
                   break;
               }
+              return graphButton(row['client'], row['check'], graphConfig) + text
             },
           }, {
             "mData": "issued",
