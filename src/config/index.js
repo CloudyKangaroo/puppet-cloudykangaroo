@@ -11,6 +11,7 @@ config.production = {};
 config.production.log = {};
 config.development.log = {};
 config.metrics = {};
+config.graphiteEvent = {}
 
 config.crmModule = {};
 config.crmModule.warmCache = false;
@@ -34,6 +35,13 @@ config.sensu.uri = 'http://' + config.sensu.host + ':' + config.sensu.port;
 config.puppetdb.host = process.env.PUPPETDB_HOST || 'localhost';
 config.puppetdb.port = process.env.PUPPETDB_PORT || 8080;
 config.puppetdb.uri =  'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3';
+
+config.graphiteEvent.enabled = false;
+config.graphiteEvent.urlPrefix = 'http://graphite.example.com/render/?';
+config.graphiteEvent.targetTemplate = 'sensu.statsd.applications.counters.sensu.events..clientName.*.checkName';
+config.graphiteEvent.severities = [ 'warning', 'critical', 'unknown' ];
+config.graphiteEvent.timeRange = "-8h";
+config.graphiteEvent.height = "450";
 
 config.redis.uri = process.env.REDIS_URI;
 config.redis.host = process.env.REDIS_HOST || 'localhost';
