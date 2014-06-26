@@ -117,7 +117,7 @@ try {
   {
     crmModule = require('cloudy-localsmith')(crmModuleConfig);
   } else {
-    crmModule = require('cloudy-ubersmith')(crmModuleConfig);
+    crmModule = require('contegix-cloudy-ubersmith')(crmModuleConfig);
   }
 }
   catch (e) {
