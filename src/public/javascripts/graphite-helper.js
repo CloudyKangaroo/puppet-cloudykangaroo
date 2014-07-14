@@ -11,8 +11,6 @@
  *   urlPrefix -- example: "http://graphite.example.com/render/?"
  *   targetTemplate -- Example: "sensu.statsd_host.applications.counters.sensu.clientName.checkName"
  *     The client name and check name are substituted onto this string, and the severity is appended to the end
- *   severities -- An array of severities for which targets should be rendered
- *     i.e., [ 'warning', 'critical', 'unknown' ]
  *   height -- Height of graph to generate. Width is $('window').width() - 60
  *   timeRange -- Default from= time range for generating the initial graph
  */
@@ -23,11 +21,7 @@ var graphUrl = function(client, checkNameUnsub, graphConfig, from, until, width)
   var checkName = checkNameUnsub.replace(/\./g, '_');
   var baseTarget = graphConfig.targetTemplate.replace('clientName', clientPath).replace('checkName', checkName);
 
-  var targets = [];
-  var i;
-  for (i = 0; i < graphConfig.severities.length; i++) {
-    targets.push('alias(transformNull(summarize('+baseTarget+'.'+graphConfig.severities[i]+',%225min%22),0),%22'+graphConfig.severities[i]+'%22)');
-  }
+  var target = ('transformNull('+baseTarget+',0)');
 
   if (typeof(from) == 'undefined') {
     from = graphConfig.timeRange;
@@ -39,7 +33,7 @@ var graphUrl = function(client, checkNameUnsub, graphConfig, from, until, width)
     additionalSettings += '&until='+until;
   }
 
-  var url = graphConfig.urlPrefix+'target='+targets.join('&target=')+additionalSettings;
+  var url = graphConfig.urlPrefix+'target='+target+additionalSettings;
   return url;
 };
 
@@ -74,4 +68,4 @@ var displayGraph = function(client, checkName, graphConfig, from, until) {
     box.modal('hide');
     displayGraph(client, checkName, graphConfig, from, until);
   });
-} 
+}
