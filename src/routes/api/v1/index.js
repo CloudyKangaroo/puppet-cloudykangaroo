@@ -192,7 +192,7 @@ module.exports = function (app, config, authenticator) {
       }
     });
   });
-
+// GET /v3/nodes/<NODE>/resources/<TYPE>/<TITLE>
   var isSensuCheck = function(resource, hostname) {
     var _ = require('underscore');
     if (!(_.contains(resource.tags, 'sensu::check')))

@@ -2,7 +2,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     githooks: {
       all: {
-        'pre-commit': 'test',
+        'pre-commit': 'test'
       }
     },
     coveralls: {
@@ -18,10 +18,22 @@ module.exports = function(grunt) {
     },
     env : {
       test : {
-        NODE_ENV : 'test'
+        USE_NOCK: 'true',
+        NODE_ENV : 'test',
+        MGMT_DOMAIN: '.unittest.us',
+        CREDS_CLASS: './config/system-dev-credentials',
+        CRM_CLASS: 'cloudy-localsmith',
+        MON_CLASS: './lib/mockMonitoring',
+        REDIS_CLASS: 'fakeredis'
       },
       development : {
-        NODE_ENV : 'development'
+        USE_NOCK: 'true',
+        NODE_ENV : 'development',
+        MGMT_DOMAIN: '.unittest.us',
+        CREDS_CLASS: './config/system-dev-credentials',
+        CRM_CLASS: 'cloudy-localsmith',
+        MON_CLASS: './lib/mockMonitoring',
+        REDIS_CLASS: 'fakeredis'
       }
     },
     mochacov: {
@@ -51,7 +63,7 @@ module.exports = function(grunt) {
     mochaTest: {
       test: {
         options: {
-          reporter: 'spec',
+          reporter: 'spec'
         },
         src: ['test/**/*.js']
       }

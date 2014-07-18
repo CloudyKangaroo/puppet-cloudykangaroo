@@ -8,25 +8,42 @@ config.cookie = {};
 config.log = {};
 config.development = {};
 config.production = {};
+config.test = {};
 config.production.log = {};
 config.development.log = {};
+config.test.log = {};
 config.metrics = {};
-config.graphiteEvent = {}
+config.graphiteEvent = {};
+config.credentials = {};
+config.credentials.class = process.env.CREDS_CLASS || './config/system-dev-credentials';
 
 config.crmModule = {};
 config.crmModule.warmCache = false;
 config.crmModule.ticketingHost = 'localhost';
 config.crmModule.ticketingPath = '/ticketing/ticket_view.php?ticket=';
-config.mgmtDomain = '.example.org';
-config.log.accessLog = './access.log';
-config.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
-config.metrics.interval = 15000;
-config.log.level = 'debug';
-config.log.screen = 'info';
-config.development.log.level = 'info';
-config.development.log.screen = 'debug';
+config.crmModule.class = process.env.CRM_CLASS || 'cloudy-ubersmith';
+
+config.monModule = {};
+config.monModule.class = process.env.MON_CLASS || './lib/monitoring';
+
+config.mgmtDomain = process.env.MGMT_DOMAIN || '.example.org';
+
+config.test.log.directory = process.env.LOG_DIR || process.cwd();
+config.test.log.accessLog = process.env.ACCESS_LOG || config.test.log.directory + '/access.log';
+config.test.log.level = 'hide';
+config.test.log.screen = 'hide';
+
+config.development.log.directory = process.env.LOG_DIR || process.cwd();
+config.development.log.accessLog = process.env.ACCESS_LOG || config.development.log.directory + '/access.log';
+config.development.log.level = 'hide';
+config.development.log.screen = 'hide';
+
+config.production.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
+config.production.log.accessLog = process.env.ACCESS_LOG || config.production.log.directory + '/access.log';
 config.production.log.level = 'hide';
 config.production.log.screen = 'debug';
+
+config.metrics.interval = 15000;
 
 config.sensu.host = process.env.SENSU_HOST || 'localhost';
 config.sensu.port = process.env.SENSU_PORT || 4567;
@@ -49,10 +66,13 @@ config.redis.port = process.env.REDIS_PORT || 6379;
 config.redis.db = process.env.REDIS_DB || 1;
 config.redis.cache = process.env.REDIS_CACHE || 6;
 config.redis.ttl = process.env.REDIS_TTL || 300; /*seconds*/
-
+config.redis.class = process.env.REDIS_CLASS || 'redis';
 config.http.port = process.env.PORT || 3000;
 config.cookie.secret = 'CHANGETHISPLEASE!!!';
+config.USE_NOCK = process.env.USE_NOCK || 'false';
 config.support = {};
+
+
 
 config.roles = {
   users: {
