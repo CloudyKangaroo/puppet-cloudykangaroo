@@ -13,26 +13,17 @@ var flash = require('connect-flash');
 var useragent = require('express-useragent');
 
 /*
-Configuration
+ Configuration
  */
-var credentials;
 
-if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
-  config.log.level = config.production.log.level;
-  config.log.screen = config.production.log.screen;
-  credentials = require('./config/system-credentials')();
-} else if (process.env.NODE_ENV === 'development') {
-  credentials = require('./config/system-dev-credentials')();
-  config.log.level = config.development.log.level;
-  config.log.screen = config.development.log.screen;
-} else if (process.env.NODE_ENV === 'test') {
-  credentials = require('./config/system-dev-credentials')();
-  config.log.level = 'hide';
-  config.log.screen = 'hide';
-  config.mgmtDomain = '.unittest.us';
-} else {
+if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'production') {
   throw new Error(process.env.NODE_ENV +  ' is not a known environment, cannot proceed');
 }
+
+config.log = config[process.env.NODE_ENV].log;
+
+var credentials;
+credentials = require(config.credentials.class)();
 
 /*
  Initialize the Logging Framework
@@ -50,13 +41,13 @@ var logstream = fs.createWriteStream(config.log.accessLog, {flags: 'a'});
 // Generic Requirements
 var redis = {};
 
-if (process.env.NODE_ENV === 'test') {
-  redis = require("fakeredis");
+if (config.redis && config.redis.class) {
+  redis = require(config.redis.class);
 } else {
-  redis = require('redis');
+  throw new Error('redis class not specified REDIS_CLASS environment variable of config.redis.class');
 }
 
-if (process.env.NODE_ENV === 'test') {
+if (config.USE_NOCK === 'true') {
   require('./lib/nock')(config, logger);
 }
 
@@ -113,11 +104,11 @@ try {
 
   var crmModule = {};
 
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
-  {
-    crmModule = require('cloudy-localsmith')(crmModuleConfig);
+  if (config.crmModule && config.crmModule.class) {
+    crmModule = require(config.crmModule.class)(crmModuleConfig);
   } else {
-    crmModule = require('cloudy-ubersmith')(crmModuleConfig);
+    var err = new Error('no crmModule specified in configuration');
+    throw err;
   }
 }
   catch (e) {
@@ -128,11 +119,11 @@ try {
 
 /* Load the monitoring module */
 try {
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
-  {
-    var monModule = require('./lib/mockMonitoring')(config, logger, crmModule, redisClient);
+  if (config.monModule && config.monModule.class) {
+    monModule = require(config.monModule.class)(config, logger, crmModule, redisClient);
   } else {
-    var monModule = require('./lib/monitoring')(config, logger, crmModule, redisClient);
+    var err = new Error('no monModule specified in configuration');
+    throw err;
   }
 
 } catch (e) {
