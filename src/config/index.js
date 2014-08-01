@@ -21,7 +21,7 @@ config.crmModule = {};
 config.crmModule.warmCache = false;
 config.crmModule.ticketingHost = 'localhost';
 config.crmModule.ticketingPath = '/ticketing/ticket_view.php?ticket=';
-config.crmModule.class = process.env.CRM_CLASS || 'cloudy-ubersmith';
+config.crmModule.class = process.env.CRM_CLASS || 'cloudy-localsmith';
 
 config.monModule = {};
 config.monModule.class = process.env.MON_CLASS || './lib/monitoring';
