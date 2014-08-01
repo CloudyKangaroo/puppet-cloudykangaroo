@@ -50,12 +50,13 @@ module.exports = function(app, credentials, config, redisClient) {
           user = JSON.parse(userJSON);
         }
         catch (e) {
-          app.locals.logger.log('error', 'uncaught exception');
+          app.locals.logger.log('error', 'uncaught exception', {error: e});
         }
         if (!user) {
-          err = new Error('could not find user');
+          done(err,null);
+        } else {
+          done(err, user);
         }
-        done(err, user);
       }
     });
   };
