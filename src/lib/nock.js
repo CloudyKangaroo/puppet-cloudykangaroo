@@ -4,7 +4,8 @@ module.exports = function(config) {
   var nock = require('nock');
 
   nock.recorder.rec({
-    output_objects: true
+    output_objects: false,
+    dont_print: true
   });
 
   nock.disableNetConnect();
