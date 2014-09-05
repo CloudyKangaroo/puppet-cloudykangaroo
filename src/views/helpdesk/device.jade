@@ -114,7 +114,7 @@ block footer
           }, {
             "mData": "command",
             "mRender": function(command) {
-              return command.replace("/opt/contegix/sensu/etc/sensu/plugins/", "");
+              return command.replace(#{config.sensu.pluginPath}, "");
             }
           }],
         "aaSorting": [[1,'desc']],

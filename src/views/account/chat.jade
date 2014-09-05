@@ -18,10 +18,9 @@ html
         Candy.init('/http-bind/', {
           core: {
             debug: true,
-            autojoin: ['engineers@conference.xmpp.myogre.com', 'operations@conference.xmpp.myogre.com']
+            autojoin: ['engineers@conference.xmpp.#{config.mgmtDomain}', 'operations@conference.xmpp.#{config.mgmtDomain}']
           },
           view: { resources: '/res/' }
         });
-        Candy.Core.connect('#{user.username}@xmpp.myogre.com');
-        //Candy.Core.connect('xmpp.contegix.com:5223', null, 'jonathan.creasy');
+        Candy.Core.connect('#{user.username}@#{config.mgmtDomain');
       });

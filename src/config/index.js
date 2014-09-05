@@ -36,7 +36,7 @@ config.test.log.screen = 'hide';
 config.development.log.directory = process.env.LOG_DIR || process.cwd();
 config.development.log.accessLog = process.env.ACCESS_LOG || config.development.log.directory + '/access.log';
 config.development.log.level = 'hide';
-config.development.log.screen = 'hide';
+config.development.log.screen = 'debug';
 
 config.production.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.production.log.accessLog = process.env.ACCESS_LOG || config.production.log.directory + '/access.log';
@@ -48,6 +48,7 @@ config.metrics.interval = 15000;
 config.sensu.host = process.env.SENSU_HOST || 'localhost';
 config.sensu.port = process.env.SENSU_PORT || 4567;
 config.sensu.uri = 'http://' + config.sensu.host + ':' + config.sensu.port;
+config.sensu.pluginPath = '/opt/contegix/sensu/etc/sensu/plugins/';
 
 config.puppetdb.host = process.env.PUPPETDB_HOST || 'localhost';
 config.puppetdb.port = process.env.PUPPETDB_PORT || 8080;
