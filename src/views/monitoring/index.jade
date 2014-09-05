@@ -52,17 +52,17 @@ block content
         .panel.panel-default
           .panel-heading RabbitMQ
           .panel-body
-            p(class=(info.rabbitmq.connected === true)? "alert alert-success" : "alert alert-danger") Connected: #{info.rabbitmq.connected}
+            p(class=(info.transport.connected === true)? "alert alert-success" : "alert alert-danger") Connected: #{info.transport.connected}
             .row
               .col-xs-7.col-md-4
                 h4 Results
                 p Messages
-                  span.badge.pull-right #{info.rabbitmq.results.messages}
+                  span.badge.pull-right #{info.transport.results.messages}
                 p Consumers
-                  span.badge.pull-right #{info.rabbitmq.results.consumers}
+                  span.badge.pull-right #{info.transport.results.consumers}
               .col-xs-7.col-md-4
                 h4 KeepAlives
                 p Messages
-                  span.badge.pull-right #{info.rabbitmq.keepalives.messages}
+                  span.badge.pull-right #{info.transport.keepalives.messages}
                 p Consumers
-                  span.badge.pull-right #{info.rabbitmq.keepalives.consumers}
+                  span.badge.pull-right #{info.transport.keepalives.consumers}

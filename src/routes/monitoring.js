@@ -5,7 +5,13 @@ module.exports = function (app, config, authenticator) {
     app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
       if (!error) {
-        app.locals.logger.log('debug', 'fetched data from Sensu');
+        app.locals.logger.log('debug', 'fetched data from Sensu', { body: body});
+
+        // Allows Sensu < 0.13 to still work, rabbitmq became transport
+        if (body.rabbitmq) {
+          body.transport = body.rabbitmq;
+        }
+
         var sinceLastIncident = moment().diff(moment('01/01/2014 00:00:00',"DD/MM/YYYY HH:mm:ss"), 'days');
         var renderParams = {
           sinceLastIncident:  sinceLastIncident,
