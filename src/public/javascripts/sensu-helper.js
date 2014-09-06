@@ -116,9 +116,8 @@ var confirmSilenceOrDelete = function(oTable, client, check, done) {
 
 var deleteCheck = function(oTable, client, check, done) {
   "use strict";
-  console.log(client, check)
   var url = '/api/v1/sensu/delete/client/' + client;
-  if (check != false && check != 'false') {
+  if (check !== false && check !== 'false') {
     url = url + '/event/' + check;
   }
   $.ajax({

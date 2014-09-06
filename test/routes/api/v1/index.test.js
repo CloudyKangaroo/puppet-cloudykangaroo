@@ -39,6 +39,7 @@ describe('GET /api/v1/helpdesk/devices/deviceid/10020/tickets', function(){
 
 describe('GET /api/v1/helpdesk/devices/hostname', function(){
   "use strict";
+  this.timeout(5000);
   it('should return code 200', function(done){
     request(app)
       .get('/api/v1/helpdesk/devices/hostname')
@@ -109,6 +110,7 @@ describe('GET /api/v1/helpdesk/clients/clientid/1022', function(){
 
 describe('GET /api/v1/helpdesk/devices/devgroupid/1', function(){
   "use strict";
+  this.timeout(3500);
   it('should return code 200', function(done){
     request(app)
       .get('/api/v1/helpdesk/devices/devgroupid/1')

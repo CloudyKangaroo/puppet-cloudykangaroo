@@ -79,7 +79,7 @@
   },
   "config": {
     "travis-cov": {
-      "threshold": 43,
+      "threshold": 41,
       "pattern": "src",
       "data-cover-never": "node_modules"
     },
