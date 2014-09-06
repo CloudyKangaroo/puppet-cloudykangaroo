@@ -15,6 +15,7 @@ var should = require('should');
 
 describe('GET /monitoring', function(){
   "use strict";
+  this.timeout(2400);
   it('should return code 200', function(done){
     request(app)
       .get('/monitoring')
@@ -85,6 +86,7 @@ describe('GET /monitoring/puppet', function(){
 
 describe('GET /monitoring/clients', function(){
   "use strict";
+  this.timeout(3500);
   it('should return code 200', function(done){
     request(app)
       .get('/monitoring/clients')
@@ -110,6 +112,7 @@ var isTheCorrectList = function(res) {
 
 describe('GET /monitoring/list/clients', function(){
   "use strict";
+  this.timeout(2000);
   it('should return code 200', function(done){
     request(app)
       .get('/monitoring/list/clients')
