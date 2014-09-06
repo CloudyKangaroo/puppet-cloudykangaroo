@@ -24,12 +24,12 @@ module.exports = function (app, config, authenticator) {
 
   // TODO: Deprecate this and "ensureAuthenticated" to move to connect-ensure-login
   app.post('/account/login', authenticator.passport.authenticate(authStrategy, authConfig),  function (req, res) {
-    app.locals.app.locals.logger.log('debug', 'User Login:' + req.currentUser.username, logData(req));
+    app.locals.logger.log('debug', 'User Login:' + req.currentUser.username, logData(req));
     res.redirect(req.header('Referer') || '/account');
   });
 
   app.get('/account/logout', function (req, res) {
-    app.locals.app.locals.logger.log('debug', 'User Logout:' + req.currentUser.username, logData(req));
+    app.locals.logger.log('debug', 'User Logout:' + req.currentUser.username, logData(req));
     req.logout();
     res.redirect('/account');
   });
