@@ -1473,9 +1473,6 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-//  {"status":true,"error_code":null,"error_message":"","data":{"id":"1025875","url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=1025875"}}
-//  {"data":{"url":"https://portal.contegix.com/admin/supportmgr/ticket_view.php?ticket=undefined"}}
-
   app.post('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
     var ticketID = req.params.ticketid;
     var subject = req.body.subject;
