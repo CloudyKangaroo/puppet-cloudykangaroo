@@ -20,12 +20,10 @@ module.exports = function (app, config, authenticator) {
     var request = require('request');
     var async = require('async');
 
-    var getNumNodes = function(callback)
-    {
+    var getNumNodes = function (callback) {
       var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dnum-nodes';
       request({ url: URL, json: true }, function (error, response, body) {
-        if (error || !body.Value)
-        {
+        if (error || !body.Value) {
           callback(error, 0);
         } else {
           callback(error, body.Value);
@@ -33,12 +31,10 @@ module.exports = function (app, config, authenticator) {
       });
     };
 
-    var getNumResources = function(callback)
-    {
+    var getNumResources = function (callback) {
       var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dnum-resources';
       request({ url: URL, json: true }, function (error, response, body) {
-        if (error || !body.Value)
-        {
+        if (error || !body.Value) {
           callback(error, 0);
         } else {
           callback(error, body.Value);
@@ -46,12 +42,10 @@ module.exports = function (app, config, authenticator) {
       });
     };
 
-    var getResourceDupes = function(callback)
-    {
+    var getResourceDupes = function (callback) {
       var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dpct-resource-dupes';
       request({ url: URL, json: true }, function (error, response, body) {
-        if (error || !body.Value)
-        {
+        if (error || !body.Value) {
           callback(error, 0);
         } else {
           callback(error, body.Value);
@@ -59,12 +53,10 @@ module.exports = function (app, config, authenticator) {
       });
     };
 
-    var getResourcesPerNode = function(callback)
-    {
+    var getResourcesPerNode = function (callback) {
       var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Davg-resources-per-node';
       request({ url: URL, json: true }, function (error, response, body) {
-        if (error || !body.Value)
-        {
+        if (error || !body.Value) {
           callback(error, 0);
         } else {
           callback(error, body.Value);
@@ -72,9 +64,8 @@ module.exports = function (app, config, authenticator) {
       });
     };
 
-    var handleResults = function(error, results) {
-      if (error)
-      {
+    var handleResults = function (error, results) {
+      if (error) {
         res.send(500);
       } else {
         var response = {
@@ -193,15 +184,13 @@ module.exports = function (app, config, authenticator) {
     });
   });
 // GET /v3/nodes/<NODE>/resources/<TYPE>/<TITLE>
-  var isSensuCheck = function(resource, hostname) {
+  var isSensuCheck = function (resource, hostname) {
     var _ = require('underscore');
-    if (!(_.contains(resource.tags, 'sensu::check')))
-    {
+    if (!(_.contains(resource.tags, 'sensu::check'))) {
       return false;
     } else if (resource.type !== 'Sensu::Check') {
       return false;
-    } else if (resource.title === 'ping_' + hostname)
-    {
+    } else if (resource.title === 'ping_' + hostname) {
       return false;
     } else {
       return true;
@@ -223,8 +212,7 @@ module.exports = function (app, config, authenticator) {
           var resourceList = catalog.resources;
           var checks = [];
           _.each(resourceList, function (resource) {
-            if (isSensuCheck(resource, hostname))
-            {
+            if (isSensuCheck(resource, hostname)) {
               var check = {
                 title: resource.title,
                 occurrences: resource.parameters.occurrences,
@@ -252,7 +240,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/sensu/events', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.monModule.getEvents(function(err, events) {
+    app.locals.monModule.getEvents(function (err, events) {
       if (err) {
         res.send(500);
       } else {
@@ -278,8 +266,8 @@ module.exports = function (app, config, authenticator) {
   app.get('/api/v1/sensu/events/filtered', authenticator.roleHandler.can('use api'), function (req, res) {
     var async = require('async');
 
-    var getEvents = function(callback) {
-      app.locals.monModule.getEvents(function(err, events) {
+    var getEvents = function (callback) {
+      app.locals.monModule.getEvents(function (err, events) {
         if (!err) {
           callback(err, events);
         } else {
@@ -288,7 +276,7 @@ module.exports = function (app, config, authenticator) {
       });
     };
 
-    var getStashes = function(callback) {
+    var getStashes = function (callback) {
       app.locals.monModule.getStashes('silence', function (err, stashes) {
         if (!err) {
           callback(err, stashes);
@@ -301,14 +289,14 @@ module.exports = function (app, config, authenticator) {
     var stashedContents = {};
     var stashedHashes = {};
 
-    var handleStash = function(stash, done) {
+    var handleStash = function (stash, done) {
       var content = stash.content;
       var path = stash.path;
       var splitPath = path.split('/');
 
       var host = splitPath[1] || '';
       var check = splitPath[2] || null;
-      var stashContentKey = splitPath.slice(1,3).join('/');
+      var stashContentKey = splitPath.slice(1, 3).join('/');
 
       if (content.ticketID) {
         content.ticketURL = 'https://' + app.locals.config.crmModule.ticketingHost + app.locals.config.crmModule.ticketingPath + content.ticketID;
@@ -327,7 +315,7 @@ module.exports = function (app, config, authenticator) {
       done(null, stash);
     };
 
-    var handleEvent = function(event, done) {
+    var handleEvent = function (event, done) {
       var client = event.client;
       var check = event.check;
       var stashContentKey = '';
@@ -388,7 +376,7 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/sensu/events/device/:device', authenticator.roleHandler.can('use api'), function (req, res) {
     var uri = '';
-    app.locals.monModule.getDeviceEvents(req.params.device, function(error, body){
+    app.locals.monModule.getDeviceEvents(req.params.device, function (error, body) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
         res.type('application/json');
@@ -420,7 +408,7 @@ module.exports = function (app, config, authenticator) {
       } else {
         var retStashes = [];
         var stashList = response;
-        _.each(stashList, function(stash) {
+        _.each(stashList, function (stash) {
           retStashes.push({path: stash.path, content: JSON.stringify(stash.content), expire: stash.expire});
         });
         res.type('application/json');
@@ -480,7 +468,7 @@ module.exports = function (app, config, authenticator) {
   // GET SILENCED CLIENTS
   app.get('/api/v1/sensu/silence/client/:client', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.monModule.getSilencedClient(req.params.client, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         res.type('application/json');
@@ -492,7 +480,7 @@ module.exports = function (app, config, authenticator) {
   // UNSILENCE A CLIENT
   app.delete('/api/v1/sensu/silence/client/:client', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.unSilenceClient(req.params.client, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         app.locals.logger.log('debug', 'response', {response: response});
@@ -504,7 +492,7 @@ module.exports = function (app, config, authenticator) {
   // UNSILENCE A CHECK
   app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.unSilenceEvent(req.params.client, req.params.check, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         app.locals.logger.log('debug', 'response', {response: response});
@@ -518,7 +506,7 @@ module.exports = function (app, config, authenticator) {
     var request = require('request');
     var path = 'silence/' + req.params.client + '/' + req.params.check;
     request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         res.type('application/json');
@@ -531,7 +519,7 @@ module.exports = function (app, config, authenticator) {
   app.get('/api/v1/sensu/silence/:path', authenticator.roleHandler.can('use api'), function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         res.type('application/json');
@@ -544,7 +532,7 @@ module.exports = function (app, config, authenticator) {
   app.del('/api/v1/sensu/silence/:path', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     var request = require('request');
     request({ method: "DELETE", url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         res.type('application/json');
@@ -558,7 +546,7 @@ module.exports = function (app, config, authenticator) {
   app.get('/api/v1/sensu/silence', authenticator.roleHandler.can('use api'), function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response) {
-      if(error){
+      if (error) {
         res.send(500);
       } else {
         res.type('application/json');
@@ -569,25 +557,23 @@ module.exports = function (app, config, authenticator) {
 
   // GET ALL DEVICES
   app.get('/api/v1/sensu/devices', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
-      if (deviceHostnames === null)
-      {
+    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames) {
+      if (deviceHostnames === null) {
         res.send(500);
       } else {
         var _ = require('underscore');
         var request = require('request');
-        app.locals.monModule.getEvents(function(error, sensuEventList) {
+        app.locals.monModule.getEvents(function (error, sensuEventList) {
           if (error) {
             res.send(500);
           } else {
             app.locals.logger.log('debug', 'response', {response: sensuEventList});
             app.locals.monModule.getDevices(function (error, sensuDeviceList) {
-              if(error){
+              if (error) {
                 res.send(500);
               } else {
                 var deviceList = [];
-                _.each(sensuDeviceList, function (device)
-                {
+                _.each(sensuDeviceList, function (device) {
                   _.defaults(device, deviceHostnames[device.name]);
                   _.defaults(device, {name: '', address: '', email: '', company: '', full_name: '', location: ''});
                   deviceList.push(device);
@@ -625,13 +611,12 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/devices/devgroupid/:devgroupid', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getDevicesbyTypeGroupID(req.params.devgroupid, function (err, deviceList){
-      if (deviceList === null)
-      {
+    app.locals.crmModule.getDevicesbyTypeGroupID(req.params.devgroupid, function (err, deviceList) {
+      if (deviceList === null) {
         res.send(500);
       } else {
         var devices = [];
-        Object.keys(deviceList).forEach(function(deviceID) {
+        Object.keys(deviceList).forEach(function (deviceID) {
           var device = deviceList[deviceID];
           devices.push(device);
         });
@@ -642,16 +627,15 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/devices/devgroups', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getDeviceTypeList(function (err, deviceGroupList){
-      if (deviceGroupList === null)
-      {
+    app.locals.crmModule.getDeviceTypeList(function (err, deviceGroupList) {
+      if (deviceGroupList === null) {
         res.send(500);
       } else {
         var _ = require('underscore');
         var deviceGroups = _.values(deviceGroupList);
         var returnList = [];
 
-        _.each(deviceGroups, function(group) {
+        _.each(deviceGroups, function (group) {
           returnList.push(_.pick(group, ['devtype_group_id', 'name', 'priority']));
         });
 
@@ -662,9 +646,8 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/devices/hostname', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
-      if (deviceHostnames === null)
-      {
+    app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames) {
+      if (deviceHostnames === null) {
         res.send(500);
       } else {
         var _ = require('underscore');
@@ -675,17 +658,14 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-
   app.get('/api/v1/helpdesk/devices/deviceid/:deviceid/tickets', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getTicketsbyDeviceID(req.params.deviceid, function (err, ticketList){
-      if (err)
-      {
+    app.locals.crmModule.getTicketsbyDeviceID(req.params.deviceid, function (err, ticketList) {
+      if (err) {
         res.send(500);
-      }  else {
+      } else {
         var _ = require('underscore');
         var tickets = _.values(ticketList);
-        for (var i=0; i<tickets.length; i++)
-        {
+        for (var i = 0; i < tickets.length; i++) {
           tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
           tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
         }
@@ -697,12 +677,10 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/helpdesk/devices/rack/:rack', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesByRack(req.params.rack, function (error, device) {
-      if (error !== null)
-      {
+      if (error !== null) {
         res.send(500);
       } else {
-        if (device.dev && device.dev !== null)
-        {
+        if (device.dev && device.dev !== null) {
           res.type('application/json');
           res.send(JSON.stringify({ aaData: [device] }));
         } else {
@@ -714,12 +692,10 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/helpdesk/devices/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByHostname(req.params.hostname, function (error, device) {
-      if (error !== null)
-      {
+      if (error !== null) {
         res.send(500);
       } else {
-        if (device.dev && device.dev !== null)
-        {
+        if (device.dev && device.dev !== null) {
           res.type('application/json');
           res.send(JSON.stringify({ aaData: [device] }));
         } else {
@@ -731,12 +707,10 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/helpdesk/devices/deviceid/:deviceid', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, device) {
-      if (error !== null)
-      {
+      if (error !== null) {
         res.send(500);
       } else {
-        if (device.dev && device.dev !== null)
-        {
+        if (device.dev && device.dev !== null) {
           res.type('application/json');
           res.send(JSON.stringify({ aaData: [device] }));
         } else {
@@ -750,16 +724,15 @@ module.exports = function (app, config, authenticator) {
     var results = [];
     var query = req.query.q;
     app.locals.logger.log('debug', 'Search Query', {query: query});
-    results.push({"id":"1", "name":"johann8384"});
-    results.push({"id":"2", "name":"rmc3"});
+    results.push({"id": "1", "name": "johann8384"});
+    results.push({"id": "2", "name": "rmc3"});
     res.type('application/json');
     res.send(results);
   });
 
   app.get('/api/v1/sales/leads', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getLeads(function(err, leadList) {
-      if (err)
-      {
+    app.locals.crmModule.getLeads(function (err, leadList) {
+      if (err) {
         res.send(500);
       } else {
         var _ = require('underscore');
@@ -790,7 +763,7 @@ module.exports = function (app, config, authenticator) {
             var emails = [];
             var companies = [];
             var names = [];
-            for (var x=0;x<clientList.length;x++) {
+            for (var x = 0; x < clientList.length; x++) {
               var client = clientList[x];
               if (client.email.email !== '') {
                 emails.push(client.email.email);
@@ -810,7 +783,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
         res.send(500);
@@ -821,13 +794,13 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
         res.send(500);
       } else {
         var elasticsearch_index = '';
-        for (var x=0;x<pipeline.pipeline.length;x++) {
+        for (var x = 0; x < pipeline.pipeline.length; x++) {
           var opportunity = pipeline.pipeline[x];
           elasticsearch_index += '{ "create": { "index": "' + req.params.index + '", "type":"opportunity", "id":"' + opportunity.opportunity_id + '" }}\n';
           elasticsearch_index += JSON.stringify(opportunity) + '\n';
@@ -838,7 +811,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleHandler.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     var type = function (type) {
       return { type: type };
     };
@@ -851,23 +824,23 @@ module.exports = function (app, config, authenticator) {
             'client_id': type('integer'),
             'contact_id': type('integer'),
             'ts': type('long'),
-            'activity' : type('long'),
-            'status' : type('integer'),
-            'opportunity_type_id' : type('integer'),
-            'opportunity_stage_id' : type('integer'),
-            'owner' : type('integer'),
-            'owner_name' : type('string'),
-            'closure_ts' : { 'type' : 'long'},
-            'closure_pct' : type('float'),
-            'price_min' : type('float'),
-            'price_max' : type('float'),
-            'value' : type('float'),
-            'last_action' : type('string'),
-            'next_step' : type('string'),
-            'description' : type('string'),
-            'listed_company' : type('string'),
-            'stage' : type('string'),
-            'type' : type('string')
+            'activity': type('long'),
+            'status': type('integer'),
+            'opportunity_type_id': type('integer'),
+            'opportunity_stage_id': type('integer'),
+            'owner': type('integer'),
+            'owner_name': type('string'),
+            'closure_ts': { 'type': 'long'},
+            'closure_pct': type('float'),
+            'price_min': type('float'),
+            'price_max': type('float'),
+            'value': type('float'),
+            'last_action': type('string'),
+            'next_step': type('string'),
+            'description': type('string'),
+            'listed_company': type('string'),
+            'stage': type('string'),
+            'type': type('string')
           }
         }
       };
@@ -878,7 +851,7 @@ module.exports = function (app, config, authenticator) {
     }
   });
 
-  var createOpportunityIndex = function(client, index, callback) {
+  var createOpportunityIndex = function (client, index, callback) {
     client.indices.exists({index: index}, function (err, response, status) {
       if (err) {
         callback(err);
@@ -896,9 +869,9 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  var createClientMapping = function(client, index, callback) {
+  var createClientMapping = function (client, index, callback) {
     var type = function (type, store) {
-      if (arguments.length <=1) {
+      if (arguments.length <= 1) {
         store = false;
       }
 
@@ -975,9 +948,9 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  var createEventMapping = function(client, index, callback) {
+  var createEventMapping = function (client, index, callback) {
     var type = function (type, store) {
-      if (arguments.length <=1) {
+      if (arguments.length <= 1) {
         store = false;
       }
 
@@ -1008,9 +981,9 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  var createOpportunityMapping = function(client, index, callback) {
+  var createOpportunityMapping = function (client, index, callback) {
     var type = function (type, store) {
-      if (arguments.length <=1) {
+      if (arguments.length <= 1) {
         store = false;
       }
 
@@ -1026,24 +999,24 @@ module.exports = function (app, config, authenticator) {
           'salesperson_id': type('integer'),
           'contact_id': type('integer'),
           'ts': type('date'),
-          'activity' : type('date'),
-          'status' : type('integer'),
-          'timestamp' : type('date', true),
-          'opportunity_type_id' : type('integer'),
-          'opportunity_stage_id' : type('integer'),
-          'owner' : type('integer'),
-          'owner_name' : type('string'),
-          'closure_ts' : { 'type' : 'long'},
-          'closure_pct' : type('float'),
-          'price_min' : type('float'),
-          'price_max' : type('float'),
-          'value' : type('float'),
-          'last_action' : type('string'),
-          'next_step' : type('string'),
-          'description' : type('string'),
-          'listed_company' : type('string'),
-          'stage' : type('string'),
-          'type' : type('string')
+          'activity': type('date'),
+          'status': type('integer'),
+          'timestamp': type('date', true),
+          'opportunity_type_id': type('integer'),
+          'opportunity_stage_id': type('integer'),
+          'owner': type('integer'),
+          'owner_name': type('string'),
+          'closure_ts': { 'type': 'long'},
+          'closure_pct': type('float'),
+          'price_min': type('float'),
+          'price_max': type('float'),
+          'value': type('float'),
+          'last_action': type('string'),
+          'next_step': type('string'),
+          'description': type('string'),
+          'listed_company': type('string'),
+          'stage': type('string'),
+          'type': type('string')
         }
       }
     };
@@ -1056,7 +1029,7 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  var populateOpportunityIndex = function(client, index, callback) {
+  var populateOpportunityIndex = function (client, index, callback) {
     app.locals.crmModule.getClients(function (err, clients) {
       if (err) {
         callback(err);
@@ -1066,7 +1039,7 @@ module.exports = function (app, config, authenticator) {
             callback(err);
           } else {
             var async = require('async');
-            async.map(pipeline.pipeline, function(opportunity, mapCallback) {
+            async.map(pipeline.pipeline, function (opportunity, mapCallback) {
               var moment = require('moment');
               var clientid = opportunity.client_id;
               opportunity.timestamp = moment.unix(opportunity.activity).format('YYYY-MM-DDTHH:mm:ssZ');
@@ -1091,7 +1064,7 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  var populateClientIndex = function(client, index, callback) {
+  var populateClientIndex = function (client, index, callback) {
     app.locals.crmModule.getClients(function (err, clients) {
       if (err) {
         callback(err);
@@ -1105,12 +1078,12 @@ module.exports = function (app, config, authenticator) {
           client.create({ index: index, type: 'client', timestamp: uberClient.created, id: uberClient.clientid, body: uberClientJSON }, function (err, response, status) {
             mapCallback(err, response);
           });
-        },callback);
+        }, callback);
       }
     });
   };
 
-  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleHandler.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     var elasticsearch = require('elasticsearch');
     var client = new elasticsearch.Client({
       host: 'localhost:9200',
@@ -1128,11 +1101,11 @@ module.exports = function (app, config, authenticator) {
           if (err) {
             res.send(500);
           } else {
-            createClientMapping(client, index, function(err, response) {
+            createClientMapping(client, index, function (err, response) {
               if (err) {
                 res.send(500);
               } else {
-                createEventMapping(client, index, function(err, response) {
+                createEventMapping(client, index, function (err, response) {
                   if (err) {
                     res.send(500);
                   } else {
@@ -1160,32 +1133,222 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function(req, res) {
+  var createSelectBoxHTML = function (field, multiple) {
+    if (arguments.length <= 1) {
+      multiple = '';
+    }
+
+    var html = '';
+    var name = field.variable;
+    var label = field.label;
+    var options = field.options.split(",");
+
+    html += '<label for="' + name + '">' + label + '</label>';
+    html += '<select class="form-control" ' + multiple + ' id="' + name + '" name="' + name + '">';
+    for (var y = 0; y < options.length; y++) {
+      var option = options[y].replace('"', '').replace('"', '');
+      html += '<option ';
+      if (option === field.default_val) {
+        html += ' selected ';
+      }
+      html += ' value="' + option + '"> ' + option + '</option>';
+    }
+    html += '</select>';
+    return html;
+  };
+
+  var createTextHTML = function (field) {
+    var html = '';
+    var name = field.variable;
+    var label = field.label;
+    var value = field.default_val.replace('"', '').replace('"', '');
+    html += '<label for="' + name + '">' + label + '</label>';
+    html += '<input class="form-control" type="text" value="' + value + '" id="' + name + '" name="' + name + '">';
+    return html;
+  };
+
+  app.get('/api/v1/crm/metadata/fieldhtml/leads', authenticator.roleHandler.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataFields('client', function (err, metadata) {
+      if (err) {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var fields = _.values(metadata);
+        var retHTML = '';
+
+        for (var x = 0; x < fields.length; x++) {
+          if (fields[x].metagroup_name === 'Lead') {
+            var field = fields[x];
+            switch (field.type) {
+              case 'select':
+                retHTML += createSelectBoxHTML(field);
+                break;
+              case 'text':
+                retHTML += createTextHTML(field);
+                break;
+              case 'select_multiple':
+                retHTML += createSelectBoxHTML(field, 'multiple');
+                break;
+              default:
+            }
+          }
+        }
+
+        res.type('text/html');
+        res.send(retHTML);
+      }
+    });
+  });
+
+  app.get('/api/v1/crm/metadata/fields/lead', authenticator.roleHandler.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataFields('client', function (err, metadata) {
+      if (err) {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var fields = _.values(metadata);
+        var retFields = [];
+        for (var x = 0; x < fields.length; x++) {
+          if (fields[x].metagroup_name === 'Lead') {
+            retFields.push(fields[x]);
+          }
+        }
+
+        res.type('application/json');
+        res.send(JSON.stringify(retFields));
+      }
+    });
+  });
+
+  app.get('/api/v1/crm/metadata/group/:group', authenticator.roleHandler.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataGroup(req.params.group, function (err, metadata) {
+      if (err) {
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(metadata));
+      }
+    });
+  });
+
+  app.get('/api/v1/crm/metadata/fields/:group', authenticator.roleHandler.can('use api'), function (req, res) {
+    app.locals.crmModule.getMetadataFields(req.params.group, function (err, metadata) {
+      if (err) {
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(metadata));
+      }
+    });
+  });
+
+  app.get('/api/v1/helpdesk/events', authenticator.roleHandler.can('use api'), function (req, res) {
+    app.locals.crmModule.getEventList(function (err, eventList) {
+      if (err) {
+        res.send(500);
+      } else {
+        var _ = require('underscore');
+        var events = _.values(eventList);
+        res.type('application/json');
+        res.send(JSON.stringify({aaData: events}));
+      }
+    });
+  });
+
+  app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function (req, res) {
+    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
+      if (err) {
+        res.send(500);
+      } else {
+        res.type('application/json');
+        res.send(JSON.stringify(pipeline));
+      }
+    });
+  });
+
+  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function (req, res) {
+    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
+      if (err) {
+        res.send(500);
+      } else {
+        var elasticsearch_index = '';
+        for (var x = 0; x < pipeline.pipeline.length; x++) {
+          var opportunity = pipeline.pipeline[x];
+          elasticsearch_index += '{ "create": { "index": "' + req.params.index + '", "type":"opportunity", "id":"' + opportunity.opportunity_id + '" }}\n';
+          elasticsearch_index += JSON.stringify(opportunity) + '\n';
+        }
+        res.type('text/plain');
+        res.send(elasticsearch_index);
+      }
+    });
+  });
+
+  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleHandler.can('view pipeline'), function (req, res) {
+    var type = function (type) {
+      return { type: type };
+    };
+
+    if (req.params.type === 'opportunity') {
+      var opportunity = {
+        'opportunity': {
+          'properties': {
+            'opportunity_id': type('integer'),
+            'client_id': type('integer'),
+            'contact_id': type('integer'),
+            'ts': type('long'),
+            'activity': type('long'),
+            'status': type('integer'),
+            'opportunity_type_id': type('integer'),
+            'opportunity_stage_id': type('integer'),
+            'owner': type('integer'),
+            'owner_name': type('string'),
+            'closure_ts': { 'type': 'long'},
+            'closure_pct': type('float'),
+            'price_min': type('float'),
+            'price_max': type('float'),
+            'value': type('float'),
+            'last_action': type('string'),
+            'next_step': type('string'),
+            'description': type('string'),
+            'listed_company': type('string'),
+            'stage': type('string'),
+            'type': type('string')
+          }
+        }
+      };
+      res.type('application/json');
+      res.send(JSON.stringify(opportunity));
+    } else {
+      res.send(404);
+    }
+  });
+
+  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     var query = {
       "query": {
-        "filtered" : {
-          "query" : {
-            "match_all" : {}
+        "filtered": {
+          "query": {
+            "match_all": {}
           },
-          "filter" : {
-            "range" : {
-              "status": { "from" : 1, "to": 1 }
+          "filter": {
+            "range": {
+              "status": { "from": 1, "to": 1 }
             }
           }
         }
       },
-      "aggs" : {
-        "stages" : {
-          "terms" : {
-            "field" : "opportunity_stage_id"
+      "aggs": {
+        "stages": {
+          "terms": {
+            "field": "opportunity_stage_id"
           },
-          "aggs" : {
-            "total_value" : { "sum": { "field" : "value" }},
-            "avg_value" : { "avg": { "field": "value" }}
+          "aggs": {
+            "total_value": { "sum": { "field": "value" }},
+            "avg_value": { "avg": { "field": "value" }}
           }
         },
-        "total_value" : { "sum": { "field" : "value" }},
-        "avg_value" : { "avg": { "field": "value" }}
+        "total_value": { "sum": { "field": "value" }},
+        "avg_value": { "avg": { "field": "value" }}
       }
     };
 
@@ -1211,144 +1374,31 @@ module.exports = function (app, config, authenticator) {
       }
     });
   });
-/*
- {
- "query": {
- "filtered" : {
- "query" : {
- "match_all" : {}
- },
- "filter" : {
- "range" : {
- "status": { "from" : 1, "to": 1}}
- }
- }
- },
- "aggs" : {
- "stages" : { "terms" : { "field" : "stage" }},
- "total_value" : { "sum": { "field" : "value" }},
- "avg_value" : { "avg": { "field": "value" }}
- }
- }
- */
+  /*
+   {
+   "query": {
+   "filtered" : {
+   "query" : {
+   "match_all" : {}
+   },
+   "filter" : {
+   "range" : {
+   "status": { "from" : 1, "to": 1}}
+   }
+   }
+   },
+   "aggs" : {
+   "stages" : { "terms" : { "field" : "stage" }},
+   "total_value" : { "sum": { "field" : "value" }},
+   "avg_value" : { "avg": { "field": "value" }}
+   }
+   }
+   */
 
-  var createSelectBoxHTML = function (field, multiple) {
-    if (arguments.length <= 1) {
-      multiple = '';
-    }
-
-    var html = '';
-    var name = field.variable;
-    var label = field.label;
-    var options = field.options.split(",");
-
-    html += '<label for="' + name + '">' + label + '</label>';
-    html += '<select class="form-control" ' + multiple + ' id="' + name +'" name="'+ name + '">';
-    for (var y=0; y<options.length;y++) {
-      var option = options[y].replace('"', '').replace('"', '');
-      html += '<option ';
-      if (option === field.default_val) {
-        html += ' selected ';
-      }
-      html += ' value="' + option + '"> ' + option + '</option>';
-    }
-    html += '</select>';
-    return html;
-  };
-
-  var createTextHTML = function (field) {
-    var html = '';
-    var name = field.variable;
-    var label = field.label;
-    var value = field.default_val.replace('"', '').replace('"', '');
-    html += '<label for="' + name + '">' + label + '</label>';
-    html += '<input class="form-control" type="text" value="' + value + '" id="' + name +'" name="'+ name + '">';
-    return html;
-  };
-
-  app.get('/api/v1/crm/metadata/fieldhtml/leads', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
-      if (err)
-      {
-        res.send(500);
-      } else {
-        var _ = require('underscore');
-        var fields = _.values(metadata);
-        var retHTML = '';
-
-        for (var x=0;x<fields.length;x++) {
-          if (fields[x].metagroup_name === 'Lead') {
-            var field = fields[x];
-            switch (field.type) {
-              case 'select':
-                retHTML += createSelectBoxHTML(field);
-                break;
-              case 'text':
-                retHTML += createTextHTML(field);
-                break;
-              case 'select_multiple':
-                retHTML += createSelectBoxHTML(field, 'multiple');
-                break;
-              default:
-            }
-          }
-        }
-
-        res.type('text/html');
-        res.send(retHTML);
-      }
-    });
-  });
-
-  app.get('/api/v1/crm/metadata/fields/lead', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
-      if (err)
-      {
-        res.send(500);
-      } else {
-        var _ = require('underscore');
-        var fields = _.values(metadata);
-        var retFields = [];
-        for (var x=0;x<fields.length;x++) {
-          if (fields[x].metagroup_name === 'Lead') {
-            retFields.push(fields[x]);
-          }
-        }
-
-        res.type('application/json');
-        res.send(JSON.stringify(retFields));
-      }
-    });
-  });
-
-  app.get('/api/v1/crm/metadata/group/:group', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getMetadataGroup(req.params.group, function(err, metadata) {
-      if (err)
-      {
-        res.send(500);
-      } else {
-        res.type('application/json');
-        res.send(JSON.stringify(metadata));
-      }
-    });
-  });
-
-  app.get('/api/v1/crm/metadata/fields/:group', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getMetadataFields(req.params.group, function(err, metadata) {
-      if (err)
-      {
-        res.send(500);
-      } else {
-        res.type('application/json');
-        res.send(JSON.stringify(metadata));
-      }
-    });
-  });
 
   app.get('/api/v1/helpdesk/events', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getEventList(function(err, eventList) {
-      if (err)
-      {
+    app.locals.crmModule.getEventList(function (err, eventList) {
+      if (err) {
         res.send(500);
       } else {
         var _ = require('underscore');
@@ -1359,449 +1409,9 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function(req, res) {
-    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
-      if (err) {
-	res.send(500);
-      } else {
-	res.type('application/json');
-	res.send(JSON.stringify(pipeline));
-      }
-    });
-  });
-
-  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function(req, res) {
-    app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
-      if (err) {
-	res.send(500);
-      } else {
-	var elasticsearch_index = '';
-	for (var x=0;x<pipeline.pipeline.length;x++) {
-	  var opportunity = pipeline.pipeline[x];
-	  elasticsearch_index += '{ "create": { "index": "' + req.params.index + '", "type":"opportunity", "id":"' + opportunity.opportunity_id + '" }}\n';
-	  elasticsearch_index += JSON.stringify(opportunity) + '\n';
-	}
-	res.type('text/plain');
-	res.send(elasticsearch_index);
-      }
-    });
-  });
-
-  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleHandler.can('view pipeline'), function(req, res) {
-    var type = function (type) {
-      return { type: type };
-    };
-
-    if (req.params.type === 'opportunity') {
-      var opportunity = {
-	'opportunity': {
-	  'properties': {
-	    'opportunity_id': type('integer'),
-	    'client_id': type('integer'),
-	    'contact_id': type('integer'),
-	    'ts': type('long'),
-	    'activity' : type('long'),
-	    'status' : type('integer'),
-	    'opportunity_type_id' : type('integer'),
-	    'opportunity_stage_id' : type('integer'),
-	    'owner' : type('integer'),
-	    'owner_name' : type('string'),
-	    'closure_ts' : { 'type' : 'long'},
-	    'closure_pct' : type('float'),
-	    'price_min' : type('float'),
-	    'price_max' : type('float'),
-	    'value' : type('float'),
-	    'last_action' : type('string'),
-	    'next_step' : type('string'),
-	    'description' : type('string'),
-	    'listed_company' : type('string'),
-	    'stage' : type('string'),
-	    'type' : type('string')
-	  }
-	}
-      };
-      res.type('application/json');
-      res.send(JSON.stringify(opportunity));
-    } else {
-      res.send(404);
-    }
-  });
-
-  var createOpportunityIndex = function(client, index, callback) {
-    client.indices.exists({index: index}, function (err, response, status) {
-      if (err) {
-	callback(err);
-      } else if (response !== false || status !== 404) {
-	callback(new Error('index already exists:' + index));
-      } else {
-	client.indices.create({index: index}, function (err, response, status) {
-	  if (err) {
-	    callback(err);
-	  } else {
-	    callback(null, response);
-	  }
-	});
-      }
-    });
-  };
-
-  var createClientMapping = function(client, index, callback) {
-    var type = function (type, store) {
-      if (arguments.length <=1) {
-	store = false;
-      }
-
-      return { type: type, store: store };
-    };
-
-    var uberClient = { clientid: type('integer'),
-      first: type('string'),
-      last: type('string'),
-      checkname: type('string'),
-      company: type('string', true),
-      address: type('string', true),
-      city: type('string', true),
-      state: type('string', true),
-      zip: type('string', true),
-      phone: type('string', true),
-      fax: type('string', true),
-      ss: type('string'),
-      email: type('string', true),
-      comments: type('string'),
-      country: type('string', true),
-      balance: type('float'),
-      credit_balance: type('float'),
-      acct_balance: type('float'),
-      datesend: type('integer'),
-      datepay: type('integer'),
-      password: { type: 'string', store: false, index: 'no', ignore_above: 0 },
-      active: type('integer', true),
-      permnote: type('string'),
-      tempnote: type('string'),
-      priority: type('integer'),
-      class_id: type('integer'),
-      login: type('string', true),
-      access: type('string'),
-      retry_every: type('integer'),
-      referred: type('string'),
-      referred_by: type('integer'),
-      credit_bool: type('integer'),
-      discount: type('float'),
-      latest_inv: type('long'),
-      datedue: type('long'),
-      grace_due: type('integer'),
-      listed_company: type('string'),
-      full_name: type('string'),
-      created: type('long'),
-      password_timeout: type('integer'),
-      password_changed: type('integer'),
-      charge_days: type('integer'),
-      discount_type: type('integer'),
-      qblistid: type('string'),
-      qbeditseq: type('string'),
-      prefer_lang: type('integer'),
-      acctmgr: type('integer'),
-      salesperson: type('integer'),
-      late_fee_scheme_id: type('integer'),
-      invoice_delivery: type('integer'),
-      business: type('integer'),
-      prebill_method: type('integer'),
-      prebill_days: type('integer'),
-      default_renew: type('integer'),
-      extended_prorate_day: type('integer'),
-      prorate_min_days: type('integer'),
-      auto_apply_credit: type('integer'),
-      inv_balance: type('float'),
-      salesperson_name: type('string'),
-      salesperson_email: type('string')
-    };
-    client.indices.putMapping({index: index, type: 'client', body: uberClient, ignoreConflicts: true }, function (err, response, status) {
-      if (err) {
-	callback(err);
-      } else {
-	callback(null, response);
-      }
-    });
-  };
-
-  var createEventMapping = function(client, index, callback) {
-    var type = function (type, store) {
-      if (arguments.length <=1) {
-	store = false;
-      }
-
-      return { type: type, store: store };
-    };
-    var event = {
-      eventid: type('integer'),
-      action: type('string'),
-      clientid: type('integer'),
-      user: type('string'),
-      time: type('date'),
-      amount: type('float'),
-      balance: type('float'),
-      ledger: type('float'),
-      type: type('integer'),
-      reference_id: type('integer'),
-      event_type: type('integer'),
-      client_viewable: type('boolean'),
-      reference_type: type('string')
-    };
-
-    client.indices.putMapping({index: index, type: 'event', body: event, ignoreConflicts: true }, function (err, response, status) {
-      if (err) {
-	callback(err);
-      } else {
-	callback(null, response);
-      }
-    });
-  };
-
-  var createOpportunityMapping = function(client, index, callback) {
-    var type = function (type, store) {
-      if (arguments.length <=1) {
-	store = false;
-      }
-
-      return { type: type, store: store };
-    };
-    var opportunity = {
-      'opportunity': {
-	'properties': {
-	  'opportunity_id': type('integer'),
-	  'client_id': type('integer'),
-	  'salesperson_name': type('string'),
-	  'salesperson_email': type('string'),
-	  'salesperson_id': type('integer'),
-	  'contact_id': type('integer'),
-	  'ts': type('date'),
-	  'activity' : type('date'),
-	  'status' : type('integer'),
-	  'timestamp' : type('date', true),
-	  'opportunity_type_id' : type('integer'),
-	  'opportunity_stage_id' : type('integer'),
-	  'owner' : type('integer'),
-	  'owner_name' : type('string'),
-	  'closure_ts' : { 'type' : 'long'},
-	  'closure_pct' : type('float'),
-	  'price_min' : type('float'),
-	  'price_max' : type('float'),
-	  'value' : type('float'),
-	  'last_action' : type('string'),
-	  'next_step' : type('string'),
-	  'description' : type('string'),
-	  'listed_company' : type('string'),
-	  'stage' : type('string'),
-	  'type' : type('string')
-	}
-      }
-    };
-    client.indices.putMapping({index: index, type: 'opportunity', body: opportunity, ignoreConflicts: true }, function (err, response, status) {
-      if (err) {
-	callback(err);
-      } else {
-	callback(null, response);
-      }
-    });
-  };
-
-  var populateOpportunityIndex = function(client, index, callback) {
-    app.locals.crmModule.getClients(function (err, clients) {
-      //console.log(clients);
-      if (err) {
-	callback(err);
-      } else {
-	app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
-	  if (err) {
-	    callback(err);
-	  } else {
-	    var async = require('async');
-	    async.map(pipeline.pipeline, function(opportunity, mapCallback) {
-	      var moment = require('moment');
-	      var clientid = opportunity.client_id;
-	      opportunity.timestamp = moment.unix(opportunity.activity).format('YYYY-MM-DDTHH:mm:ssZ');
-	      opportunity.activity = moment.unix(opportunity.activity).format('YYYY-MM-DDTHH:mm:ssZ');
-	      opportunity.ts = moment.unix(opportunity.ts).format('YYYY-MM-DDTHH:mm:ssZ');
-	      if (clients.hasOwnProperty(clientid)) {
-		var uberClient = clients[clientid];
-		opportunity.salesperson_name = uberClient.salesperson_name;
-		opportunity.salesperson_email = uberClient.salesperson_email;
-		opportunity.salesperson_id = uberClient.salesperson;
-	      } else {
-		console.log('no client for client id ' + clientid);
-	      }
-	      var opportunityJSON = JSON.stringify(opportunity);
-	      client.create({ index: index, type: 'opportunity', timestamp: opportunity.timestamp, id: opportunity.opportunity_id, body: opportunityJSON }, function (err, response, status) {
-		mapCallback(err, response);
-	      });
-	    }, callback);
-	  }
-	});
-      }
-    });
-  };
-
-  var populateClientIndex = function(client, index, callback) {
-    app.locals.crmModule.getClients(function (err, clients) {
-      if (err) {
-	callback(err);
-      } else {
-	var async = require('async');
-	var _ = require('underscore');
-	async.map(_.values(clients), function (uberClient, mapCallback) {
-	  console.log(uberClient);
-	  var moment = require('moment');
-	  uberClient.created = moment.unix(uberClient.created).format('YYYY-MM-DDTHH:mm:ssZ');
-	  var uberClientJSON = JSON.stringify(uberClient);
-	  client.create({ index: index, type: 'client', timestamp: uberClient.created, id: uberClient.clientid, body: uberClientJSON }, function (err, response, status) {
-	    mapCallback(err, response);
-	  });
-	},callback);
-      }
-    });
-  };
-
-  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleHandler.can('view pipeline'), function(req, res) {
-    var elasticsearch = require('elasticsearch');
-    var client = new elasticsearch.Client({
-      host: 'localhost:9200',
-      log: 'error'
-    });
-    var moment = require('moment');
-    var hour = moment().format('YYYY.MM.DD.HH');
-    var index = 'pipeline-' + hour;
-
-    createOpportunityIndex(client, index, function (err, response) {
-      if (err) {
-	res.send(500);
-      } else {
-	createOpportunityMapping(client, index, function (err, response) {
-	  if (err) {
-	    res.send(500);
-	  } else {
-	    createClientMapping(client, index, function(err, response) {
-	      if (err) {
-		res.send(500);
-	      } else {
-		createEventMapping(client, index, function(err, response) {
-		  if (err) {
-		    res.send(500);
-		  } else {
-		    populateClientIndex(client, index, function (err, response) {
-		      if (err) {
-			res.send(500);
-		      } else {
-			populateOpportunityIndex(client, index, function (err, response) {
-			  if (err) {
-			    res.send(500);
-			  } else {
-			    res.type('application/json');
-			    res.send(response);
-			  }
-			});
-		      }
-		    });
-		  }
-		});
-	      }
-	    });
-	  }
-	});
-      }
-    });
-  });
-
-  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function(req, res) {
-    var query = {
-      "query": {
-	"filtered" : {
-	  "query" : {
-	    "match_all" : {}
-	  },
-	  "filter" : {
-	    "range" : {
-	      "status": { "from" : 1, "to": 1 }
-	    }
-	  }
-	}
-      },
-      "aggs" : {
-	"stages" : {
-	  "terms" : {
-	    "field" : "opportunity_stage_id"
-	  },
-	  "aggs" : {
-	    "total_value" : { "sum": { "field" : "value" }},
-	    "avg_value" : { "avg": { "field": "value" }}
-	  }
-	},
-	"total_value" : { "sum": { "field" : "value" }},
-	"avg_value" : { "avg": { "field": "value" }}
-      }
-    };
-
-    var elasticsearch = require('elasticsearch');
-    var client = new elasticsearch.Client({
-      host: 'localhost:9200',
-      log: 'trace'
-    });
-    var searchParams = {
-      index: '[pipeline-]YYYY.MM.DD.HH',
-      type: 'opportunity',
-      body: query
-    };
-
-    client.search(searchParams, function (err, response, status) {
-      if (err) {
-	res.send(500);
-      } else if (status !== 200) {
-	res.send(status);
-      } else {
-	res.type('application/json');
-	res.send(response.aggregations.stages.buckets);
-      }
-    });
-  });
-/*
- {
- "query": {
- "filtered" : {
- "query" : {
- "match_all" : {}
- },
- "filter" : {
- "range" : {
- "status": { "from" : 1, "to": 1}}
- }
- }
- },
- "aggs" : {
- "stages" : { "terms" : { "field" : "stage" }},
- "total_value" : { "sum": { "field" : "value" }},
- "avg_value" : { "avg": { "field": "value" }}
- }
- }
- */
-
-
-  app.get('/api/v1/helpdesk/events', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getEventList(function(err, eventList) {
-      if (err)
-      {
-	res.send(500);
-      } else {
-	var _ = require('underscore');
-	var events = _.values(eventList);
-	res.type('application/json');
-	res.send(JSON.stringify({aaData: events}));
-      }
-    });
-  });
-
   app.get('/api/v1/helpdesk/clients', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getClients(function(err, clientList) {
-      if (err)
-      {
+    app.locals.crmModule.getClients(function (err, clientList) {
+      if (err) {
         res.send(500);
       } else {
         var _ = require('underscore');
@@ -1814,7 +1424,7 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/helpdesk/clients/clientid/:clientid', authenticator.roleHandler.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
-    app.locals.crmModule.getClientByID(clientID, function(err, client) {
+    app.locals.crmModule.getClientByID(clientID, function (err, client) {
       if (err) {
         res.send(500);
       } else {
@@ -1826,7 +1436,7 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/helpdesk/clients/clientid/:clientid/contacts', authenticator.roleHandler.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
-    app.locals.crmModule.getContactsbyClientID(clientID, function(err, contactList) {
+    app.locals.crmModule.getContactsbyClientID(clientID, function (err, contactList) {
       if (err) {
         res.send(500);
       } else {
@@ -1839,7 +1449,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/clients/clientid/:clientid/devices', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
+    app.locals.crmModule.getDevicesbyClientID(req.params.clientid, function (err, devicelist) {
       if (err) {
         res.send(500);
       } else {
@@ -1852,15 +1462,13 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/clients/clientid/:clientid/tickets', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
-      if (err)
-      {
+    app.locals.crmModule.getTicketsbyClientID(req.params.clientid, function (err, ticketList) {
+      if (err) {
         res.send(500);
-      }  else {
+      } else {
         var _ = require('underscore');
         var tickets = _.values(ticketList);
-        for (var i=0; i<tickets.length; i++)
-        {
+        for (var i = 0; i < tickets.length; i++) {
           tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
           tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
         }
@@ -1871,7 +1479,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/api/methods', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getAPIMethods(function(err, client) {
+    app.locals.crmModule.getAPIMethods(function (err, client) {
       if (err) {
         res.send(500);
       } else {
@@ -1882,15 +1490,13 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/tickets', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getTickets(function(err, ticketList) {
-      if (err)
-      {
+    app.locals.crmModule.getTickets(function (err, ticketList) {
+      if (err) {
         res.send(500);
-      }  else {
+      } else {
         var _ = require('underscore');
         var tickets = _.values(ticketList);
-        for (var i=0; i<tickets.length; i++)
-        {
+        for (var i = 0; i < tickets.length; i++) {
           tickets[i].timestamp = utils.getFormattedTimestamp(tickets[i].timestamp);
           tickets[i].activity = utils.getFormattedTimestamp(tickets[i].activity);
         }
@@ -1901,11 +1507,10 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
-      if (err)
-      {
+    app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function (err, ticket) {
+      if (err) {
         res.send(500);
-      }  else {
+      } else {
         res.type('application/json');
         res.send(JSON.stringify(ticket));
       }
@@ -1922,8 +1527,7 @@ module.exports = function (app, config, authenticator) {
     var sensuEventData = req.body.sensuEvent || '';
     var checkString = "Created Ticket from Monitoring Event:\n";
 
-    if (sensuEventData !== '')
-    {
+    if (sensuEventData !== '') {
       var eventJSON = decodeURI(sensuEventData);
       var sensuEvent = JSON.parse(eventJSON);
       checkString += "Check Output:\n--------------------------------------\n" + sensuEvent.output + "\n--------------------------------------\n";
@@ -1941,10 +1545,8 @@ module.exports = function (app, config, authenticator) {
     msgBody += app.locals.config.support.signatureTemplate;
 
     app.locals.crmModule.addPostToTicket(ticketID, subject, msgBody, visible, from, time_spent, function (err, response) {
-      if (err)
-      {
-        if (err.code === 'ETIMEDOUT')
-        {
+      if (err) {
+        if (err.code === 'ETIMEDOUT') {
           app.locals.logger.log('warn', 'Got timeout while trying to create support ticket');
           res.send(504);
         } else {
@@ -1974,7 +1576,7 @@ module.exports = function (app, config, authenticator) {
         var _ = require('underscore');
         adminList = _.values(adminList);
 
-        _.each(adminList, function(admin) {
+        _.each(adminList, function (admin) {
           if (admin.email === req.currentUser.email) {
             req.currentUser.adminID = admin.id;
           }
@@ -1992,11 +1594,10 @@ module.exports = function (app, config, authenticator) {
             var toList = [];
             var ccList = [];
             contactList = _.values(contactList);
-            _.each(contactList, function(contact) {
+            _.each(contactList, function (contact) {
               if (contact.access) {
                 var access = contact.access;
-                if (access['submit_new_ticket'] && access['submit_new_ticket'] === 'edit')
-                {
+                if (access['submit_new_ticket'] && access['submit_new_ticket'] === 'edit') {
                   toList.push(contact.email);
                 } else if (access['submit_new_ticket']) {
                   ccList.push(contact.email);
@@ -2006,10 +1607,8 @@ module.exports = function (app, config, authenticator) {
             req.body.ccList = ccList;
             req.body.toList = toList;
             createSupportTicket(req, res, function (err, response) {
-              if (err)
-              {
-                if (err.code === 'ETIMEDOUT')
-                {
+              if (err) {
+                if (err.code === 'ETIMEDOUT') {
                   app.locals.logger.log('warn', 'Got timeout while trying to create support ticket');
                   res.send(504);
                 } else {
@@ -2032,7 +1631,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  var createSupportTicket = function(req, res, callback) {
+  var createSupportTicket = function (req, res, callback) {
     var subject = req.body.subject;
     var recipient = req.body.recipient;
     var user_id = req.currentUser.adminID;
@@ -2047,8 +1646,7 @@ module.exports = function (app, config, authenticator) {
     var sensuEventData = req.body.sensuEvent || '';
     var checkString = '';
 
-    if (sensuEventData !== '')
-    {
+    if (sensuEventData !== '') {
       var eventJSON = decodeURI(sensuEventData);
       var sensuEvent = JSON.parse(eventJSON);
       checkString = "Created Ticket from Monitoring Event:\n";
@@ -2070,15 +1668,13 @@ module.exports = function (app, config, authenticator) {
   };
 
   app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
-      if (err)
-      {
+    app.locals.crmModule.getTicketPostsbyTicketID(req.params.ticketid, function (err, postsList) {
+      if (err) {
         res.send(500);
-      }  else {
+      } else {
         var _ = require('underscore');
         var posts = _.values(postsList);
-        for (var i=0; i<posts.length; i++)
-        {
+        for (var i = 0; i < posts.length; i++) {
           posts[i].timestamp = utils.getFormattedTimestamp(posts[i].timestamp);
         }
         res.type('application/json');
@@ -2089,13 +1685,12 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/global/devices/deviceid/:deviceid', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, uberDevice) {
-      if (error !== null)
-      {
+      if (error !== null) {
         app.locals.logger.log('error', 'Failed to retrieve device from Ubersmith', { deviceid: req.params.deviceid });
         res.send(404);
       } else {
         var async = require('async');
-        var hostname =  uberDevice.dev_desc + app.locals.config.mgmtDomain;
+        var hostname = uberDevice.dev_desc + app.locals.config.mgmtDomain;
         async.parallel([
           function (asyncCallback) {
             app.locals.puppetModule.getDevice(hostname, asyncCallback);
@@ -2103,13 +1698,11 @@ module.exports = function (app, config, authenticator) {
           function (asyncCallback) {
             app.locals.monModule.getDevice(hostname, asyncCallback);
           }
-        ], function(err, results) {
-          if (err)
-          {
+        ], function (err, results) {
+          if (err) {
             res.send(500);
           } else {
-            if (results && results.length === 2)
-            {
+            if (results && results.length === 2) {
               var puppetDevice = results[0];
               var sensuDevice = results[1];
               res.type('application/json');
@@ -2125,12 +1718,11 @@ module.exports = function (app, config, authenticator) {
 
   app.get('/api/v1/global/devices/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     var async = require('async');
-    var hostname =  req.params.hostname;
+    var hostname = req.params.hostname;
     async.parallel([
       function (asyncCallback) {
-        app.locals.crmModule.getDeviceByHostname(hostname, function (err, device){
-          if (err)
-          {
+        app.locals.crmModule.getDeviceByHostname(hostname, function (err, device) {
+          if (err) {
             asyncCallback(null, { error: 'No information is known about ' + hostname, device: {}});
           } else {
             asyncCallback(null, { device: device });
@@ -2138,9 +1730,8 @@ module.exports = function (app, config, authenticator) {
         });
       },
       function (asyncCallback) {
-        app.locals.puppetModule.getDevice(hostname, function (err, device){
-          if (err)
-          {
+        app.locals.puppetModule.getDevice(hostname, function (err, device) {
+          if (err) {
             asyncCallback(null, {});
           } else {
             asyncCallback(null, device);
@@ -2148,22 +1739,19 @@ module.exports = function (app, config, authenticator) {
         });
       },
       function (asyncCallback) {
-        app.locals.monModule.getDevice(hostname, function (err, device){
-          if (err)
-          {
+        app.locals.monModule.getDevice(hostname, function (err, device) {
+          if (err) {
             asyncCallback(null, {});
           } else {
             asyncCallback(null, device);
           }
         });
       }
-    ], function(err, results) {
-      if (err)
-      {
+    ], function (err, results) {
+      if (err) {
         res.send(500);
       } else {
-        if (results && results.length === 3)
-        {
+        if (results && results.length === 3) {
           var uberDevice = results[0];
           var puppetDevice = results[1];
           var sensuDevice = results[2];
