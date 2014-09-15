@@ -340,11 +340,14 @@ module.exports = function(app) {
 
   initializeRoles();
 
-  module.use = roleHandler.use;
-  module.can = roleHandler.can;
-  module.is = roleHandler.is;
-  module.userCan = roleHandler.userCan;
-  module.userIs = roleHandler.userIs;
+  //module.use = roleHandler.use;
+  //module.can = roleHandler.can;
+  //module.is = roleHandler.is;
+  //module.userCan = roleHandler.userCan;
+  //module.userIs = roleHandler.userIs;
+  //module.test = roleHandler.test;
+  //module.functionList = roleHandler.functionList;
+  //module.failureHandler = roleHandler.failureHandler;
   module.roleHandler = roleHandler;
   module.authorizeUserRoles = authorizeUserRoles;
   module.hasRequiredRoles = hasRequiredRoles;
@@ -362,5 +365,6 @@ module.exports = function(app) {
   module.registerRole = registerRole;
   module.authorizeRoles = authorizeRoles;
   module.saveConfig = saveConfig;
+
   return module;
 };

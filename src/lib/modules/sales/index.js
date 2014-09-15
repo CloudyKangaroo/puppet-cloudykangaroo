@@ -20,7 +20,7 @@ module.exports = function (app, config, authenticator) {
   authenticator.roleManager.registerDefaultAction(moduleName, 'view all accounts', 'View existing account and lead non-billing information', ['sales']);
   authenticator.roleManager.registerDefaultAction(moduleName, 'view dashboard', 'View existing account and lead non-billing information', ['sales']);
 
-  app.get('/sales', authenticator.roleManager.can('view dashboard'), function (req, res) {
+  app.get('/sales', authenticator.roleHandler.can('view dashboard'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
   res.send(500);
@@ -55,7 +55,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/sales/lead/new', authenticator.roleManager.can('submit new lead'), function (req, res) {
+  app.get('/sales/lead/new', authenticator.roleHandler.can('submit new lead'), function (req, res) {
     var renderParams = {
       user:req.currentUser,
       section: moduleName,
@@ -65,7 +65,7 @@ module.exports = function (app, config, authenticator) {
     res.render(__dirname + '/views/lead/new', renderParams);
   });
 
-  app.post('/sales/lead/new', authenticator.roleManager.can('submit new lead'), function (req, res) {
+  app.post('/sales/lead/new', authenticator.roleHandler.can('submit new lead'), function (req, res) {
 
     var first= req.body.firstname;
     var last= req.body.lastname;
@@ -88,7 +88,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/sales/accounts', authenticator.roleManager.can('view all accounts'), function (req, res) {
+  app.get('/sales/accounts', authenticator.roleHandler.can('view all accounts'), function (req, res) {
     app.locals.crmModule.getClientByKeyword('innovate', function (err, clients) {
       if (err) {
   res.send(500);
@@ -105,7 +105,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/sales/activity', authenticator.roleManager.can('submit activity'), function (req, res) {
+  app.get('/sales/activity', authenticator.roleHandler.can('submit activity'), function (req, res) {
     app.locals.crmModule.getLeads(function (err, leads) {
       if (err) {
   res.send(500);
@@ -122,7 +122,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.post('/sales/activity', authenticator.roleManager.can('submit activity'), function (req, res) {
+  app.post('/sales/activity', authenticator.roleHandler.can('submit activity'), function (req, res) {
     var commentJSON = JSON.stringify({ data: { formData: req.body, user: req.currentUser}});
     var lineSeperator = "\n";
     var fieldSeperator = "|";
@@ -146,14 +146,14 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/sales/lead', authenticator.roleManager.can('view all accounts'), function (req, res) {
+  app.get('/sales/lead', authenticator.roleHandler.can('view all accounts'), function (req, res) {
     res.render(__dirname + '/views/lead', { user:req.currentUser, section: moduleName, key: 'lead', navSections: req.navSections  });
   });
 
   /*
    This function is just bad, it's really really bad. I should feel bad, I do feel bad. I will rewrite it.
    */
-  app.get('/sales/activity/view', authenticator.roleManager.can('view all activity'), function (req, res) {
+  app.get('/sales/activity/view', authenticator.roleHandler.can('view all activity'), function (req, res) {
     app.locals.crmModule.getLeads(function (err, leads) {
       var async = require('async');
       var _ = require('underscore');
