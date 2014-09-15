@@ -1,0 +1,129 @@
+extends ../../layout
+block head
+  link(rel='stylesheet', href='/stylesheets/datepicker3.css')
+block content
+  .page-header
+    h1 Submit Lead Activity
+  .container
+    .row
+      .col-md-6
+	form(role="form", id="form", method="post").form.form-horizontal
+	  .form-group
+	    label.sr-only(for="leadSelector") Lead Selection
+	    .panel.panel-default
+	      .panel-heading Lead Selection
+	      .panel-body
+		select.form-control(id="leadSelector", name="leadSelector")
+		  each lead,id in leads
+		    option(value="#{lead.clientid}") #{lead.listed_company} - #{lead.full_name} - #{lead.clientid}
+
+	  .form-group
+	    .panel.panel-default
+	      .panel-heading Contact Method
+	      .panel-body
+		.radio
+		  label
+		    input(type="radio" name="contactMethod", id="contactMethod1", value="phone", checked="")
+		    |Phone
+		.radio
+		  label
+		    input(type="radio" name="contactMethod", id="contactMethod2", value="email")
+		    |Email
+		.radio
+		  label
+		    input(type="radio" name="contactMethod", id="contactMethod3", value="direct")
+		    |Direct Mail
+		.radio
+		  label
+		    input(type="radio" name="contactMethod", id="contactMethod4", value="other")
+		    |Other
+		label(for="contactMethodNotes") Contact Notes:
+		textarea.form-control(rows=3, id="contactMethodNotes", name="contactMethodNotes")
+	  .form-group
+	    .panel.panel-default
+	      .panel-heading Disposition
+	      .panel-body
+		label.sr-only(for="contactDisposition") Disposition
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition1", value="No_Answer", checked="")
+		    | No Answer
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition2", value="Hangup")
+		    | Hangup
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition3", value="Left_Message")
+		    | Left Message
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition4", value="Receptive")
+		    | Left Receptive
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition5", value="Annoyed")
+		    | Annoyed
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition6", value="Did_Not_Need_Service")
+		    | Did Not Need Service
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition7", value="Has Opportunity")
+		    | Has Opportunity
+		.radio
+		  label
+		    input(type="radio" name="contactDisposition", id="contactDisposition8", value="other")
+		    | Other
+		label(for="contactDispositionNotes") Disposition Notes:
+		textarea.form-control(rows=3, id="contactDispositionNotes", name="contactDispositionNotes")
+	  .form-group
+	    .panel.panel-default
+	      .panel-heading Next Step
+	      .panel-body
+		label.sr-only(for="contactFollowup") NextStep
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup1", value="Scheduled_Followup", checked="")
+		    | Scheduled Followup
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup2", value="Scheduled_Meeting")
+		    | Scheduled Meeting
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup3", value="Scheduled_DC_Tour")
+		    | Scheduled Data Center Tour
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup4", value="Send_Material")
+		    | Send Marketing Material
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup5", value="Quote")
+		    | Provide Quote
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup6", value="None")
+		    | None, Dead Lead
+		.radio
+		  label
+		    input(type="radio" name="contactFollowup", id="contactFollowup7", value="other")
+		    | Other
+		label(for="contactFollowupNotes") Next Step Notes:
+		textarea.form-control(rows=3, id="contactFollowupNotes", name="contactFollowupNotes")
+		label(for='followUpDate') Follow-Up Scheduled On:
+		.input-group.date(name="followUpDate", id="followUpDate")
+		  input.form-control(type="text", name="followupDate", id="followUpDate")
+		  span.input-group-addon
+		    i.glyphicon.glyphicon-th
+	    .form-group
+	      .panel.panel-default
+		.panel-heading Save Activity
+		.panel-body
+		  button.btn.btn-primary(type="submit") Submit
+block footer
+  script(src='/javascripts/datepicker/bootstrap-datepicker.js')
+  script(type="text/javascript").
+    $('#form .input-group.date').datepicker({});

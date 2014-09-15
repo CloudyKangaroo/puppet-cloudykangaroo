@@ -68,6 +68,11 @@ module.exports = function(grunt) {
         },
         src: ['test/**/*.js']
       }
+    },
+    execute: {
+        target: {
+            src: ['src/app.js']
+        }
     }
   });
   
@@ -78,8 +83,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-mocha-cov');
   grunt.loadNpmTasks('grunt-coveralls');
+  grunt.loadNpmTasks('grunt-execute');
 
   grunt.registerTask('hooks', 'githooks');
+  grunt.registerTask('run', ['env:development', 'execute']);
   grunt.registerTask('test', ['env:test', 'mochaTest', 'mochacov:test', 'jshint']);
   grunt.registerTask('report', ['mochacov:lcov', 'coveralls']);
   grunt.registerTask('default', ['env:development', 'mochaTest']);

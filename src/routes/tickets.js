@@ -1,14 +1,14 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
-  app.get('/tickets', authenticator.roleManager.can('view tickets'), function (req, res) {
+  app.get('/tickets', authenticator.roleHandler.can('view tickets'), function (req, res) {
     res.render('tickets',{ user: req.currentUser, section: 'tickets', key: 'dashboard', navSections: config.navSections });
   });
 
-  app.get('/tickets/list', authenticator.roleManager.can('view tickets'), function (req, res) {
+  app.get('/tickets/list', authenticator.roleHandler.can('view tickets'), function (req, res) {
     res.render('tickets/list',{ user: req.currentUser, section: 'helpdesk', key: 'list', navSections: config.navSections });
   });
 
-  app.get('/tickets/new', authenticator.roleManager.can('view tickets'), function (req, res) {
+  app.get('/tickets/new', authenticator.roleHandler.can('view tickets'), function (req, res) {
     var _ = require('underscore');
     app.locals.crmModule.getClients(function (err, clientList) {
       if (err) {
@@ -27,7 +27,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/tickets/ticketid/:ticketid', authenticator.roleManager.can('view tickets'), function (req, res) {
+  app.get('/tickets/ticketid/:ticketid', authenticator.roleHandler.can('view tickets'), function (req, res) {
     app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function (err, ticket) {
       if (err)
       {

@@ -1,7 +1,7 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
   
-  app.get('/monitoring', authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring', authenticator.roleHandler.can('view monitoring'), function (req, res) {
     app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
       if (!error) {
@@ -25,12 +25,11 @@ module.exports = function (app, config, authenticator) {
       } else {
         res.send(500);
         app.locals.logger.log('error', 'error processing request', { error: error});
-        app.locals.logger.trace(error);
       }
     });
   });
 
-  app.get('/monitoring/events', authenticator.roleManager.can('view monitoring events'), function (req, res) {
+  app.get('/monitoring/events', authenticator.roleHandler.can('view monitoring events'), function (req, res) {
     app.locals.monModule.getEvents(function(error, body) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
@@ -46,12 +45,11 @@ module.exports = function (app, config, authenticator) {
       } else {
         res.send(500);
         app.locals.logger.log('error', 'error processing request', { error: error});
-        app.locals.logger.trace(error);
       }
     });
   });
 
-  app.get('/monitoring/events/device/:hostname', authenticator.roleManager.can('view devices'), authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/events/device/:hostname', authenticator.roleHandler.can('view devices'), authenticator.roleHandler.can('view monitoring'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.monModule.getDeviceEvents(hostname, function(error, body) {
       if (!error) {
@@ -67,16 +65,15 @@ module.exports = function (app, config, authenticator) {
       } else {
         res.send(500);
         app.locals.logger.log('error', 'error processing request', { error: error});
-        app.locals.logger.trace(error);
       }
     });
   });
 
-  app.get('/monitoring/stashes',authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/stashes',authenticator.roleHandler.can('view monitoring'), function (req, res) {
     res.render('monitoring/stashes', {user:req.currentUser, section: 'monitoring', key:  'stashes', navSections: req.navSections });
   });
 
-  app.get('/monitoring/puppet',authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/puppet',authenticator.roleHandler.can('view monitoring'), function (req, res) {
     var hoursAgo = 10;
     var renderParams = {
       hoursAgo: hoursAgo,
@@ -88,7 +85,7 @@ module.exports = function (app, config, authenticator) {
     res.render('monitoring/puppet', renderParams);
   });
 
-  app.get('/monitoring/clients',authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/clients',authenticator.roleHandler.can('view monitoring'), function (req, res) {
     app.locals.monModule.getDevices(function (error, clients) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
@@ -103,12 +100,11 @@ module.exports = function (app, config, authenticator) {
       } else {
         res.send(500);
         app.locals.logger.log('error', 'error processing request', { error: error});
-        app.locals.logger.trace(error);
       }
     });
   });
 
-  app.get('/monitoring/list/clients',authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/list/clients',authenticator.roleHandler.can('view monitoring'), function (req, res) {
     app.locals.monModule.getDevices(function (error, clients) {
       if (!error) {
         app.locals.logger.log('debug', 'fetched data from Sensu');
@@ -123,12 +119,11 @@ module.exports = function (app, config, authenticator) {
         res.send(500);
         res.send(500);
         app.locals.logger.log('error', 'error processing request', { error: error});
-        app.locals.logger.trace(error);
       }
     });
   });
 
-  app.get('/monitoring/devices',authenticator.roleManager.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/devices',authenticator.roleHandler.can('view monitoring'), function (req, res) {
     res.render('monitoring/devices', {user:req.currentUser, section: 'monitoring', key:  'clients', navSections: req.navSections });
   });
 };

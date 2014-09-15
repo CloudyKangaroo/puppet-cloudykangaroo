@@ -161,6 +161,7 @@ module.exports = function(params) {
 
   module.addMenuContent = addMenuContent;
   module.addMenuItem = addMenuItem;
+
   module.handle = function(req, res, next) {
     buildMenu(req, next);
   };

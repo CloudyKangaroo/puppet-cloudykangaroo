@@ -201,6 +201,7 @@ module.exports = function(app, credentials, config, redisClient) {
         }
 
         return done(null, userprofile);
+
       });
     };
 
