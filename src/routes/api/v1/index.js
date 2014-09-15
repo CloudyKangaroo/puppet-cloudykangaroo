@@ -3,7 +3,7 @@ module.exports = function (app, config, authenticator) {
   "use strict";
   var utils = require('../../../lib/utils');
 
-  app.get('/api/v1/puppet/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/devices/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.puppetModule.getDevice(req.params.hostname, function (err, device) {
       if (err) {
         res.send(500);
@@ -15,7 +15,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/puppet/metrics/population', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/metrics/population', authenticator.roleHandler.can('use api'), function (req, res) {
 
     var request = require('request');
     var async = require('async');
@@ -96,7 +96,7 @@ module.exports = function (app, config, authenticator) {
     ], handleResults);
   });
 
-  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', authenticator.roleHandler.can('use api'), function (req, res) {
     var moment = require('moment');
     var hoursAgo = req.params.hours;
     var request = require('request');
@@ -117,7 +117,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/aggregate_event_counts/hours/:hours', authenticator.roleHandler.can('use api'), function (req, res) {
     var moment = require('moment');
     var hoursAgo = req.params.hours;
     var request = require('request');
@@ -143,7 +143,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/puppet/failures/hours/:hours', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/failures/hours/:hours', authenticator.roleHandler.can('use api'), function (req, res) {
     var moment = require('moment');
     var hoursAgo = req.params.hours;
     var request = require('request');
@@ -165,7 +165,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/puppet/devices/hostname/:hostname/facts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/devices/hostname/:hostname/facts', authenticator.roleHandler.can('use api'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.puppetModule.getDevice(hostname, function (err, device) {
       if (err) {
@@ -178,7 +178,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/puppet/catalog/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/puppet/catalog/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     var request = require('request');
     var hostname = req.params.hostname;
     var url = app.get('puppetdb_uri') + '/catalogs/' + hostname;
@@ -208,7 +208,7 @@ module.exports = function (app, config, authenticator) {
     }
   };
 
-  app.get('/api/v1/sensu/checks/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/checks/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     var _ = require('underscore');
     var request = require('request');
     var hostname = req.params.hostname;
@@ -251,7 +251,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sensu/events', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/events', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.monModule.getEvents(function(err, events) {
       if (err) {
         res.send(500);
@@ -262,7 +262,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sensu/events/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/events/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.monModule.getDeviceEvents(hostname, function (err, events) {
       if (err) {
@@ -275,7 +275,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sensu/events/filtered', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/events/filtered', authenticator.roleHandler.can('use api'), function (req, res) {
     var async = require('async');
 
     var getEvents = function(callback) {
@@ -399,7 +399,7 @@ module.exports = function (app, config, authenticator) {
     async.parallel(seriesObj, handleResults);
   });
 
-  app.get('/api/v1/sensu/events/device/:device', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/events/device/:device', authenticator.roleHandler.can('use api'), function (req, res) {
     var uri = '';
     app.locals.monModule.getDeviceEvents(req.params.device, function(error, body){
       if (!error) {
@@ -414,7 +414,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // GET STASHES THAT MATCH ^stash
-  app.get('/api/v1/sensu/stashes/:stash', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/stashes/:stash', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.monModule.getStashes(req.params.stash, function (err, response) {
       if (err) {
         res.send(500);
@@ -425,7 +425,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sensu/stashes', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/stashes', authenticator.roleHandler.can('use api'), function (req, res) {
     var _ = require('underscore');
     app.locals.monModule.getStashes('.*', function (err, response) {
       if (err) {
@@ -443,7 +443,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // SILENCE a CLIENT
-  app.post('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+  app.post('/api/v1/sensu/silence/client/:client', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.silenceClient(req.currentUser.username, req.params.client, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
@@ -455,7 +455,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // SILENCE a CHECK
-  app.post('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+  app.post('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.silenceCheck(req.currentUser.username, req.params.client, req.params.check, parseInt(req.body.expires), req.body.ticketID, function (err, response) {
       if (err) {
         res.send(500);
@@ -467,7 +467,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // DELETE a CLIENT
-  app.delete('/api/v1/sensu/delete/client/:client', authenticator.roleManager.can('delete monitoring events'), function (req, res) {
+  app.delete('/api/v1/sensu/delete/client/:client', authenticator.roleHandler.can('delete monitoring events'), function (req, res) {
     app.locals.monModule.deleteClient(req.params.client, function (err, response) {
       if (err) {
         res.send(500);
@@ -479,7 +479,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // DELETE an EVENT
-  app.delete('/api/v1/sensu/delete/client/:client/event/:event', authenticator.roleManager.can('delete monitoring events'), function (req, res) {
+  app.delete('/api/v1/sensu/delete/client/:client/event/:event', authenticator.roleHandler.can('delete monitoring events'), function (req, res) {
     app.locals.monModule.deleteEvent(req.params.client, req.params.event, function (err, response) {
       if (err) {
         res.send(500);
@@ -491,7 +491,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // GET SILENCED CLIENTS
-  app.get('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/silence/client/:client', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.monModule.getSilencedClient(req.params.client, function (error, response) {
       if(error){
         res.send(500);
@@ -503,7 +503,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // UNSILENCE A CLIENT
-  app.delete('/api/v1/sensu/silence/client/:client', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+  app.delete('/api/v1/sensu/silence/client/:client', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.unSilenceClient(req.params.client, function (error, response) {
       if(error){
         res.send(500);
@@ -515,7 +515,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // UNSILENCE A CHECK
-  app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+  app.delete('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     app.locals.monModule.unSilenceEvent(req.params.client, req.params.check, function (error, response) {
       if(error){
         res.send(500);
@@ -527,7 +527,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // GET SILENCED CHECKS
-  app.get('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/silence/client/:client/check/:check', authenticator.roleHandler.can('use api'), function (req, res) {
     var request = require('request');
     var path = 'silence/' + req.params.client + '/' + req.params.check;
     request({ url: app.get('sensu_uri') + '/stashes/' + path, json: true }, function (error, response) {
@@ -541,7 +541,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // GET A STASH
-  app.get('/api/v1/sensu/silence/:path', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/silence/:path', authenticator.roleHandler.can('use api'), function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }, function (error, response) {
       if(error){
@@ -554,7 +554,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // DELETE A STASH
-  app.del('/api/v1/sensu/silence/:path', authenticator.roleManager.can('silence monitoring events'), function (req, res) {
+  app.del('/api/v1/sensu/silence/:path', authenticator.roleHandler.can('silence monitoring events'), function (req, res) {
     var request = require('request');
     request({ method: "DELETE", url: app.get('sensu_uri') + '/stashes/' + req.params.path, json: true }, function (error, response) {
       if(error){
@@ -568,7 +568,7 @@ module.exports = function (app, config, authenticator) {
 
 
   // GET ALL STASHES
-  app.get('/api/v1/sensu/silence', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/silence', authenticator.roleHandler.can('use api'), function (req, res) {
     var request = require('request');
     request({ url: app.get('sensu_uri') + '/stashes', json: true }, function (error, response) {
       if(error){
@@ -581,7 +581,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // GET ALL DEVICES
-  app.get('/api/v1/sensu/devices', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/devices', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
       if (deviceHostnames === null)
       {
@@ -615,7 +615,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sensu/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/devices/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.monModule.getDevice(req.params.hostname, function (err, device) {
       if (err) {
         res.send(500);
@@ -626,7 +626,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sensu/devices/hostname/:hostname/events', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sensu/devices/hostname/:hostname/events', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.monModule.getDevice(req.params.hostname, function (err, device) {
       if (err) {
         res.send(500);
@@ -637,7 +637,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/devices/devgroupid/:devgroupid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/devgroupid/:devgroupid', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesbyTypeGroupID(req.params.devgroupid, function (err, deviceList){
       if (deviceList === null)
       {
@@ -654,7 +654,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/devices/devgroups', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/devgroups', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceTypeList(function (err, deviceGroupList){
       if (deviceGroupList === null)
       {
@@ -674,7 +674,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/devices/hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceHostnames(function (err, deviceHostnames){
       if (deviceHostnames === null)
       {
@@ -689,7 +689,7 @@ module.exports = function (app, config, authenticator) {
   });
 
 
-  app.get('/api/v1/helpdesk/devices/deviceid/:deviceid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/deviceid/:deviceid/tickets', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketsbyDeviceID(req.params.deviceid, function (err, ticketList){
       if (err)
       {
@@ -708,7 +708,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/devices/rack/:rack', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/rack/:rack', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesByRack(req.params.rack, function (error, device) {
       if (error !== null)
       {
@@ -725,7 +725,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByHostname(req.params.hostname, function (error, device) {
       if (error !== null)
       {
@@ -742,7 +742,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/devices/deviceid/:deviceid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/devices/deviceid/:deviceid', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, device) {
       if (error !== null)
       {
@@ -759,7 +759,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/contacts/search', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/contacts/search', authenticator.roleHandler.can('use api'), function (req, res) {
     var results = [];
     var query = req.query.q;
     app.locals.logger.log('debug', 'Search Query', {query: query});
@@ -769,7 +769,7 @@ module.exports = function (app, config, authenticator) {
     res.send(results);
   });
 
-  app.get('/api/v1/sales/leads', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sales/leads', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getLeads(function(err, leadList) {
       if (err)
       {
@@ -783,7 +783,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/clients', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/sales/clients', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getAllClients(function (err, clients) {
       if (err) {
         res.send(500);
@@ -823,7 +823,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
         res.send(500);
@@ -834,7 +834,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
         res.send(500);
@@ -851,7 +851,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     var type = function (type) {
       return { type: type };
     };
@@ -1123,7 +1123,7 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     var elasticsearch = require('elasticsearch');
     var client = new elasticsearch.Client({
       host: 'localhost:9200',
@@ -1173,7 +1173,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     var query = {
       "query": {
         "filtered" : {
@@ -1279,7 +1279,7 @@ module.exports = function (app, config, authenticator) {
     return html;
   };
 
-  app.get('/api/v1/crm/metadata/fieldhtml/leads', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/crm/metadata/fieldhtml/leads', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
       if (err)
       {
@@ -1313,7 +1313,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/crm/metadata/fields/lead', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/crm/metadata/fields/lead', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getMetadataFields('client', function(err, metadata) {
       if (err)
       {
@@ -1334,7 +1334,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/crm/metadata/group/:group', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/crm/metadata/group/:group', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getMetadataGroup(req.params.group, function(err, metadata) {
       if (err)
       {
@@ -1346,7 +1346,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/crm/metadata/fields/:group', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/crm/metadata/fields/:group', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getMetadataFields(req.params.group, function(err, metadata) {
       if (err)
       {
@@ -1358,7 +1358,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/events', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/events', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getEventList(function(err, eventList) {
       if (err)
       {
@@ -1372,7 +1372,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
   res.send(500);
@@ -1383,7 +1383,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
   res.send(500);
@@ -1400,7 +1400,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/mapping/:type', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     var type = function (type) {
       return { type: type };
     };
@@ -1674,7 +1674,7 @@ module.exports = function (app, config, authenticator) {
     });
   };
 
-  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/populateES', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     var elasticsearch = require('elasticsearch');
     var client = new elasticsearch.Client({
       host: 'localhost:9200',
@@ -1724,7 +1724,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleManager.can('view pipeline'), function(req, res) {
+  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function(req, res) {
     var query = {
       "query": {
   "filtered" : {
@@ -1797,7 +1797,7 @@ module.exports = function (app, config, authenticator) {
  */
 
 
-  app.get('/api/v1/helpdesk/events', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/events', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getEventList(function(err, eventList) {
       if (err)
       {
@@ -1811,7 +1811,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/clients', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getClients(function(err, clientList) {
       if (err)
       {
@@ -1825,7 +1825,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/clients/clientid/:clientid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid', authenticator.roleHandler.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
     app.locals.crmModule.getClientByID(clientID, function(err, client) {
       if (err) {
@@ -1837,7 +1837,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/clients/clientid/:clientid/contacts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid/contacts', authenticator.roleHandler.can('use api'), function (req, res) {
     var clientID = req.params.clientid;
     app.locals.crmModule.getContactsbyClientID(clientID, function(err, contactList) {
       if (err) {
@@ -1851,7 +1851,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/clients/clientid/:clientid/devices', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid/devices', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDevicesbyClientID(req.params.clientid, function(err, devicelist) {
       if (err) {
         res.send(500);
@@ -1864,7 +1864,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/clients/clientid/:clientid/tickets', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/clients/clientid/:clientid/tickets', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketsbyClientID(req.params.clientid, function(err, ticketList) {
       if (err)
       {
@@ -1883,7 +1883,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/api/methods', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/api/methods', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getAPIMethods(function(err, client) {
       if (err) {
         res.send(500);
@@ -1894,7 +1894,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/tickets', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/tickets', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getTickets(function(err, ticketList) {
       if (err)
       {
@@ -1913,7 +1913,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketbyTicketID(req.params.ticketid, function(err, ticket) {
       if (err)
       {
@@ -1925,7 +1925,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.post('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.post('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleHandler.can('use api'), function (req, res) {
     var ticketID = req.params.ticketid;
     var subject = req.body.subject;
     var visible = req.body.comment || 0;
@@ -1976,7 +1976,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.post('/api/v1/helpdesk/tickets/ticket', authenticator.roleManager.can('use api'), function (req, res) {
+  app.post('/api/v1/helpdesk/tickets/ticket', authenticator.roleHandler.can('use api'), function (req, res) {
     var clientID = req.body.clientID;
 
     app.locals.crmModule.getAdminByEmail(req.currentUser.email, function (err, adminList) {
@@ -2082,7 +2082,7 @@ module.exports = function (app, config, authenticator) {
     app.locals.crmModule.createNewTicket(msgBody, subject, recipient, user_id, author, ccList, toList, priority, clientID, contactID, deviceID, callback);
   };
 
-  app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/helpdesk/tickets/ticketid/:ticketid/posts', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getTicketPostsbyTicketID(req.params.ticketid, function(err, postsList) {
       if (err)
       {
@@ -2100,7 +2100,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/global/devices/deviceid/:deviceid', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/global/devices/deviceid/:deviceid', authenticator.roleHandler.can('use api'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, uberDevice) {
       if (error !== null)
       {
@@ -2136,7 +2136,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/global/devices/hostname/:hostname', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/global/devices/hostname/:hostname', authenticator.roleHandler.can('use api'), function (req, res) {
     var async = require('async');
     var hostname =  req.params.hostname;
     async.parallel([

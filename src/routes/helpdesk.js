@@ -1,7 +1,7 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
 
-  app.get('/helpdesk', authenticator.roleManager.can('view helpdesk'), function (req, res) {
+  app.get('/helpdesk', authenticator.roleHandler.can('view helpdesk'), function (req, res) {
     var ticketLow = 0;
     var ticketNormal = 0;
     var ticketHigh = 0;
@@ -25,12 +25,12 @@ module.exports = function (app, config, authenticator) {
     res.render('helpdesk', renderParams);
   });
 
-  app.get('/helpdesk/tickets',  authenticator.roleManager.can('view helpdesk tickets'), function (req, res) {
+  app.get('/helpdesk/tickets',  authenticator.roleHandler.can('view helpdesk tickets'), function (req, res) {
     res.redirect('/tickets');
   });
 
   // Device Browser
-  app.get('/helpdesk/devices',  authenticator.roleManager.can('view helpdesk devices'), function (req, res) {
+  app.get('/helpdesk/devices',  authenticator.roleHandler.can('view helpdesk devices'), function (req, res) {
     app.locals.crmModule.getDeviceTypeList(function(err, deviceTypeList) {
       if (err) {
         res.send(500);
@@ -48,7 +48,7 @@ module.exports = function (app, config, authenticator) {
   });
 
   // Used to view a single device
-  app.get('/helpdesk/devices/deviceid/:deviceid',  authenticator.roleManager.can('view helpdesk device detail'), function (req, res) {
+  app.get('/helpdesk/devices/deviceid/:deviceid',  authenticator.roleHandler.can('view helpdesk device detail'), function (req, res) {
     app.locals.crmModule.getDeviceByID(req.params.deviceid, function (error, uberDevice) {
       if (!uberDevice)
       {
@@ -168,7 +168,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/helpdesk/devices/hostname/:hostname',  authenticator.roleManager.can('view helpdesk device detail'), function (req, res) {
+  app.get('/helpdesk/devices/hostname/:hostname',  authenticator.roleHandler.can('view helpdesk device detail'), function (req, res) {
     app.locals.crmModule.getDeviceByHostname(req.params.hostname, function (error, uberDevice) {
       if (!uberDevice)
       {
@@ -180,11 +180,11 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/helpdesk/clients', authenticator.roleManager.can('view helpdesk clients'), function (req, res) {
+  app.get('/helpdesk/clients', authenticator.roleHandler.can('view helpdesk clients'), function (req, res) {
     res.render('helpdesk/clients', { user:req.currentUser, section: 'helpdesk', key: 'clients', navSections: req.navSections  });
   });
 
-  app.get('/helpdesk/clients/clientid/:clientid', authenticator.roleManager.can('view helpdesk client detail'), function (req, res) {
+  app.get('/helpdesk/clients/clientid/:clientid', authenticator.roleHandler.can('view helpdesk client detail'), function (req, res) {
     var async = require('async');
     async.parallel([
       function(callback){

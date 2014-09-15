@@ -53,7 +53,7 @@
     "connect-flash": ">=0.0.x",
     "connect-redis": "1.5.x",
     "connect-requestid": "1.1.x",
-    "connect-roles": "~3.0.2",
+    "connect-roles": "~3.0.3",
     "contegix-logger": "0.1.x",
     "express": "3.5.x",
     "express-request-logger": "0.0.x",
