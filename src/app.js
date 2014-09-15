@@ -210,12 +210,11 @@ app.use(flash());
 
 var authenticator = require('./lib/auth')(app, credentials, config, redisClient);
 var oauth2 = require('./lib/oauth2')(app, config, authenticator);
-var roleManager = require('./lib/roleManager')(app, config.roles);
+var roleManager = require('./lib/roleManager')(app);
 var roleHandler = roleManager.roleHandler;
 authenticator.oauth2 = oauth2;
 authenticator.roleManager = roleManager;
 authenticator.roleHandler = roleHandler;
-
 
 if (process.env.NODE_ENV === 'test') {
   app.use(authenticator.mockPassport.initialize(userPropertyConfig));
@@ -223,11 +222,18 @@ if (process.env.NODE_ENV === 'test') {
   app.use(authenticator.passport.initialize(userPropertyConfig));
 }
 
+console.log('begin auth/access middleware')
 app.use(authenticator.passport.session());
+
+console.log('rolehandler start')
 app.use(roleHandler.middleware());
+console.log('authenticator');
 app.use(authenticator);
+console.log('oauth2');
 app.use(oauth2);
+console.log('rolemanager');
 app.use(roleManager);
+console.log('menus');
 app.use(menus);
 
 /*
