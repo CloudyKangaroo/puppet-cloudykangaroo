@@ -23,43 +23,44 @@ module.exports = function (app, config, authenticator) {
   app.get('/sales', authenticator.roleHandler.can('view dashboard'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
-  res.send(500);
+        res.send(500);
       } else {
-  var stages = {};
-  var stageItems = pipeline.stats.stages;
-  for (var stageID in stageItems) {
-    if (stageItems.hasOwnProperty(stageID)) {
-      var stageItemOpen = lib.retrieveStageItem(stageItems[stageID], '1') || {sum: 0, values: []};
-      var stageItemWon = lib.retrieveStageItem(stageItems[stageID], '2') || {sum: 0, values: []};
-      var stageItemLost = lib.retrieveStageItem(stageItems[stageID], '4') || {sum: 0, values: []};
-      var accounting = require('accounting');
-      accounting.settings.currency.precision = "0";
-      stages[stageID] = {};
-      stages[stageID].open = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
-      stages[stageID].won = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
-      stages[stageID].lost = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
-    }
-  }
-  var renderParams = {
-    user:req.currentUser,
-    section: moduleName,
-    key:  'dashboard',
-    metadata: pipeline.metadata,
-    pipeline: pipeline.pipeline,
-    summary: pipeline.summarizedStats,
-    stages: stages,
-    navSections: req.navSections
-  };
-  res.render('sales', renderParams);
+        var stages = {};
+        var stageItems = pipeline.stats.stages;
+        for (var stageID in stageItems) {
+          if (stageItems.hasOwnProperty(stageID)) {
+            var stageItemOpen = lib.retrieveStageItem(stageItems[stageID], '1') || {sum: 0, values: []};
+            var stageItemWon = lib.retrieveStageItem(stageItems[stageID], '2') || {sum: 0, values: []};
+            var stageItemLost = lib.retrieveStageItem(stageItems[stageID], '4') || {sum: 0, values: []};
+            var accounting = require('accounting');
+            accounting.settings.currency.precision = "0";
+            stages[stageID] = {};
+            stages[stageID].open = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
+            stages[stageID].won = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
+            stages[stageID].lost = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
+          }
+        }
+        var renderParams = {
+          user: req.currentUser,
+          section: moduleName,
+          key: 'dashboard',
+          metadata: pipeline.metadata,
+          pipeline: pipeline.pipeline,
+          summary: pipeline.summarizedStats,
+          stages: stages,
+          navSections: req.navSections
+        };
+        res.render('sales', renderParams);
+>>>>>>> handled dynamically loading auhtorizations, fixed tests
       }
     });
   });
 
   app.get('/sales/lead/new', authenticator.roleHandler.can('submit new lead'), function (req, res) {
     var renderParams = {
-      user:req.currentUser,
+      user: req.currentUser,
       section: moduleName,
-      key:  'newlead',
+      key: 'newlead',
       navSections: req.navSections
     };
     res.render(__dirname + '/views/lead/new', renderParams);
@@ -67,23 +68,23 @@ module.exports = function (app, config, authenticator) {
 
   app.post('/sales/lead/new', authenticator.roleHandler.can('submit new lead'), function (req, res) {
 
-    var first= req.body.firstname;
-    var last= req.body.lastname;
+    var first = req.body.firstname;
+    var last = req.body.lastname;
     var company = req.body.company;
-    var email= req.body.email;
-    var phone= req.body.phone;
-    var address1= req.body.address1;
-    var address2= req.body.address2;
-    var city= req.body.city;
-    var state= req.body.state;
-    var zip= req.body.zip;
-    var country= req.body.country;
+    var email = req.body.email;
+    var phone = req.body.phone;
+    var address1 = req.body.address1;
+    var address2 = req.body.address2;
+    var city = req.body.city;
+    var state = req.body.state;
+    var zip = req.body.zip;
+    var country = req.body.country;
 
     app.locals.crmModule.submitNewLead(first, last, company, email, address1 + "\n" + address2, city, state, zip, country, phone, function (err, data) {
       if (err) {
-  res.send(500);
+        res.send(500);
       } else {
-  res.redirect('/helpdesk/clients/clientid/' + data.data);
+        res.redirect('/helpdesk/clients/clientid/' + data.data);
       }
     });
   });
@@ -91,16 +92,16 @@ module.exports = function (app, config, authenticator) {
   app.get('/sales/accounts', authenticator.roleHandler.can('view all accounts'), function (req, res) {
     app.locals.crmModule.getClientByKeyword('innovate', function (err, clients) {
       if (err) {
-  res.send(500);
+        res.send(500);
       } else {
-  var renderParams = {
-    user:req.currentUser,
-    section: moduleName,
-    key:  'activity',
-    clients: clients,
-    navSections: req.navSections
-  };
-  res.render(__dirname + '/views/accounts', renderParams);
+        var renderParams = {
+          user: req.currentUser,
+          section: moduleName,
+          key: 'activity',
+          clients: clients,
+          navSections: req.navSections
+        };
+        res.render(__dirname + '/views/accounts', renderParams);
       }
     });
   });
@@ -108,16 +109,16 @@ module.exports = function (app, config, authenticator) {
   app.get('/sales/activity', authenticator.roleHandler.can('submit activity'), function (req, res) {
     app.locals.crmModule.getLeads(function (err, leads) {
       if (err) {
-  res.send(500);
+        res.send(500);
       } else {
-  var renderParams = {
-    user:req.currentUser,
-    section: moduleName,
-    key:  'activity',
-    leads: leads,
-    navSections: req.navSections
-  };
-  res.render(__dirname + '/views/activity', renderParams);
+        var renderParams = {
+          user: req.currentUser,
+          section: moduleName,
+          key: 'activity',
+          leads: leads,
+          navSections: req.navSections
+        };
+        res.render(__dirname + '/views/activity', renderParams);
       }
     });
   });
@@ -136,18 +137,18 @@ module.exports = function (app, config, authenticator) {
       "Followup Notes   " + fieldSeperator + "   " + req.body.contactFollowupNotes + "   " + fieldSeperator + lineSeperator +
       "Followup Date   " + fieldSeperator + "   " + req.body.followupDate + "   " + fieldSeperator + lineSeperator;
 
-    app.locals.crmModule.submitComment('client', req.body.leadSelector, commentData, req.currentUser.username, commentJSON, function(err) {
+    app.locals.crmModule.submitComment('client', req.body.leadSelector, commentData, req.currentUser.username, commentJSON, function (err) {
       if (err) {
-  res.send(500);
+        res.send(500);
       } else {
-  app.locals.leadActivity.push(commentJSON);
-  res.redirect('/sales/activity/view');
+        app.locals.leadActivity.push(commentJSON);
+        res.redirect('/sales/activity/view');
       }
     });
   });
 
   app.get('/sales/lead', authenticator.roleHandler.can('view all accounts'), function (req, res) {
-    res.render(__dirname + '/views/lead', { user:req.currentUser, section: moduleName, key: 'lead', navSections: req.navSections  });
+    res.render(__dirname + '/views/lead', { user: req.currentUser, section: moduleName, key: 'lead', navSections: req.navSections  });
   });
 
   /*
@@ -158,59 +159,59 @@ module.exports = function (app, config, authenticator) {
       var async = require('async');
       var _ = require('underscore');
       async.map(_.values(leads), function (lead, callback) {
-  app.locals.crmModule.getClientComments(lead.clientid, callback);
-      }, function(err, leadComments) {
-  if (err) {
-    res.send(500);
-  } else {
-    async.concat(_.values(leadComments), function(leadComment, callback) {
-      var commentIDList = [];
-      for(var j=0; j<leadComment.length; j++) {
-        var comment = leadComment[j];
-        if (comment.comment.substring(0,3) === '###') {
-    commentIDList.push(comment.comment_id);
-        }
-      }
-      callback(null, commentIDList);
-    }, function (err, commentIDList) {
-      async.map(commentIDList, function(commentID, callback) {
-        app.locals.crmModule.getCommentAttachments(commentID, callback);
-      }, function(err, attachmentListing) {
+        app.locals.crmModule.getClientComments(lead.clientid, callback);
+      }, function (err, leadComments) {
         if (err) {
-    res.send(500);
+          res.send(500);
         } else {
-    async.map(attachmentListing, function(attachmentObjectList, callback) {
-      callback(null, _.values(attachmentObjectList));
-    }, function(err, attachmentObjects) {
-      if (err) {
-        res.send(500);
-      } else {
-        async.concat(attachmentObjects, function(attachmentObject, callback) {
-          callback(null, attachmentObject);
-        }, function(err, attachmentObjects) {
-          async.map(attachmentObjects, function(attachmentItem, callback) {
-      app.locals.crmModule.getAttachment(attachmentItem.attach_id, callback);
-          }, function (err, attachments) {
-      if (err) {
-        res.send(500);
-      } else {
-        var renderParams = {
-          user:req.currentUser,
-          section: moduleName,
-          key:  'activityview',
-          activities: attachments,
-          navSections: req.navSections
-        };
-        res.render(__dirname + '/views/activity/view', renderParams);
-      }
+          async.concat(_.values(leadComments), function (leadComment, callback) {
+            var commentIDList = [];
+            for (var j = 0; j < leadComment.length; j++) {
+              var comment = leadComment[j];
+              if (comment.comment.substring(0, 3) === '###') {
+                commentIDList.push(comment.comment_id);
+              }
+            }
+            callback(null, commentIDList);
+          }, function (err, commentIDList) {
+            async.map(commentIDList, function (commentID, callback) {
+              app.locals.crmModule.getCommentAttachments(commentID, callback);
+            }, function (err, attachmentListing) {
+              if (err) {
+                res.send(500);
+              } else {
+                async.map(attachmentListing, function (attachmentObjectList, callback) {
+                  callback(null, _.values(attachmentObjectList));
+                }, function (err, attachmentObjects) {
+                  if (err) {
+                    res.send(500);
+                  } else {
+                    async.concat(attachmentObjects, function (attachmentObject, callback) {
+                      callback(null, attachmentObject);
+                    }, function (err, attachmentObjects) {
+                      async.map(attachmentObjects, function (attachmentItem, callback) {
+                        app.locals.crmModule.getAttachment(attachmentItem.attach_id, callback);
+                      }, function (err, attachments) {
+                        if (err) {
+                          res.send(500);
+                        } else {
+                          var renderParams = {
+                            user: req.currentUser,
+                            section: moduleName,
+                            key: 'activityview',
+                            activities: attachments,
+                            navSections: req.navSections
+                          };
+                          res.render(__dirname + '/views/activity/view', renderParams);
+                        }
+                      });
+                    });
+                  }
+                });
+              }
+            });
           });
-        });
-      }
-    });
         }
-      });
-    });
-  }
       });
     });
   });
