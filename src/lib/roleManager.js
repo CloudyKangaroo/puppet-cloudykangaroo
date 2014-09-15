@@ -1,36 +1,41 @@
-module.exports = function(app) {
+module.exports = function (app) {
   "use strict";
   var ConnectRoles = require('connect-roles');
   var defaultRoles = { users: { name: 'users', description: 'default group, no access', groups: [], users: []}};
   var nconf = require('nconf');
   var fs = require('fs');
 
-  nconf.env().argv();
+  if (app.locals.roles) {
+    nconf.defaults({
+      'roles': app.locals.roles
+    });
+    nconf.set('roles', app.locals.roles);
+  } else {
+    // Check for a config file or the default location.
+    var configPath = nconf.get('conf') || app.get('base_config_dir') + '/roleManagerConfig.json';
 
-// Check for a config file or the default location.
-  var configPath = nconf.get('conf') || app.get('base_config_dir') + '/roleManagerConfig.json';
+    if (configPath) {
+      nconf.file({file: configPath});
+    }
 
-  if (configPath) {
-    nconf.file({file: configPath});
+    nconf.defaults({
+      'roles': defaultRoles
+    });
   }
-
-  nconf.defaults({
-    'roles': defaultRoles
-  });
 
   var roles = nconf.get('roles');
 
-  var registerDefaultAction = function(module, action, description, defaultRoles) {
+  var registerDefaultAction = function (module, action, description, defaultRoles) {
     var roles = defaultRoles || ['super'];
     app.locals.logger.log('info', 'registered action: "' + action + '" for module "' + module + '" allowing ' + JSON.stringify(roles) + ' to access: "' + description + '"', {module: module, action: action, roles: roles, description: description});
     registerAction(module, action, description);
     authorizeRoles(action, roles);
   };
 
-  var registerAction = function(module, action, description) {
+  var registerAction = function (module, action, description) {
     app.locals.logger.log('info', 'registered action: "' + action + '" for module "' + module, {module: module, action: action});
     nconf.set('actions:' + action, {module: module, action: action, description: description});
-    saveConfig(function() {});
+    //saveConfig(function() {});
   };
 
   var registerRole = function (name, description, groups, users) {
@@ -44,37 +49,37 @@ module.exports = function(app) {
       users = [];
     }
     nconf.set('roles:' + name, { name: name, description: description, groups: groups, users: users});
-    saveConfig(function () {});
+    //saveConfig(function () {});
   };
 
   var authorizeRoles = function (action, roles) {
     nconf.set('authorizations:' + action, roles);
-    saveConfig(function (err, results) {
-      if (err) {
-  app.locals.logger.log('error', 'error', { err: JSON.stringify(err)});
-      } else {
-  app.locals.logger.log('debug', 'saved', {results: JSON.stringify(results)});
-      }
-    });
+    /*saveConfig(function (err, results) {
+     if (err) {
+     app.locals.logger.log('error', 'error', { err: JSON.stringify(err)});
+     } else {
+     app.locals.logger.log('debug', 'saved', {results: JSON.stringify(results)});
+     }
+     });*/
   };
 
   var saveConfig = function (done) {
     nconf.save(function (err) {
       if (err) {
-  done(err);
-      } else {
-  try {
-    fs.readFile(configPath, function (err, configJSON) {
-      if (err) {
         done(err);
       } else {
-        var config = JSON.parse(configJSON);
-        done(null, config);
-      }
-    });
-  } catch (ex) {
-    done(ex);
-  }
+        try {
+          fs.readFile(configPath, function (err, configJSON) {
+            if (err) {
+              done(err);
+            } else {
+              var config = JSON.parse(configJSON);
+              done(null, config);
+            }
+          });
+        } catch (ex) {
+          done(ex);
+        }
       }
     });
   };
@@ -126,7 +131,7 @@ module.exports = function(app) {
     var _ = require('underscore');
     var roleGroups = role.groups;
 
-    for (var i=0; i<userGroups.length; i++) {
+    for (var i = 0; i < userGroups.length; i++) {
       var userGroup = userGroups[i];
 
       app.locals.logger.log('silly', 'hasRoleGroups: checking userGroup', { roleGroups: roleGroups, userGroup: userGroup});
@@ -151,26 +156,26 @@ module.exports = function(app) {
   };
 
   /* Placeholder for When I make this Async */
-  var cachedUserRoles = function(user, requiredRoles, join) {
+  var cachedUserRoles = function (user, requiredRoles, join) {
     return authorizeUserRoles(user, requiredRoles, join);
   };
 
   var authorizeUserRoles = function (user, requiredRoles, join) {
     var accessGranted = false;
-    app.locals.logger.log('silly', 'authorizeUserRoles: checking user', {user: user, requiredRoles:  requiredRoles});
-    for (var i=0; i<requiredRoles.length;i++) {
+    app.locals.logger.log('silly', 'authorizeUserRoles: checking user', {user: user, requiredRoles: requiredRoles});
+    for (var i = 0; i < requiredRoles.length; i++) {
       var roleName = requiredRoles[i];
       if (roles.hasOwnProperty(roleName)) {
         var role = roles[roleName];
         var roleGranted = hasAccess(user, role);
         if (roleGranted === true && join === 'OR') {
-          app.locals.logger.log('silly', 'returning true role granted with join OR', {roleName: roleName, username:user.username, roleGroups: role.groups, roleUser: role.users});
+          app.locals.logger.log('silly', 'returning true role granted with join OR', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUser: role.users});
           return true;
         } else if (roleGranted === true && join === 'AND') {
-          app.locals.logger.log('silly', 'returning true, role granted', {roleName: roleName, username:user.username, roleGroups: role.groups, roleUser: role.users});
+          app.locals.logger.log('silly', 'returning true, role granted', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUser: role.users});
           accessGranted = true;
         } else if (roleGranted === false && join === 'AND') {
-          app.locals.logger.log('silly', 'returning false role not granted with join AND', {roleName: roleName, username:user.username, roleGroups: role.groups, roleUser: role.users});
+          app.locals.logger.log('silly', 'returning false role not granted with join AND', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUser: role.users});
           return false;
         }
       } else {
@@ -182,7 +187,7 @@ module.exports = function(app) {
     return accessGranted;
   };
 
-  var hasRequiredRoles = function(user, requiredRoles, join) {
+  var hasRequiredRoles = function (user, requiredRoles, join) {
     if (arguments.length <= 1) {
       requiredRoles = ['users'];
     }
@@ -212,14 +217,14 @@ module.exports = function(app) {
     return accessGranted;
   };
 
-  var getCachedRoles = function(user, getCachedRolesCallback) {
+  var getCachedRoles = function (user, getCachedRolesCallback) {
     /*
-    memoryCache.wrap('roleManager::getCachedRoles::' + user.username, function (cb) {
-      getRoles(user, cb);
-    }, function (err, userRoles) {
-      getCachedRolesCallback(err, userRoles);
-    });
-    */
+     memoryCache.wrap('roleManager::getCachedRoles::' + user.username, function (cb) {
+     getRoles(user, cb);
+     }, function (err, userRoles) {
+     getCachedRolesCallback(err, userRoles);
+     });
+     */
     getRoles(user, getCachedRolesCallback);
   };
 
@@ -240,10 +245,16 @@ module.exports = function(app) {
 
   var handle = function (req, res, next) {
     if (req.hasOwnProperty('currentUser')) {
-      getCachedRoles(req.currentUser, function (err, userRoles) {
-        req.currentUser.roles = userRoles;
+      if (process.env.NODE_ENV === 'test') {
+        var _ = require('underscore');
+        req.currentUser.roles = _.keys(roles);
         next();
-      });
+      } else {
+        getCachedRoles(req.currentUser, function (err, userRoles) {
+          req.currentUser.roles = userRoles;
+          next();
+        });
+      }
     } else {
       app.locals.logger.log('debug', 'no roles added, no user');
       next();
@@ -289,6 +300,22 @@ module.exports = function(app) {
   registerDefaultAction('internal', 'use api', 'Minimal API Access Level', ['users']);
   registerDefaultAction('internal', 'view devices', 'Ability to view customer equipment information', ['helpdesk']);
 
+  roleHandler.use('guest', function (req) {
+    return isGuest(req);
+  });
+
+  roleHandler.use('user', function (req) {
+    return isUsers(req);
+  });
+
+  roleHandler.use('view devices', function (req) {
+    return isHelpdesk(req);
+  });
+
+  roleHandler.use('use api', function (req) {
+    return isUsers(req);
+  });
+
   roleHandler.use('view pipeline', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
@@ -308,11 +335,10 @@ module.exports = function(app) {
   });
   roleHandler.use('issue credit', isSuper);
 
-  roleHandler.use('view pipeline detail', function(req) {
+  roleHandler.use('view pipeline detail', function (req) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
-
-  roleHandler.use('view monitoring events',  function (req) {
+  roleHandler.use('view monitoring events', function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
   roleHandler.use('view helpdesk tickets', function (req) {

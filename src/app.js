@@ -190,9 +190,10 @@ app.set('port', config.http.port || 3000);
 app.set('views', path.join(__dirname, 'views'));
 /*jslint nomen: false*/
 app.set('view engine', 'jade');
+/*jslint nomen: true*/
 app.set('base_config_dir', __dirname + '/config');
 app.set('base_lib_dir', __dirname + '/lib');
-
+/*jslint nomen: false*/
 app.set('sensu_uri', config.sensu.uri);
 app.set('puppetdb_uri', config.puppetdb.uri);
 app.use(express.bodyParser());
@@ -237,18 +238,12 @@ if (process.env.NODE_ENV === 'test') {
   app.use(authenticator.passport.initialize(userPropertyConfig));
 }
 
-console.log('begin auth/access middleware')
 app.use(authenticator.passport.session());
 
-console.log('rolehandler start')
 app.use(roleHandler.middleware());
-console.log('authenticator');
 app.use(authenticator);
-console.log('oauth2');
 app.use(oauth2);
-console.log('rolemanager');
 app.use(roleManager);
-console.log('menus');
 app.use(menus);
 
 /*
