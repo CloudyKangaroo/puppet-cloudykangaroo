@@ -200,13 +200,13 @@ module.exports = function(app) {
 
     if (user) {
       accessGranted = cachedUserRoles(user, requiredRoles, join);
-      app.locals.logger.log('debug', 'returning ' + accessGranted, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'returning ' + accessGranted, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
     } else if (_.contains(requiredRoles, 'guest')) {
       accessGranted = true;
-      app.locals.logger.log('debug', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
     } else {
       accessGranted = false;
-      app.locals.logger.log('debug', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
     }
 
     return accessGranted;
