@@ -54,7 +54,7 @@
     "connect-redis": "1.5.x",
     "connect-requestid": "1.1.x",
     "connect-roles": "~3.0.3",
-    "contegix-logger": "0.1.x",
+    "contegix-logger": "0.1.7",
     "express": "3.5.x",
     "express-request-logger": "0.0.x",
     "express-session": "1.0.x",
