@@ -314,3 +314,56 @@ var syntaxHighlight = function(json) {
     return '<span class="' + cls + '">' + match + '</span>';
   });
 };
+
+// This function exists to bridge differences in event schemas between sensu 0.12 and 0.13.
+// It should detect which schema is in use in the event that is passed and select the field appropriately.
+var eventField = function(field, event_data) {
+  "use strict";
+  if (typeof event_data === 'undefined') {
+    return null;
+  }
+  switch(field) {
+    case 'status':
+      if ('status' in event_data) {
+        return event_data['status'];
+      } else if ('status' in event_data['check']) {
+        return event_data['check']['status'];
+      }
+      break;
+    case 'client':
+      if ('client' in event_data && typeof event_data['client'] === 'string') {
+        return event_data['client'];
+      } else if ('name' in event_data['client']) {
+        return event_data['client']['name'];
+      }
+      break;
+    case 'check':
+      if ('check' in event_data && typeof event_data['check'] === 'string') {
+        return event_data['check'];
+      } else if ('name' in event_data['check']) {
+        return event_data['check']['name'];
+      }
+      break;
+    case 'issued':
+      if ('issued' in event_data) {
+        return event_data['issued'];
+      } else if ('issued' in event_data['check']) {
+        return event_data['check']['issued'];
+      }
+      break;
+    case 'occurrences':
+      if ('occurrences' in event_data) {
+        return event_data['occurrences'];
+      } else if ('occurrences' in event_data['check']) {
+        return event_data['check']['occurrences'];
+      }
+      break;
+    case 'output':
+      if ('output' in event_data) {
+        return event_data['output'];
+      } else if ('output' in event_data['check']) {
+        return event_data['check']['output'];
+      }
+      break;
+  }
+}
