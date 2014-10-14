@@ -283,8 +283,16 @@ block footer
             display = true;
           }
 
-          if ((display == true) && show != 'All' && (typeof(row.check_parameters) != "undefined")) {
-            if (row.check_parameters.occurrences <= row.occurrences) {
+          // Fix for misspelling introduced in contegix-sensu-0.13.1-3
+          var check_parameters;
+          if ('check_parameters' in row) {
+            check_parameters = row.check_parameters;
+          } else if ('check_paramters' in row) {
+            check_parameters = row.check_paramters;
+          } 
+
+          if ((display == true) && show != 'All' && (typeof(check_parameters) != "undefined")) {
+            if (check_parameters.occurrences <= eventField('occurrences', row)) {
               display = true;
             } else {
               display = false;
