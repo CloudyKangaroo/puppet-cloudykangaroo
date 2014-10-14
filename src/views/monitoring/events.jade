@@ -43,7 +43,6 @@ block content
             th Issued
             th Client
             th Check
-            th Flapping
             th Count
             th User
             th Silenced At
@@ -132,7 +131,7 @@ block footer
       oTable = $('#table_events').dataTable( {
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndedFull ) {
           jQuery('td:eq(0)', nRow).parent('tr').addClass('datatable-row');
-          switch (aData['status']) {
+          switch (eventField('status', aData)) {
             case 2:
               jQuery('td:eq(0)', nRow).parent('tr').addClass('danger');
               break;
@@ -156,11 +155,11 @@ block footer
         "bSortClasses": false,
         "aoColumns": [
           {
-            "mData": "status",
+            "mData": null,
             "sWidth": "70px",
             "mRender": function (status, type, row) {
               var text;
-              switch(status) {
+              switch(eventField('status', row)) {
                 case 2:
                   text = "Critical"
                   break;
@@ -174,15 +173,19 @@ block footer
                   text = "Unknown"
                   break;
               }
-              return graphButton(row['client'], row['check'], graphConfig) + text
+              return graphButton(eventField('client', row), eventField('check', row), graphConfig) + text;
             },
           }, {
-            "mData": "issued",
-            "sWidth": "80px"
+            "mData": null,
+            "sWidth": "80px",
+            "mRender": function (issued, type, row) {
+              return moment.utc(parseInt(eventField('issued', row)) * 1000).local();
+            }
           }, {
-            "mData": "client",
-            "sWidth": "140px",
+            "mData": null,
+            "sWidth": "200px",
             "mRender": function (client, type, row) {
+              var client = eventField('client', row);
               var text = client.replace('#{config.mgmtDomain}', '');
               if (#{userCan('silence monitoring events')}) {
                 return renderButton(row['silenced'], row['silence_stash'], client, 'false') + '<a href="/helpdesk/devices/deviceid/'+row['dev'] + '">' + text + '</a>';
@@ -191,22 +194,24 @@ block footer
               }
             }
           }, {
-            "mData": "check",
+            "mData": null,
             "mData": "client",
             "sWidth": "220px",
             "mRender": function(client, type, row) {
+              var check = eventField('check', row);
+              var client = eventField('client', row);
               if (#{userCan('silence monitoring events')}) {
-                return renderButton(row['silenced'], row['silence_stash'], row['client'], row['check']) + row['check'];
+                return renderButton(row['silenced'], row['silence_stash'], client, check) + check;
               } else {
-                return row['check'];
+                return check;
               }
             },
           }, {
-            "mData": "flapping",
-            "sWidth": "40px"
-          }, {
-            "mData": "occurrences",
-            "sWidth": "40px"
+            "mData": null,
+            "sWidth": "40px",
+            "mRender": function(occurrences, type, row) {
+              return eventField('occurrences', row);
+            }
           }, {
             "mData": "silence_contents",
             "mRender": function(contents, type, row) {
@@ -239,8 +244,9 @@ block footer
               }
             }
           }, {
-            "mData": "output",
+            "mData": null,
             "mRender": function (output, type, row) {
+              var output = eventField('output', row);
               var dispOutput = output.slice(0,75).replace(/["']/g, "");
               if (#{userCan('silence monitoring events')}) {
                 var dispOutput = output.slice(0,75).replace(/["']/g, "");
@@ -305,9 +311,10 @@ block footer
         showSilenceColumns = true;
       }
 
+      oTable.fnSetColumnVis(5, showSilenceColumns);
       oTable.fnSetColumnVis(6, showSilenceColumns);
       oTable.fnSetColumnVis(7, showSilenceColumns);
-      oTable.fnSetColumnVis(8, showSilenceColumns);
+      oTable.fnSetColumnVis(8, true);
     }
 
     var setRenderedTime = function() {

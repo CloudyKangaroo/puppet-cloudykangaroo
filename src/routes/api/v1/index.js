@@ -328,8 +328,21 @@ module.exports = function (app, config, authenticator) {
     };
 
     var handleEvent = function(event, done) {
-      var client = event.client;
-      var check = event.check;
+      // Assign client and check from either Sensu 0.12.x or 0.13.x event schema
+      var client;
+      var check;
+      if ('client' in event && typeof event['client'] === 'string') {
+        client = event.client;
+      } else if ('name' in event['client']) {
+        client = event.client.name;
+      }
+
+      if ('check' in event && typeof event['check'] === 'string') {
+        check = event.check;
+      } else if ('name' in event['check']) {
+        check = event.check.name;
+      }
+
       var stashContentKey = '';
 
       if (stashedHashes[client]) {
