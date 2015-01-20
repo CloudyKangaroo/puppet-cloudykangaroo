@@ -16,7 +16,6 @@ module.exports = function (config, logger, crmModule, redisClient) {
             var events = [];
             _.each(body, function(event) {
               _.defaults(event, deviceHostnames[event.client]);
-              event.issued = utils.getFormattedTimestamp(event.issued);
               events.push(event);
             });
             logger.log('debug', 'fetched data from Sensu', { uri: config.sensu.uri + '/events'});
