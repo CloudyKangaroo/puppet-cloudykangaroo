@@ -4,9 +4,10 @@ process.env.REDIS_CLASS="fakeredis"
 process.env.CREDS_CLASS="./config/system-dev-credentials"
 process.env.MGMT_DOMAIN=".unittest.us"
 process.env.MON_CLASS="./lib/mockMonitoring"
+process.env.INST_CLASS="./lib/instrumentation"
 process.env.CRM_CLASS="cloudy-localsmith"
 process.env.USE_NOCK=true
-//process.env.PORT=3001
+process.env.PORT=3001
 
 var app = require('../src/app');
 var request = require('supertest');

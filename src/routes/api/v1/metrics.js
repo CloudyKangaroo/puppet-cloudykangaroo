@@ -9,7 +9,6 @@ module.exports = function (app, config, authenticator) {
       if (err) {
         res.send(500);
       } else {
-        console.log(metricUID);
         app.locals.instModule.getMetric(metricUID.uid, function (err, metricObj) {
           var resBody = JSON.stringify(metricObj);
           res.type('application/json');
@@ -46,7 +45,6 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.put('/api/v1/metrics/uid/:uid', function (req, res) {
-    console.log(req.body);
     var metricMetaData = req.body; //TODO: validate the input dude
     app.locals.instModule.setMetricMetadata(req.params.uid, metricMetaData, function (err, metricObj) {
       console.log(metricObj);
@@ -57,10 +55,8 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.post('/api/v1/metrics/uid/:uid', function (req, res) {
-    console.log(req.body);
     var metricMetaData = req.body; //TODO: validate the input dude
     app.locals.instModule.setMetricMetadata(req.params.uid, metricMetaData, function (err, metricObj) {
-      console.log(metricObj);
       var resBody = JSON.stringify(metricObj);
       res.type('application/json');
       res.send(resBody);

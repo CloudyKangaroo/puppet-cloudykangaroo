@@ -1,4 +1,4 @@
-/* jshint undef: true, devel: true, unused: false, browser: true, node: false */
+/* jshint undef: true, devel: true, unused: false, browser: true, node: false, unused: false, sub: false */
 /*global $:false */
 /*global bootbox:false */
 /*global prettyPrintOne:false */
@@ -324,45 +324,45 @@ var eventField = function(field, event_data) {
   switch(field) {
     case 'status':
       if ('status' in event_data) {
-        return event_data['status'];
-      } else if ('status' in event_data['check']) {
-        return event_data['check']['status'];
+        return event_data.status;
+      } else if ('status' in event_data.check) {
+        return event_data.check.status;
       }
       break;
     case 'client':
-      if ('client' in event_data && typeof event_data['client'] === 'string') {
-        return event_data['client'];
-      } else if ('name' in event_data['client']) {
-        return event_data['client']['name'];
+      if ('client' in event_data && typeof event_data.client === 'string') {
+        return event_data.client;
+      } else if ('name' in event_data.client) {
+        return event_data.client.name;
       }
       break;
     case 'check':
-      if ('check' in event_data && typeof event_data['check'] === 'string') {
-        return event_data['check'];
-      } else if ('name' in event_data['check']) {
-        return event_data['check']['name'];
+      if ('check' in event_data && typeof event_data.check === 'string') {
+        return event_data.check;
+      } else if ('name' in event_data.check) {
+        return event_data.check.name;
       }
       break;
     case 'issued':
       if ('issued' in event_data) {
-        return event_data['issued'];
-      } else if ('issued' in event_data['check']) {
-        return event_data['check']['issued'];
+        return event_data.issued;
+      } else if ('issued' in event_data.check) {
+        return event_data.check.issued;
       }
       break;
     case 'occurrences':
       if ('occurrences' in event_data) {
-        return event_data['occurrences'];
-      } else if ('occurrences' in event_data['check']) {
-        return event_data['check']['occurrences'];
+        return event_data.occurrences;
+      } else if ('occurrences' in event_data.check) {
+        return event_data.check.occurrences;
       }
       break;
     case 'output':
       if ('output' in event_data) {
-        return event_data['output'];
-      } else if ('output' in event_data['check']) {
-        return event_data['check']['output'];
+        return event_data.output;
+      } else if ('output' in event_data.check) {
+        return event_data.check.output;
       }
       break;
   }
-}
+};

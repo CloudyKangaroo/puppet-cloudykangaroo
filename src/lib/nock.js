@@ -9,9 +9,26 @@ module.exports = function(config) {
 
   nock.disableNetConnect();
   nock.enableNetConnect('127.0.0.1');
-  nock.enableNetConnect('localhost:4242');
+//  nock.enableNetConnect('localhost:4242');
 
   var options = {allowUnmocked: true};
+
+  nock('http://' + config.metrics.host + ':' + config.metrics.port)
+    .get('/api/uid/uidmeta?uid=00000122&type=metric')
+    .reply(200, "{\"uid\":\"00000122\",\"type\":\"METRIC\",\"name\":\"os.sys.cpu\",\"description\":\"\",\"notes\":\"\",\"created\":0,\"custom\":null,\"displayName\":\"\"}", { 'content-type': 'application/json; charset=UTF-8',
+      'content-length': '125' });
+
+  nock('http://' + config.metrics.host + ':' + config.metrics.port)
+    .get('/api/uid/uidmeta?uid=undefined&type=metric')
+    .reply(200, "{\"uid\":\"00000122\",\"type\":\"METRIC\",\"name\":\"os.sys.cpu\",\"description\":\"\",\"notes\":\"\",\"created\":0,\"custom\":null,\"displayName\":\"\"}", { 'content-type': 'application/json; charset=UTF-8',
+      'content-length': '125' });
+
+  nock('http://' + config.metrics.host + ':' + config.metrics.port)
+    .get('/api/uid/assign?metric=os.sys.cpu')
+    .reply(200, "{\"metric\":{\"os.sys.cpu\":\"00000122\"}}", { 'content-type': 'application/json;charset=utf-8',
+      'content-length': '168',
+      connection: 'keep-alive',
+      server: 'thin 1.5.0 codename Knife' });
 
   nock('http://' + config.sensu.host + ':' + config.sensu.port, options)
     .get('/info')

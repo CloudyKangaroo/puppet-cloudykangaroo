@@ -47,6 +47,8 @@ config.production.log.level = 'hide';
 config.production.log.screen = 'debug';
 
 config.metrics.interval = 15000;
+config.metrics.host = '127.0.0.1'
+config.metrics.port = '4242'
 
 config.sensu.host = process.env.SENSU_HOST || 'localhost';
 config.sensu.port = process.env.SENSU_PORT || 4567;

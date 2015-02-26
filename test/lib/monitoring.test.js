@@ -25,6 +25,12 @@ config.sensu.host = 'localhost';
 config.sensu.port = 4567;
 config.sensu.uri = 'http://' + config.sensu.host + ':' + config.sensu.port;
 
+
+config.metrics = {};
+config.metrics.host = '127.0.0.1';
+config.metrics.port = 4242;
+config.metrics.uri = 'http://' + config.metrics.host + ':' + config.metrics.port;
+
 config.puppetdb = {};
 config.puppetdb.host = 'localhost';
 config.puppetdb.port = 8080;

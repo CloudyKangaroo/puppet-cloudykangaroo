@@ -38,7 +38,6 @@ module.exports = function(config, logger) {
       if (error) {
         callback(error);
       } else {
-        console.log(response);
         logger.log('verbose', 'response from puppet', {body: response.body, url: url});
         callback(null, response.body);
       }
