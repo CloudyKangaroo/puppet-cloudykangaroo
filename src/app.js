@@ -131,6 +131,20 @@ try {
   throw e;
 }
 
+/* Load the instrumentation module */
+try {
+  if (config.instModule && config.instModule.class) {
+    instModule = require(config.instModule.class)(config, logger, crmModule, redisClient);
+  } else {
+    var err = new Error('no instModule specified in configuration');
+    throw err;
+  }
+
+} catch (e) {
+  logger.log('error', 'Could not initialize Instrumentation Module', { error: e.message});
+  throw e;
+}
+
 /* Load the puppet module */
 try {
   var puppetModule = require('./lib/puppet')(config, logger, redisClient);
@@ -160,6 +174,7 @@ app.locals.config = config;
 app.locals.logger = logger;
 app.locals.crmModule = crmModule;
 app.locals.monModule = monModule;
+app.locals.instModule = instModule;
 app.locals.appMetrics = appMetrics;
 app.locals.puppetModule = puppetModule;
 app.locals.title = 'Cloudy Kangaroo';
