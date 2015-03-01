@@ -23,6 +23,9 @@ config.crmModule.ticketingHost = 'localhost';
 config.crmModule.ticketingPath = '/ticketing/ticket_view.php?ticket=';
 config.crmModule.class = process.env.CRM_CLASS || 'cloudy-localsmith';
 
+config.instModule = {};
+config.instModule.class = process.env.INST_CLASS || './lib/instrumentation';
+
 config.monModule = {};
 config.monModule.class = process.env.MON_CLASS || './lib/monitoring';
 
@@ -44,6 +47,8 @@ config.production.log.level = 'hide';
 config.production.log.screen = 'debug';
 
 config.metrics.interval = 15000;
+config.metrics.host = '127.0.0.1'
+config.metrics.port = '4242'
 
 config.sensu.host = process.env.SENSU_HOST || 'localhost';
 config.sensu.port = process.env.SENSU_PORT || 4567;

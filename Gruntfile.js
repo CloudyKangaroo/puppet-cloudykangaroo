@@ -24,6 +24,7 @@ module.exports = function(grunt) {
         CREDS_CLASS: './config/system-dev-credentials',
         CRM_CLASS: 'cloudy-localsmith',
         MON_CLASS: './lib/mockMonitoring',
+        INST_CLASS: './lib/insturmentation',
         REDIS_CLASS: 'fakeredis'
       },
       development : {
@@ -33,6 +34,7 @@ module.exports = function(grunt) {
         CREDS_CLASS: './config/system-dev-credentials',
         CRM_CLASS: 'cloudy-localsmith',
         MON_CLASS: './lib/mockMonitoring',
+        INST_CLASS: './lib/instrumentation',
         REDIS_CLASS: 'fakeredis'
       }
     },
