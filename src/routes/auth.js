@@ -9,7 +9,7 @@ module.exports = function (app, config, authenticator) {
     if (req.currentUser && req.currentUser.username) {
       username = req.currentUser.username;
     }
-    return { username: username, requestID: req.id, sessionID: req.sessionID };
+    return { username: username, requestID: req.id, sessionID: req.CloudySessionID };
   };
 
   app.get('/oauth2/login', authenticator.oauth2.login);

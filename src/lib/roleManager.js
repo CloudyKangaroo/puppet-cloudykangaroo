@@ -1,7 +1,7 @@
 module.exports = function (app) {
   "use strict";
   var ConnectRoles = require('connect-roles');
-  var defaultRoles = { users: { name: 'users', description: 'default group, no access', groups: [], users: []}};
+  var defaultRoles = { users: { name: 'users', description: 'default group, no access', groups: ['users'], users: []}};
   var nconf = require('nconf');
   var fs = require('fs');
 
@@ -188,6 +188,8 @@ module.exports = function (app) {
   };
 
   var hasRequiredRoles = function (user, requiredRoles, join) {
+    app.locals.logger.log('debug', 'Authorization Request', {requiredRoles: requiredRoles, username: user});
+
     if (arguments.length <= 1) {
       requiredRoles = ['users'];
     }
@@ -202,16 +204,23 @@ module.exports = function (app) {
 
     var accessGranted = false;
     var _ = require('underscore');
+    var message = '';
 
     if (user) {
       accessGranted = cachedUserRoles(user, requiredRoles, join);
-      app.locals.logger.log('audit', 'returning ' + accessGranted, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
+      if (accessGranted === true) {
+        message = 'Authorization Granted';
+      } else {
+        message = 'Authorization Denied'
+      }
+      app.locals.logger.log('audit', message, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
+
     } else if (_.contains(requiredRoles, 'guest')) {
       accessGranted = true;
-      app.locals.logger.log('audit', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'Authorization Granted', {requiredRoles: requiredRoles, accessGranted: accessGranted});
     } else {
       accessGranted = false;
-      app.locals.logger.log('audit', 'returning ' + accessGranted, {requiredRoles: requiredRoles, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'Authorization Denied', {requiredRoles: requiredRoles, accessGranted: accessGranted});
     }
 
     return accessGranted;

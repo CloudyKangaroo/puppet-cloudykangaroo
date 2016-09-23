@@ -39,13 +39,13 @@ config.test.log.screen = 'hide';
 
 config.development.log.directory = process.env.LOG_DIR || process.cwd();
 config.development.log.accessLog = process.env.ACCESS_LOG || config.development.log.directory + '/access.log';
-config.development.log.level = 'hide';
-config.development.log.screen = 'debug';
+config.development.log.level = process.env.LOG_LEVEL || 'hide';
+config.development.log.screen = process.env.LOG_LEVEL_SCREEN || 'debug';
 
 config.production.log.directory = process.env.LOG_DIR || '/var/log/cloudykangaroo';
 config.production.log.accessLog = process.env.ACCESS_LOG || config.production.log.directory + '/access.log';
-config.production.log.level = 'hide';
-config.production.log.screen = 'debug';
+config.production.log.level = process.env.LOG_LEVEL || 'hide';
+config.production.log.screen = process.env.LOG_LEVEL_SCREEN || 'debug';
 
 config.metrics.interval = 15000;
 config.metrics.host = '127.0.0.1'

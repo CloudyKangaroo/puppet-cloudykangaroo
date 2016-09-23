@@ -127,11 +127,12 @@ module.exports = function(app, credentials, config, redisClient) {
    * @param done
    */
   var authenticateUserLocally = function(username, password, done) {
+    app.locals.logger.log('debug', 'Authentication Request', {username: username});
     db.users.findByUsername(username, function(err, user) {
-      if (err) { return done(err); }
-      if (!user) { return done(null, false, { message: 'Unknown user ' + username }); }
-      if (user.password !== password) { return done(null, false, { message: 'Invalid password' }); }
-      return done(null, user);
+      if (err) { app.locals.logger.log('audit', 'Failed to Authenticate', {username: username}); return done(err); }
+      if (!user) {  app.locals.logger.log('audit', 'Unknown User', {username: username}); return done(null, false, { message: 'Unknown user ' + username }); }
+      if (user.password !== password) { app.locals.logger.log('audit', 'Invalid Password', {username: username});  return done(null, false, { message: 'Invalid password' }); }
+      app.locals.logger.log('audit', 'Authenticated User', {username: username}); return done(null, user);
     });
   };
 
