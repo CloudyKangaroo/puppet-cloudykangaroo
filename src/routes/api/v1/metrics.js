@@ -3,7 +3,7 @@ module.exports = function (app, config, authenticator) {
   "use strict";
   var utils = require('../../../lib/utils');
 
-  app.get('/api/v1/metrics/metric/:metric', authenticator.roleManager.can('use api'), function (req, res) {
+  app.get('/api/v1/metrics/metric/:metric', authenticator.roleHandler.can('use api'), function (req, res) {
     //TODO: validate the input dude
     app.locals.instModule.getMetricUID(req.params.metric, function (err, metricUID) {
       if (err) {

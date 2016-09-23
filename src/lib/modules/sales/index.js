@@ -51,7 +51,6 @@ module.exports = function (app, config, authenticator) {
           navSections: req.navSections
         };
         res.render('sales', renderParams);
->>>>>>> handled dynamically loading auhtorizations, fixed tests
       }
     });
   });

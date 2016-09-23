@@ -1271,17 +1271,10 @@ module.exports = function (app, config, authenticator) {
   app.get('/api/v1/sales/pipeline', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
-<<<<<<< HEAD
-  res.send(500);
-      } else {
-  res.type('application/json');
-  res.send(JSON.stringify(pipeline));
-=======
         res.send(500);
       } else {
         res.type('application/json');
         res.send(JSON.stringify(pipeline));
->>>>>>> handled dynamically loading auhtorizations, fixed tests
       }
     });
   });
@@ -1289,18 +1282,6 @@ module.exports = function (app, config, authenticator) {
   app.get('/api/v1/sales/pipeline/index/:index', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
-<<<<<<< HEAD
-  res.send(500);
-      } else {
-  var elasticsearch_index = '';
-  for (var x=0;x<pipeline.pipeline.length;x++) {
-    var opportunity = pipeline.pipeline[x];
-    elasticsearch_index += '{ "create": { "index": "' + req.params.index + '", "type":"opportunity", "id":"' + opportunity.opportunity_id + '" }}\n';
-    elasticsearch_index += JSON.stringify(opportunity) + '\n';
-  }
-  res.type('text/plain');
-  res.send(elasticsearch_index);
-=======
         res.send(500);
       } else {
         var elasticsearch_index = '';
@@ -1311,7 +1292,6 @@ module.exports = function (app, config, authenticator) {
         }
         res.type('text/plain');
         res.send(elasticsearch_index);
->>>>>>> handled dynamically loading auhtorizations, fixed tests
       }
     });
   });
@@ -1323,33 +1303,6 @@ module.exports = function (app, config, authenticator) {
 
     if (req.params.type === 'opportunity') {
       var opportunity = {
-<<<<<<< HEAD
-  'opportunity': {
-    'properties': {
-      'opportunity_id': type('integer'),
-      'client_id': type('integer'),
-      'contact_id': type('integer'),
-      'ts': type('long'),
-      'activity' : type('long'),
-      'status' : type('integer'),
-      'opportunity_type_id' : type('integer'),
-      'opportunity_stage_id' : type('integer'),
-      'owner' : type('integer'),
-      'owner_name' : type('string'),
-      'closure_ts' : { 'type' : 'long'},
-      'closure_pct' : type('float'),
-      'price_min' : type('float'),
-      'price_max' : type('float'),
-      'value' : type('float'),
-      'last_action' : type('string'),
-      'next_step' : type('string'),
-      'description' : type('string'),
-      'listed_company' : type('string'),
-      'stage' : type('string'),
-      'type' : type('string')
-    }
-  }
-=======
         'opportunity': {
           'properties': {
             'opportunity_id': type('integer'),
@@ -1375,7 +1328,6 @@ module.exports = function (app, config, authenticator) {
             'type': type('string')
           }
         }
->>>>>>> handled dynamically loading auhtorizations, fixed tests
       };
       res.type('application/json');
       res.send(JSON.stringify(opportunity));
@@ -1384,7 +1336,6 @@ module.exports = function (app, config, authenticator) {
     }
   });
 
-<<<<<<< HEAD
   var createOpportunityIndex = function(client, index, callback) {
     client.indices.exists({index: index}, function (err, response, status) {
       if (err) {
@@ -1669,33 +1620,6 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function(req, res) {
-    var query = {
-      "query": {
-  "filtered" : {
-    "query" : {
-      "match_all" : {}
-    },
-    "filter" : {
-      "range" : {
-        "status": { "from" : 1, "to": 1 }
-      }
-    }
-  }
-      },
-      "aggs" : {
-  "stages" : {
-    "terms" : {
-      "field" : "opportunity_stage_id"
-    },
-    "aggs" : {
-      "total_value" : { "sum": { "field" : "value" }},
-      "avg_value" : { "avg": { "field": "value" }}
-    }
-  },
-  "total_value" : { "sum": { "field" : "value" }},
-  "avg_value" : { "avg": { "field": "value" }}
-=======
   app.get('/api/v1/sales/pipeline/opportunity', authenticator.roleHandler.can('view pipeline'), function (req, res) {
     var query = {
       "query": {
@@ -1722,7 +1646,6 @@ module.exports = function (app, config, authenticator) {
         },
         "total_value": { "sum": { "field": "value" }},
         "avg_value": { "avg": { "field": "value" }}
->>>>>>> handled dynamically loading auhtorizations, fixed tests
       }
     };
 
@@ -1739,49 +1662,6 @@ module.exports = function (app, config, authenticator) {
 
     client.search(searchParams, function (err, response, status) {
       if (err) {
-<<<<<<< HEAD
-  res.send(500);
-      } else if (status !== 200) {
-  res.send(status);
-      } else {
-  res.type('application/json');
-  res.send(response.aggregations.stages.buckets);
-      }
-    });
-  });
-/*
- {
- "query": {
- "filtered" : {
- "query" : {
- "match_all" : {}
- },
- "filter" : {
- "range" : {
- "status": { "from" : 1, "to": 1}}
- }
- }
- },
- "aggs" : {
- "stages" : { "terms" : { "field" : "stage" }},
- "total_value" : { "sum": { "field" : "value" }},
- "avg_value" : { "avg": { "field": "value" }}
- }
- }
- */
-
-
-  app.get('/api/v1/helpdesk/events', authenticator.roleHandler.can('use api'), function (req, res) {
-    app.locals.crmModule.getEventList(function(err, eventList) {
-      if (err)
-      {
-  res.send(500);
-      } else {
-  var _ = require('underscore');
-  var events = _.values(eventList);
-  res.type('application/json');
-  res.send(JSON.stringify({aaData: events}));
-=======
         res.send(500);
       } else if (status !== 200) {
         res.send(status);
@@ -1822,7 +1702,6 @@ module.exports = function (app, config, authenticator) {
         var events = _.values(eventList);
         res.type('application/json');
         res.send(JSON.stringify({aaData: events}));
->>>>>>> handled dynamically loading auhtorizations, fixed tests
       }
     });
   });
