@@ -13,7 +13,7 @@ module.exports = function (app) {
       name: 'super',
       description: 'super user role',
       groups: ['super'],
-      users: ['jcreasy']
+      users: []
     }
   };
 
@@ -227,9 +227,9 @@ module.exports = function (app) {
       accessGranted = cachedUserRoles(user, requiredRoles, join);
       if (accessGranted === true) {
         message = 'Authorization Granted';
-      } else if (cachedUserRoles(user, 'super'), join) {
-        accessGranted = true;
-        message = 'Granted with SUPER role';
+      //} else if (cachedUserRoles(user, 'super'), join) {
+      //  accessGranted = true;
+      //  message = 'Granted with SUPER role';
       } else {
         message = 'Authorization Denied'
       }
@@ -337,10 +337,6 @@ module.exports = function (app) {
     return isUsers(req);
   });
 
-  roleHandler.use('view devices', function (req) {
-    return isHelpdesk(req);
-  });
-
   roleHandler.use('use api', function (req) {
     return isUsers(req);
   });
@@ -368,6 +364,9 @@ module.exports = function (app) {
     return isSales(req) || isAdmin(req) || isSuper(req);
   });
   roleHandler.use('view monitoring events', function (req) {
+    return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
+  });
+  roleHandler.use('view devices', function (req) {
     return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
   roleHandler.use('view helpdesk tickets', function (req) {
