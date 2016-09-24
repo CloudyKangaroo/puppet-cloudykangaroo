@@ -231,7 +231,7 @@ module.exports = function (app) {
       //  accessGranted = true;
       //  message = 'Granted with SUPER role';
       } else {
-        message = 'Authorization Denied'
+        message = 'Authorization Denied';
       }
       app.locals.logger.log('audit', message, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
     } else if (_.contains(requiredRoles, 'guest')) {

@@ -1,3 +1,4 @@
+//noinspection JSUnresolvedVariable
 module.exports = function (app, config, authenticator) {
   "use strict";
   app.get('/tickets', authenticator.roleHandler.can('view tickets'), function (req, res) {

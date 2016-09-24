@@ -13,16 +13,19 @@ module.exports = function (app, config, authenticator) {
   var retrieveStageItem = function(stageItem, statusID) {
     if (stageItem.hasOwnProperty(statusID)) {
       if (stageItem[statusID].hasOwnProperty('stats')) {
-  return stageItem[statusID].stats;
+        return stageItem[statusID].stats;
       } else {
-  return null;
+        return null;
+      }
+    }
+  };
 
   app.get('/sales', authenticator.roleManager.can('view accounts'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
       if (err) {
         res.send(500);
       } else {
-			  var stages = {};
+        var stages = {};
         var stageItems = pipeline.stats.stages;
         for (var stageID in stageItems) {
           if (stageItems.hasOwnProperty(stageID)) {
@@ -32,23 +35,23 @@ module.exports = function (app, config, authenticator) {
             var accounting = require('accounting');
             accounting.settings.currency.precision = "0";
             stages[stageID] = {};
-            stages[stageID]['open'] = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
-            stages[stageID]['won'] = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
-            stages[stageID]['lost'] = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
+            stages[stageID].open = {sum: accounting.formatMoney(stageItemOpen.sum), count: stageItemOpen.values.length};
+            stages[stageID].won = {sum: accounting.formatMoney(stageItemWon.sum), count: stageItemWon.values.length};
+            stages[stageID].lost = {sum: accounting.formatMoney(stageItemLost.sum), count: stageItemLost.values.length};
           }
         }
 
-				var renderParams = {
-				  user:req.currentUser,
-				  section: 'sales',
-				  key:  'dashboard',
-				  metadata: pipeline.metadata,
-				  pipeline: pipeline.pipeline,
-				  summary: pipeline.summarizedStats,
-				  stages: stages,
-				  navSections: req.navSections
-				};
-				res.render('sales', renderParams);
+        var renderParams = {
+          user:req.currentUser,
+          section: 'sales',
+          key:  'dashboard',
+          metadata: pipeline.metadata,
+          pipeline: pipeline.pipeline,
+          summary: pipeline.summarizedStats,
+          stages: stages,
+          navSections: req.navSections
+        };
+        res.render('sales', renderParams);
       }
     });
   });
@@ -62,8 +65,6 @@ module.exports = function (app, config, authenticator) {
     };
     res.render('sales/lead/new', renderParams);
   });
-
-  app.post('/sales/lead/new', authenticator.roleManager.can('submit lead activity'), function (req, res) {
 
   app.get('/sales', authenticator.roleManager.can('view accounts'), function (req, res) {
     app.locals.crmModule.getSalesPipeline(true, function (err, pipeline) {
