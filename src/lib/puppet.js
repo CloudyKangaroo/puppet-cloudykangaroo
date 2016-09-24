@@ -34,6 +34,7 @@ module.exports = function(config, logger) {
   var getPuppetDBNode = function(hostname, callback) {
     var request = require('request');
     var url = config.puppetdb.uri + '/nodes/' + hostname;
+    logger.log('debug', 'getting node from puppetDB', {hostname: hostname, url: url});
     request({ url: url, json: true }, function (error, response) {
       if (error) {
         callback(error);
@@ -47,6 +48,7 @@ module.exports = function(config, logger) {
   var getPuppetDBNodeFacts = function (hostname, callback) {
     var request = require('request');
     var url = config.puppetdb.uri + '/nodes/' + hostname + '/facts';
+    logger.log('debug', 'getting facts from puppetDB', {hostname: hostname, url: url});
     request({ url: url, json: true }, function (error, response) {
       if (error) {
         callback(error);
@@ -88,7 +90,7 @@ module.exports = function(config, logger) {
   };
 
   var getDeviceFromPuppetDB = function(hostname, getDevCallback) {
-    logger.log('debug', 'getting device from puppet');
+    logger.log('debug', 'getting device from puppet', {hostname: hostname});
     var async = require('async');
     async.parallel([
       function (callback) {
