@@ -21,7 +21,7 @@ module.exports = function (app, config, authenticator) {
     var async = require('async');
 
     var getNumNodes = function (callback) {
-      var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dnum-nodes';
+      var URL = config.puppetdb.metrics_uri + '/puppetlabs.puppetdb.population:name=num-nodes';
       request({ url: URL, json: true }, function (error, response, body) {
         if (error || !body.Value) {
           callback(error, 0);
@@ -32,7 +32,7 @@ module.exports = function (app, config, authenticator) {
     };
 
     var getNumResources = function (callback) {
-      var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dnum-resources';
+      var URL = config.puppetdb.metrics_uri + '/puppetlabs.puppetdb.population:name=num-resources';
       request({ url: URL, json: true }, function (error, response, body) {
         if (error || !body.Value) {
           callback(error, 0);
@@ -43,7 +43,7 @@ module.exports = function (app, config, authenticator) {
     };
 
     var getResourceDupes = function (callback) {
-      var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Dpct-resource-dupes';
+      var URL = config.puppetdb.metrics_uri + '/puppetlabs.puppetdb.population:name=pct-resource-dupe';
       request({ url: URL, json: true }, function (error, response, body) {
         if (error || !body.Value) {
           callback(error, 0);
@@ -54,7 +54,7 @@ module.exports = function (app, config, authenticator) {
     };
 
     var getResourcesPerNode = function (callback) {
-      var URL = app.get('puppetdb_uri') + '/metrics/mbean/com.puppetlabs.puppetdb.query.population%3Atype%3Ddefault%2Cname%3Davg-resources-per-node';
+      var URL = config.puppetdb.metrics_uri + '/puppetlabs.puppetdb.population:name=avg-resources-per-node';
       request({ url: URL, json: true }, function (error, response, body) {
         if (error || !body.Value) {
           callback(error, 0);
@@ -92,7 +92,7 @@ module.exports = function (app, config, authenticator) {
     var hoursAgo = req.params.hours;
     var request = require('request');
     var queryString = '?query=[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]';
-    queryString += '&summarize-by=certname';
+    queryString += '&summarize_by=certname';
 
     var URL = app.get('puppetdb_uri') + '/aggregate-event-counts' + queryString;
 
@@ -118,7 +118,7 @@ module.exports = function (app, config, authenticator) {
       '[">", "timestamp", "' + moment().subtract('hours', hoursAgo).format() + '"]' +
       ']';
 
-    queryString += '&summarize-by=certname';
+    queryString += '&summarize_by=certname';
 
     var URL = app.get('puppetdb_uri') + '/aggregate-event-counts' + queryString;
 
