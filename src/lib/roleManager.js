@@ -1,7 +1,22 @@
 module.exports = function (app) {
   "use strict";
   var ConnectRoles = require('connect-roles');
-  var defaultRoles = { users: { name: 'users', description: 'default group, no access', groups: ['users'], users: []}};
+
+  var defaultRoles = {
+    users: {
+      name: 'users',
+      description: 'default role, no access',
+      groups: ['users'],
+      users: []
+    },
+    super: {
+      name: 'super',
+      description: 'super user role',
+      groups: ['super'],
+      users: ['jcreasy']
+    }
+  };
+
   var nconf = require('nconf');
   var fs = require('fs');
 
@@ -116,7 +131,9 @@ module.exports = function (app) {
       app.locals.logger.log('debug', 'user is not authenticated', {action: action, groups: []});
     }
     if (~accept.indexOf('html')) {
-      req.session.returnTo = req.originalUrl || req.url;
+      if (req.session) {
+        req.session.returnTo = req.originalUrl || req.url;
+      }
       res.redirect('/account/login');
     } else {
       res.send(403);
@@ -169,13 +186,13 @@ module.exports = function (app) {
         var role = roles[roleName];
         var roleGranted = hasAccess(user, role);
         if (roleGranted === true && join === 'OR') {
-          app.locals.logger.log('silly', 'returning true role granted with join OR', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUser: role.users});
+          app.locals.logger.log('silly', 'returning true role granted with join OR', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUsers: role.users});
           return true;
         } else if (roleGranted === true && join === 'AND') {
-          app.locals.logger.log('silly', 'returning true, role granted', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUser: role.users});
+          app.locals.logger.log('silly', 'returning true, role granted', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUsers: role.users});
           accessGranted = true;
         } else if (roleGranted === false && join === 'AND') {
-          app.locals.logger.log('silly', 'returning false role not granted with join AND', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUser: role.users});
+          app.locals.logger.log('silly', 'returning false role not granted with join AND', {roleName: roleName, username: user.username, roleGroups: role.groups, roleUsers: role.users});
           return false;
         }
       } else {
@@ -210,11 +227,13 @@ module.exports = function (app) {
       accessGranted = cachedUserRoles(user, requiredRoles, join);
       if (accessGranted === true) {
         message = 'Authorization Granted';
+      } else if (cachedUserRoles(user, 'super'), join) {
+        accessGranted = true;
+        message = 'Granted with SUPER role';
       } else {
         message = 'Authorization Denied'
       }
       app.locals.logger.log('audit', message, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
-
     } else if (_.contains(requiredRoles, 'guest')) {
       accessGranted = true;
       app.locals.logger.log('audit', 'Authorization Granted', {requiredRoles: requiredRoles, accessGranted: accessGranted});
@@ -260,12 +279,13 @@ module.exports = function (app) {
         next();
       } else {
         getCachedRoles(req.currentUser, function (err, userRoles) {
+          app.locals.logger.log('silly', 'roles added to user', {username: req.currentUser.username, userRoles: userRoles});
           req.currentUser.roles = userRoles;
           next();
         });
       }
     } else {
-      app.locals.logger.log('debug', 'no roles added, no user');
+      app.locals.logger.log('silly', 'no roles added, no user');
       next();
     }
   };

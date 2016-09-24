@@ -1,7 +1,7 @@
 module.exports = function(params) {
   "use strict";
 
-  var userProperty = 'user';
+  var userProperty = 'currentUser';
 
   if (arguments.length < 1) {
     params = {};
@@ -107,15 +107,16 @@ module.exports = function(params) {
     var section = {};
     var matches = [];
     var user = {};
-
-    if (req.hasOwnProperty(userProperty)) {
+    if (!req.hasOwnProperty(userProperty) || !req[userProperty].hasOwnProperty('roles')) {
+      req.app.locals.logger.log('debug', 'Req has no user, or user has no roles', {userProperty: userProperty});
+      matchedSections = unauthenticatedMenu;
+    } else {
       user = req[userProperty];
       for (var sectionName in navSections) {
         if (navSections.hasOwnProperty(sectionName)) {
           section = navSections[sectionName];
           if (section.hasOwnProperty('roles')) {
-            matches = _.intersection(user.roles, section.roles);
-            if (matches.length) {
+            if (!user.hasOwnProperty('roles').length) {
               var newSection = {
                 label: section.label,
                 key: section.key,
@@ -129,32 +130,25 @@ module.exports = function(params) {
                   if (!menuItem.hasOwnProperty('roles')) {
                     menuItem.roles = section.roles;
                   }
-                  var menuItemRoles = menuItem.roles;
-                  menuItemRolesLoop:
-                  for (var j=0; j<menuItemRoles.length; j++) {
-                    var menuItemRole = menuItemRoles[j];
-                    if (user.hasOwnProperty('roles')) {
-                      if (_.contains(user.roles, menuItemRole)) {
-                        newSection.content.push(menuItem);
-                        break menuItemRolesLoop;
-                      } // else user does not have any roles for this menuItem
-                    } //else user has no roles
+                  if (_.intersection(user.roles, menuItem.roles).length) {
+                    req.app.locals.logger.log('silly', 'found match', {userRoles: user.roles, menuItemRoles: menuItem.roles});
+                    newSection.content.push(menuItem);
                   }
                 }
               }
               if (newSection.content.length >= 1) {
                 matchedSections[sectionName] = newSection;
               }
+            } else {
+              req.app.locals.logger.log('silly', 'No intersection of roles', {userRoles: user.roles, sectionRoles: section.roles});
             }
           } else {
             throw new Error('section has no roles defined: ' + sectionName);
           }
         }
       }
-    } else {
-      matchedSections = unauthenticatedMenu;
     }
-
+    req.app.locals.logger.log('silly', 'menu build complete', {navSections: matchedSections});
     req.navSections = matchedSections;
     next();
   };

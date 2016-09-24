@@ -29,8 +29,10 @@ module.exports = function (app, config, authenticator) {
   });
 
   app.get('/account/logout', function (req, res) {
-    app.locals.logger.log('debug', 'User Logout:' + req.currentUser.username, logData(req));
-    req.logout();
+    if (req.currentUser) {
+      app.locals.logger.log('debug', 'User Logout:' + req.currentUser.username, logData(req));
+      req.logout();
+    }
     res.redirect('/account');
   });
 };

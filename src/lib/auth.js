@@ -27,7 +27,7 @@ module.exports = function(app, credentials, config, redisClient) {
       userID = new RegExp('[^/]*$').exec(user.id)||[,null][1];
       redisClient.set("user:"+userID, JSON.stringify(user));
     } catch (e) {
-      app.locals.logger.log('error', 'Could not serialize user', {user: user});
+      app.locals.logger.log('error', 'Could not serialize user', {user: user.name});
       done(new Error('could not serialize user'));
     } finally {
       done(null, userID);

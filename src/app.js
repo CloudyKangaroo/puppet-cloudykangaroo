@@ -219,28 +219,16 @@ app.use(helmet());
 app.use(express.cookieParser(config.cookie.secret));
 
 var session = require('express-session');
-
 var RedisStore = require('connect-redis')(session);
 var client  = redis.createClient();
 var expiryDate = new Date( Date.now() + 60 * 60 * 1000 ); // 1 hour
 
 app.use(session({
-  name: 'CloudySessionID',
-  store: new RedisStore({
-    host: config.redis.host,
-    port: config.redis.port,
-    client: client
-  }),
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    domain: 'example.com',
-    path: 'foo/bar',
-    expires: expiryDate
-  },
-  secret: config.cookie.secret,
-  saveUninitialized: false,
-  resave: false
+    name: 'CloudySessionID',
+    secret: config.cookie.secret,
+    store: new RedisStore({ host: config.redis.host, port: config.redis.port, client: client,ttl :  260}),
+    saveUninitialized: false,
+    resave: false
 }));
 
 app.use(flash());
@@ -276,10 +264,11 @@ app.use(appMetrics.reqWrapper);
 
 app.use(function (req, res, next) {
   if (!req.session) {
-    return next(new Error('User Session could not be Retrieved')) // handle error
+    logger.log('error', 'No Session Information');
+    return next(new Error('User Session could not be Retrieved')); // handle error
   }
-  next() // otherwise continue
-})
+  next(); // otherwise continue
+});
 
 /* Pass the requests through the routes */
 app.use(app.router);
