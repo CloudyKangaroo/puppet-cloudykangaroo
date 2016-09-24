@@ -58,7 +58,8 @@ config.sensu.pluginPath = '/opt/contegix/sensu/etc/sensu/plugins/';
 
 config.puppetdb.host = process.env.PUPPETDB_HOST || 'localhost';
 config.puppetdb.port = process.env.PUPPETDB_PORT || 8080;
-config.puppetdb.uri =  'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/v3';
+config.puppetdb.uri =  'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/pdb/query/v4';
+config.puppetdb.metrics_uri =  'http://' + config.puppetdb.host + ':' + config.puppetdb.port + '/metrics/v1/mbeans';
 
 config.graphiteEvent.enabled = false;
 config.graphiteEvent.urlPrefix = 'http://graphite.example.com/render/?';
