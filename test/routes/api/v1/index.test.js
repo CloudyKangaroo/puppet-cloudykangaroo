@@ -54,10 +54,31 @@ describe('GET /api/v1/helpdesk/devices/hostname', function(){
 
 describe('GET /api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us', function(){
   "use strict";
+  var expectedResult = { aaData:
+      [ { domain: 'jaskolski-waters.com',
+        deviceID: 10023,
+        typeGroupID: '1',
+        shortname: 'jsklskwtrs',
+        ipAddr: '10.50.33.47',
+        typeGroupName: 'Servers',
+        clientID: 1003,
+        name: 'jsklskwtrs-engage05',
+        company: 'Jaskolski-Waters',
+        management_level: 'managed',
+        device_status: 'Active',
+        type: 'Servers',
+        dev_desc: 'jsklskwtrs-engage05',
+        dev: 10023,
+        client_id: 1003,
+        clientid: 1003,
+        label: 'jsklskwtrs-servers',
+        active: 1,
+        location: 'SJC' } ] };
   it('should return code 200', function(done) {
     request(app)
       .get('/api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us')
-      .expect(200, done);
+      .set('Accept', 'application/json')
+      .expect(200, expectedResult, done);
   });
   it('should respond with json', function(done){
     request(app)
@@ -67,31 +88,7 @@ describe('GET /api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us'
   it('should return jsklskwtrs-engage05', function(done) {
     request(app)
       .get('/api/v1/helpdesk/devices/hostname/jsklskwtrs-engage05.unittest.us')
-      .expect(200, {
-        "aaData":[
-          {
-            "domain":"jaskolski-waters.com",
-            "deviceID":10023,
-            "typeGroupID":"1",
-            "shortname":"jsklskwtrs",
-            "ipAddr":"10.50.33.47",
-            "typeGroupName":"Servers",
-            "clientID":1003,
-            "name":"jsklskwtrs-engage05",
-            "company":"Jaskolski-Waters",
-            "management_level":"managed",
-            "device_status":"Active",
-            "type":"Servers",
-            "dev_desc":"jsklskwtrs-engage05",
-            "dev":10023,
-            "client_id":1003,
-            "clientid":1003,
-            "label":"jsklskwtrs-servers",
-            "active":1,
-            "location":"SJC"
-          }
-        ]
-      }, done);
+      .expect(200, expectedResult, done);
   });
 });
 describe('GET /api/v1/helpdesk/clients/clientid/1022', function(){
