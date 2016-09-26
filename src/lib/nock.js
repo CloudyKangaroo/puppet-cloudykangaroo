@@ -7,9 +7,10 @@ module.exports = function(config) {
     dont_print: true
   });
 
-  nock.disableNetConnect();
-  nock.enableNetConnect('127.0.0.1', 'coveralls.io:443');
-
+//  nock.disableNetConnect();
+//  nock.enableNetConnect('127.0.0.1', 'coveralls.io:443');
+//    nock.cleanAll();
+//    nock.enableNetConnect();
   var options = {allowUnmocked: true};
 
   nock('http://' + config.metrics.host + ':' + config.metrics.port)

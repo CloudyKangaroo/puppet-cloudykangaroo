@@ -48,7 +48,7 @@ if (config.redis && config.redis.class) {
 }
 
 if (config.USE_NOCK === 'true') {
-  require('./lib/nock')(config, logger);
+  var nock = require('./lib/nock')(config, logger);
 }
 
 /* Connect to Redis */
