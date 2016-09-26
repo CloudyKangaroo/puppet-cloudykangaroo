@@ -237,11 +237,14 @@ describe ("roleManager registerRole", function () {
   var groups = ['groups'];
   var users = ['users'];
   var description = 'description';
+
+  it('should throw error with empty name', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    assert.deepEqual(roleManager.registerRole(''),new Error('name is a required field for registerRole()'));
+  });
   it('should throw error with no name', function () {
     var roleManager = require('../../src/lib/roleManager')(app);
-    var expectedRole = { name: '', description: 'no description provided', groups: [], users: []};
-    var newRole = roleManager.registerRole(name);
-    assert.equal(newRole.description, expectedRole.description);
+    assert.deepEqual(roleManager.registerRole(),new Error('name is a required field for registerRole()'));
   });
   it('should provide default description', function () {
     var roleManager = require('../../src/lib/roleManager')(app);
@@ -252,7 +255,7 @@ describe ("roleManager registerRole", function () {
   it('should provide empty groups', function () {
     var roleManager = require('../../src/lib/roleManager')(app);
     var expectedRole = { name: name, description: description, groups: [], users: []};
-    var newRole = roleManager.registerRole(name, description);
+    var newRole = roleManager.registerRole(name, description, '');
     assert.deepEqual(newRole.groups, expectedRole.groups);
   });
   it('should provide empty users', function () {

@@ -54,21 +54,25 @@ module.exports = function (app) {
   };
 
   var registerRole = function (name, description, groups, users) {
-    if (!name || name === '') {
+    if (arguments.length < 1) {
       app.locals.logger.log('error', 'name is required');
-      throw new Error('name is a required field for registerRole()');
+      return new Error('name is a required field for registerRole()');
     }
-    if (!description || description === '') {
+    if (name === undefined || !name || name === '') {
+      app.locals.logger.log('error', 'name is required');
+      return new Error('name is a required field for registerRole()');
+    }
+    if (description === undefined || !description || description === '') {
       description = 'no description provided';
     }
     if (arguments.length <=2) {
       users = [];
       groups = [];
     }
-    if (!users || users === '') {
+    if (users === undefined || !users || users === '') {
       users = [];
     }
-    if (!groups || groups === '') {
+    if (groups === undefined || !groups || groups === '') {
       groups = [];
     }
     var newRole = { name: name, description: description, groups: groups, users: users};
