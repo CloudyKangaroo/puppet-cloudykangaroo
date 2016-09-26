@@ -25,7 +25,8 @@ module.exports = function(grunt) {
         CRM_CLASS: 'cloudy-localsmith',
         MON_CLASS: './lib/mockMonitoring',
         INST_CLASS: './lib/insturmentation',
-        REDIS_CLASS: 'fakeredis'
+        REDIS_CLASS: 'fakeredis',
+        TZ: 'America/Los_Angeles'
       },
       development : {
         USE_NOCK: 'true',
@@ -35,7 +36,8 @@ module.exports = function(grunt) {
         CRM_CLASS: 'cloudy-localsmith',
         MON_CLASS: './lib/mockMonitoring',
         INST_CLASS: './lib/instrumentation',
-        REDIS_CLASS: 'fakeredis'
+        REDIS_CLASS: 'fakeredis',
+        TZ: 'America/Los_Angeles'
       }
     },
     mochacov: {
