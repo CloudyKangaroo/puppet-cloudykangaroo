@@ -21,17 +21,21 @@ module.exports = function(app, credentials, config, redisClient) {
    * @param user
    * @param done
    */
-  var serializeUser = function(user, done) {
-    var userID = '';
+  var serializeUser = function(user, returnUserID) {
+    var userID = null;
     try {
       userID = new RegExp('[^/]*$').exec(user.id)||[,null][1];
-      redisClient.set("user:"+userID, JSON.stringify(user));
-    } catch (e) {
-      app.locals.logger.log('error', 'Could not serialize user', {user: user.name});
-      done(new Error('could not serialize user'));
-    } finally {
-      done(null, userID);
+    } catch (err) {
+      app.locals.logger.log('error', 'Could not serialize user', {user: user.name, error: err.message});
+      returnUserID(err, null);
     }
+    redisClient.set("user:"+userID, JSON.stringify(user), function (err, reply) {
+      if (err) {
+        returnUserID(err, null);
+      } else {
+        returnUserID(null, userID);
+      }
+    });
   };
 
   /**

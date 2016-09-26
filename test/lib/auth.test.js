@@ -10,7 +10,7 @@ app.base_config_dir =  __dirname + '/config';
 
 app.locals = {};
 app.locals.logger = {};
-app.locals.logger.log = function () {
+app.locals.logger.log = function (text) {
     "use strict";
 };
 
@@ -53,8 +53,20 @@ describe("auth serializeUser", function (){
         redisClient.set = function (key, value) {};
         var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
         auth.serializeUser(providedUser, function(err, userID) {
-            assert.notEqual(err, Error);
             assert.equal(0, userID);
+        });
+    });
+    it('should not return a userID when redis store fails', function () {
+        var providedUser ={ id: '0', name: 'Development User', username: 'development.user', type:'admin', emails: [{name: 'primary', value: 'development.user@contegix.com'}], groups: ['users', 'engineers', 'devops', 'sales', 'super']};
+        var redisClient = {};
+        var expectedError = new Error('redis set failed');
+        redisClient.set = function (key, value, respond) {
+            respond(expectedError, null);
+        };
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.serializeUser(providedUser, function (err, userID) {
+            assert.deepEqual(err, expectedError);
+            assert.deepEqual(null, userID);
         });
     });
 });
@@ -83,5 +95,16 @@ describe("auth deserializeUser", function (){
             assert.deepEqual(returnedUser, userObject);
         });
     });
-
+    it('should not return a user object if redis request fails', function () {
+        var userObject ={ id: '0', name: 'Development User', username: 'development.user', type:'admin', emails: [{name: 'primary', value: 'development.user@contegix.com'}], groups: ['users', 'engineers', 'devops', 'sales', 'super']};
+        var redisClient = {};
+        redisClient.get = function (userID, returnUser) {
+            returnUser(new Error('redis request failed'), null);
+        };
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.deserializeUser(0, function(err, returnedUser) {
+            assert.deepEqual(err, new Error('redis request failed'));
+            assert.notDeepEqual(returnedUser, userObject);
+        });
+    });
 });
