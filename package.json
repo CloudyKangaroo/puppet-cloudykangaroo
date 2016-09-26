@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start": "forever start -a -l c/var/log/cloudykangaroo/forever.log -o /var/log/cloudykangaroo/out.log -e /var/log/cloudykangaroo/err.log app.js",
-    "test": "grunt test"
+    "test": "grunt report"
   },
   "devDependencies": {
     "assert": "1.1.x",

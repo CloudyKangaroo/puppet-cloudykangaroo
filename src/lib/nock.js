@@ -8,7 +8,7 @@ module.exports = function(config) {
   });
 
   nock.disableNetConnect();
-  nock.enableNetConnect('127.0.0.1');
+  nock.enableNetConnect('127.0.0.1', 'coveralls.io:443');
 //  nock.enableNetConnect('localhost:4242');
 
   var options = {allowUnmocked: true};
