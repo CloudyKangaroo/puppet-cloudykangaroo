@@ -49,7 +49,7 @@ exports.getFormattedISO8601 = function (timeStamp, dateString) {
   "use strict";
   var moment = require('moment');
   if (arguments.length === 1) {
-    dateString = 'MMM DD H:mm:ss';
+    dateString = moment.ISO_8601;
   }
   var offset = moment(timeStamp);
   return offset.format(dateString);

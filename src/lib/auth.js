@@ -39,25 +39,22 @@ module.exports = function(app, credentials, config, redisClient) {
    * @param id
    * @param done
    */
-  var deserializeUser = function(id, done) {
+  var deserializeUser = function(id, returnUser) {
     redisClient.get("user:"+id, function(err, userJSON) {
       var user;
-
+      var error;
       if (err) {
-        done(err, null);
+        error = err;
       } else {
         try {
           user = JSON.parse(userJSON);
         }
-        catch (e) {
-          app.locals.logger.log('error', 'uncaught exception', {error: e});
-        }
-        if (!user) {
-          done(err,null);
-        } else {
-          done(err, user);
+        catch (er) {
+          app.locals.logger.log('error', 'uncaught exception', {error: er});
+          error = er;
         }
       }
+      returnUser(error, user);
     });
   };
 
@@ -252,6 +249,10 @@ module.exports = function(app, credentials, config, redisClient) {
   module.passport = passport;
   module.login = login;
   module.handle = handle;
+  module.serializeUser = serializeUser;
+  module.deserializeUser = deserializeUser;
+  module.authenticateClientLocally = authenticateClientLocally;
+  module.authenticateUserLocally = authenticateUserLocally;
   module.authenticationStrategy = authenticationStrategy;
   module.authenticationAPIStrategy = authenticationAPIStrategy;
   return module;
