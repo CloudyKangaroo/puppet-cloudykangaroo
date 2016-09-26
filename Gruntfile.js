@@ -50,9 +50,9 @@ module.exports = function(grunt) {
         ],
         'data-cover-never': 'node_modules'
       },
-      lcov: {
+      coverage: {
         options: {
-          reporter: 'mocha-lcov-reporter',
+          coveralls: true,
           files: 'test/**/*.js',
           src: ['test/**/*.js']
         },
@@ -90,6 +90,6 @@ module.exports = function(grunt) {
   grunt.registerTask('hooks', 'githooks');
   grunt.registerTask('run', ['env:development', 'execute']);
   grunt.registerTask('test', ['env:test', 'mochaTest', 'mochacov:test', 'jshint']);
-  grunt.registerTask('report', ['mochacov:lcov', 'coveralls']);
+  grunt.registerTask('report', ['test', 'mochacov:coverage']);
   grunt.registerTask('default', ['env:development', 'mochaTest']);
 };

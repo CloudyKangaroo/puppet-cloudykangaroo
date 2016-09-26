@@ -54,17 +54,26 @@ module.exports = function (app) {
   };
 
   var registerRole = function (name, description, groups, users) {
-    if (arguments.length <= 1) {
-      description = 'No Description Given: ' + name;
+    if (!name || name === '') {
+      app.locals.logger.log('error', 'name is required');
+      throw new Error('name is a required field for registerRole()');
     }
-    if (arguments.length <= 2) {
+    if (!description || description === '') {
+      description = 'no description provided';
+    }
+    if (arguments.length <=2) {
+      users = [];
       groups = [];
     }
-    if (arguments.length <= 3) {
+    if (!users || users === '') {
       users = [];
     }
-    nconf.set('roles:' + name, { name: name, description: description, groups: groups, users: users});
-    //saveConfig(function () {});
+    if (!groups || groups === '') {
+      groups = [];
+    }
+    var newRole = { name: name, description: description, groups: groups, users: users};
+    nconf.set('roles:' + name, newRole);
+    return newRole;
   };
 
   var authorizeRoles = function (action, roles) {

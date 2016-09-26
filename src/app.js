@@ -212,6 +212,10 @@ var helmet = require('helmet');
 app.use(helmet());
 
 
+/* Last chance, perhaps it is a static resource, most of this offloaded to Nginx */
+/*jslint nomen: true*/
+app.use(express.static(path.join(__dirname, 'public')));
+
 /*
  Initialize the session and prepare user authentication
  */
@@ -273,9 +277,6 @@ app.use(function (req, res, next) {
 /* Pass the requests through the routes */
 app.use(app.router);
 
-/* Last chance, perhaps it is a static resource, most of this offloaded to Nginx */
-/*jslint nomen: true*/
-app.use(express.static(path.join(__dirname, 'public')));
 /*jslint nomen: false*/
 /* Development Environment Code */
 app.configure('development', function () {

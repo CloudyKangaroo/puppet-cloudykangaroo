@@ -231,6 +231,50 @@ describe("roleManager isSuper", function (){
   });
 });
 
+describe ("roleManager registerRole", function () {
+  "use string";
+  var name = 'role';
+  var groups = ['groups'];
+  var users = ['users'];
+  var description = 'description';
+  it('should throw error with no name', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    var expectedRole = { name: '', description: 'no description provided', groups: [], users: []};
+    var newRole = roleManager.registerRole(name);
+    assert.equal(newRole.description, expectedRole.description);
+  });
+  it('should provide default description', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    var expectedRole = { name: name, description: 'no description provided', groups: [], users: []};
+    var newRole = roleManager.registerRole(name);
+    assert.deepEqual(newRole.description, expectedRole.description);
+  });
+  it('should provide empty groups', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    var expectedRole = { name: name, description: description, groups: [], users: []};
+    var newRole = roleManager.registerRole(name, description);
+    assert.deepEqual(newRole.groups, expectedRole.groups);
+  });
+  it('should provide empty users', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    var expectedRole = { name: name, description: description, groups: [], users: []};
+    var newRole = roleManager.registerRole(name, description);
+    assert.deepEqual(newRole.users, expectedRole.users);
+  });
+  it('should populate groups', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    var expectedRole = { name: name, description: description, groups: groups, users: []};
+    var newRole = roleManager.registerRole(name, description, groups);
+    assert.deepEqual(newRole.groups, expectedRole.groups);
+  });
+  it('should populate users', function () {
+    var roleManager = require('../../src/lib/roleManager')(app);
+    var expectedRole = { name: name, description: description, groups: [], users: users};
+    var newRole = roleManager.registerRole(name, description, [], users);
+    assert.deepEqual(newRole.users, expectedRole.users);
+  });
+});
+
 describe("roleManager one off users", function (){
   "use strict";
   it('should find user oneoffAdmin in the admin role', function () {
