@@ -42,7 +42,7 @@ db.clients.findClientByID = function (username, returnClient) {
 
 describe("auth authenticateClientLocally", function () {
     "use strict";
-    it('should lookup user', function () {
+    it('should lookup client', function () {
         var providedUsername = 'testUser';
         var providedPassword = 'testUser';
         var redisClient = {};
@@ -55,7 +55,7 @@ describe("auth authenticateClientLocally", function () {
         var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
         auth.authenticateClientLocally(providedUsername, providedPassword, function () {});
     });
-    it('should authenticate user with matching password', function () {
+    it('should authenticate client with matching password', function () {
         var providedUsername = 'testUser';
         var providedPassword = 'testUser';
         var providedClient =  {
@@ -77,7 +77,30 @@ describe("auth authenticateClientLocally", function () {
             assert.equal(providedClient, expectedClient);
         });
     });
-    it('should not authenticate user that cannot be found', function () {
+    it('should not authenticate client after db error', function () {
+        var providedUsername = 'testUser';
+        var providedPassword = 'testUser';
+        var providedClient =  {
+            id: '1',
+            name: 'testUser',
+            clientID: 'abc123',
+            clientSecret: 'testUser',
+            redirectURI: 'http://localhost:3006/auth/keeper/callback'
+        };
+        var redisClient = {};
+        var db = {};
+        db.clients = {};
+        db.clients.findByClientId = function (expectedUsername, returnClient) {
+            returnClient(new Error('could not find client'), null);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateClientLocally(providedUsername, providedPassword, function (err, expectedClient) {
+            assert.deepEqual(new Error('could not find client'), err);
+            assert.equal(null, expectedClient);
+        });
+    });
+    it('should not authenticate client that cannot be found', function () {
         var providedUsername = 'testUser';
         var providedPassword = 'testUser';
         var providedClient =  {
@@ -99,7 +122,7 @@ describe("auth authenticateClientLocally", function () {
             assert.equal(false, expectedClient);
         });
     });
-    it('should not authenticate user with non-matching password', function () {
+    it('should not authenticate client with non-matching password', function () {
         var providedUsername = 'testUser';
         var providedPassword = 'testUser';
         var providedClient =  {
@@ -150,6 +173,20 @@ describe("auth authenticateUserLocally", function () {
         var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
         auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
             assert.equal(providedUser, expectedUser);
+        });
+    });
+    it('should not authenticate user after db error', function () {
+        var redisClient = {};
+        var db = {};
+        db.users = {};
+        db.users.findByUsername = function (expectedUsername, returnUser) {
+            returnUser(new Error('could not find user'), null);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
+            assert.deepEqual(err, new Error('could not find user'));
+            assert.equal(null, expectedUser);
         });
     });
     it('should not authenticate user that cannot be found', function () {
