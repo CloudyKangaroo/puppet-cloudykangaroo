@@ -10,7 +10,13 @@ module.exports = function(app, credentials, config, redisClient) {
   var BearerStrategy = require('passport-http-bearer').Strategy;
 
   var login = require('connect-ensure-login');
-  var db = require('./db')();
+  
+  var db;
+  if (app.locals.db) {
+    db = app.locals.db;
+  } else {
+    db = require('./db')();
+  }
 
   /**
    * Session Serialization Functions

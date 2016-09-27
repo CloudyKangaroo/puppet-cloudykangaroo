@@ -33,6 +33,155 @@ config.redis.db = 1;
 
 var assert = require('assert');
 
+var db = {};
+db.clients = {};
+db.clients.findClientByID = function (username, returnClient) {
+
+};
+
+
+describe("auth authenticateClientLocally", function () {
+    "use strict";
+    it('should lookup user', function () {
+        var providedUsername = 'testUser';
+        var providedPassword = 'testUser';
+        var redisClient = {};
+        var db = {};
+        db.clients = {};
+        db.clients.findByClientId = function (expectedUsername, returnClient) {
+            assert.equal(providedUsername, expectedUsername);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateClientLocally(providedUsername, providedPassword, function () {});
+    });
+    it('should authenticate user with matching password', function () {
+        var providedUsername = 'testUser';
+        var providedPassword = 'testUser';
+        var providedClient =  {
+            id: '1',
+            name: 'testUser',
+            clientID: 'abc123',
+            clientSecret: 'testUser',
+            redirectURI: 'http://localhost:3006/auth/keeper/callback'
+        };
+        var redisClient = {};
+        var db = {};
+        db.clients = {};
+        db.clients.findByClientId = function (expectedUsername, returnClient) {
+            returnClient(null,providedClient);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateClientLocally(providedUsername, providedPassword, function (err, expectedClient) {
+            assert.equal(providedClient, expectedClient);
+        });
+    });
+    it('should not authenticate user that cannot be found', function () {
+        var providedUsername = 'testUser';
+        var providedPassword = 'testUser';
+        var providedClient =  {
+            id: '1',
+            name: 'testUser',
+            clientID: 'abc123',
+            clientSecret: 'testUser',
+            redirectURI: 'http://localhost:3006/auth/keeper/callback'
+        };
+        var redisClient = {};
+        var db = {};
+        db.clients = {};
+        db.clients.findByClientId = function (expectedUsername, returnClient) {
+            returnClient(null, null);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateClientLocally(providedUsername, providedPassword, function (err, expectedClient) {
+            assert.equal(false, expectedClient);
+        });
+    });
+    it('should not authenticate user with non-matching password', function () {
+        var providedUsername = 'testUser';
+        var providedPassword = 'testUser';
+        var providedClient =  {
+            id: '1',
+            name: 'testUser',
+            clientID: 'abc123',
+            clientSecret: 'false',
+            redirectURI: 'http://localhost:3006/auth/keeper/callback'
+        };
+        var redisClient = {};
+        var db = {};
+        db.clients = {};
+        db.clients.findByClientId = function (expectedUsername, returnClient) {
+            returnClient(null,providedClient);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateClientLocally(providedUsername, providedPassword, function (err, expectedClient) {
+            assert.equal(false, expectedClient);
+        });
+    });
+});
+
+describe("auth authenticateUserLocally", function () {
+    "use strict";
+    var providedUsername = 'development.user';
+    var providedPassword = 'testUser';
+    var providedUser =  { id: '0', name: 'Development User', password: providedPassword, username: 'development.user', type:'admin', emails: [{name: 'primary', value: 'development.user@contegix.com'}], groups: ['users', 'engineers', 'devops', 'sales', 'super']};
+    it('should lookup user', function () {
+        var redisClient = {};
+        var db = {};
+        db.users = {};
+        db.users.findByUsername = function (expectedUsername, returnUser) {
+            assert.equal(providedUsername, expectedUsername);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function () {});
+    });
+    it('should authenticate user with matching password', function () {
+        var redisClient = {};
+        var db = {};
+        db.users = {};
+        db.users.findByUsername = function (expectedUsername, returnUser) {
+            returnUser(null, providedUser);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
+            assert.equal(providedUser, expectedUser);
+        });
+    });
+    it('should not authenticate user that cannot be found', function () {
+        var redisClient = {};
+        var db = {};
+        db.users = {};
+        db.users.findByUsername = function (expectedUsername, returnUser) {
+           returnUser(null, null);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
+            assert.equal(false, expectedUser);
+        });
+    });
+    it('should not authenticate user with non-matching password', function () {
+        var redisClient = {};
+        providedUser.password = 'secret';
+        var db = {};
+        db.users = {};
+        db.users.findByUsername = function (expectedUsername, returnUser) {
+           returnUser(null, providedUser);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
+            assert.equal(false, expectedUser);
+        });
+    });
+});
+
+
 describe("auth serializeUser", function (){
     "use strict";
     it('should store a serialized user', function () {
