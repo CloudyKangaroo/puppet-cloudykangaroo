@@ -37,20 +37,20 @@ exports.uid = function(len) {
 
 exports.getFormattedTimestamp = function (timeStamp, dateString) {
   "use strict";
-  var moment = require('moment');
+  var moment = require('moment-timezone');
+  moment.tz.setDefault(process.env.TZ);
   if (arguments.length === 1) {
     dateString = 'MMM DD H:mm:ss';
   }
-  var offset = moment(timeStamp * 1000);
-  return offset.format(dateString);
+  return moment(timeStamp * 1000).format(dateString);
 };
 
 exports.getFormattedISO8601 = function (timeStamp, dateString) {
   "use strict";
-  var moment = require('moment');
+  var moment = require('moment-timezone');
+  moment.tz.setDefault(process.env.TZ);
   if (arguments.length === 1) {
-    dateString = moment.ISO_8601;
+    dateString = require('moment').ISO_8601;
   }
-  var offset = moment(timeStamp);
-  return offset.format(dateString);
+  return moment(timeStamp).toISOString();
 };

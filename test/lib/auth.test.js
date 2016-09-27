@@ -218,6 +218,37 @@ describe("auth authenticateUserLocally", function () {
     });
 });
 
+describe("auth authenticateAccessToken", function () {
+    "use strict";
+    var providedUsername = 'development.user';
+    var providedPassword = 'testUser';
+    var providedUser =  { id: '0', name: 'Development User', password: providedPassword, username: 'development.user', type:'admin', emails: [{name: 'primary', value: 'development.user@contegix.com'}], groups: ['users', 'engineers', 'devops', 'sales', 'super']};
+    it('should lookup user', function () {
+        var redisClient = {};
+        var db = {};
+        db.users = {};
+        db.db.accessTokens.find = function (expectedAccessToken, returnUser) {
+            assert.equal(providedUsername, expectedUsername);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function () {});
+    });
+    it('should not authenticate user with non-matching password', function () {
+        var redisClient = {};
+        providedUser.password = 'secret';
+        var db = {};
+        db.users = {};
+        db.users.findByUsername = function (expectedUsername, returnUser) {
+            returnUser(null, providedUser);
+        };
+        app.locals.db = db;
+        var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
+        auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
+            assert.equal(false, expectedUser);
+        });
+    });
+});
 
 describe("auth serializeUser", function (){
     "use strict";
