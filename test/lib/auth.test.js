@@ -220,32 +220,43 @@ describe("auth authenticateUserLocally", function () {
 
 describe("auth authenticateAccessToken", function () {
     "use strict";
-    var providedUsername = 'development.user';
+    var providedTokenKey = 'development.user';
+    var providedToken = {'token': providedTokenKey, userID: 'development.user'};
     var providedPassword = 'testUser';
+    var providedInfo = { scope: '*' };
     var providedUser =  { id: '0', name: 'Development User', password: providedPassword, username: 'development.user', type:'admin', emails: [{name: 'primary', value: 'development.user@contegix.com'}], groups: ['users', 'engineers', 'devops', 'sales', 'super']};
-    it('should lookup user', function () {
+    it('should lookup token', function () {
         var redisClient = {};
         var db = {};
         db.users = {};
-        db.db.accessTokens.find = function (expectedAccessToken, returnUser) {
-            assert.equal(providedUsername, expectedUsername);
+        db.users.find = function (expectedUsername, returnUser) {
+            return providedUser;
+        };
+        db.accessTokens = {};
+        db.accessTokens.find = function (expectedToken, returnToken) {
+            assert.equal(providedToken, expectedToken);
         };
         app.locals.db = db;
         var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
-        auth.authenticateUserLocally(providedUsername, providedPassword, function () {});
+        auth.authenticateAccessToken(providedToken, function () {});
     });
-    it('should not authenticate user with non-matching password', function () {
+    it('should authenticate valid token', function () {
         var redisClient = {};
-        providedUser.password = 'secret';
         var db = {};
         db.users = {};
-        db.users.findByUsername = function (expectedUsername, returnUser) {
-            returnUser(null, providedUser);
+        db.users.find = function (expectedUsername, returnUser) {
+            return providedUser;
+        };
+        db.accessTokens = {};
+        db.accessTokens.find = function (expectedToken, returnToken) {
+            returnToken(null, {token: providedToken});
         };
         app.locals.db = db;
         var auth = require('../../src/lib/auth')(app, credentials, config, redisClient);
-        auth.authenticateUserLocally(providedUsername, providedPassword, function (err, expectedUser) {
-            assert.equal(false, expectedUser);
+        auth.authenticateAccessToken(providedToken, function (err, expectedUser, expectedInfo) {
+            assert.equal(null, err);
+            assert.equal(providedInfo, expectedInfo);
+            assert.equal(providedUser, expectedUser);
         });
     });
 });

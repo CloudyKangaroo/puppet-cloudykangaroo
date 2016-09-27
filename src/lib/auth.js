@@ -10,7 +10,7 @@ module.exports = function(app, credentials, config, redisClient) {
   var BearerStrategy = require('passport-http-bearer').Strategy;
 
   var login = require('connect-ensure-login');
-  
+
   var db;
   if (app.locals.db) {
     db = app.locals.db;
@@ -263,6 +263,7 @@ module.exports = function(app, credentials, config, redisClient) {
   module.deserializeUser = deserializeUser;
   module.authenticateClientLocally = authenticateClientLocally;
   module.authenticateUserLocally = authenticateUserLocally;
+  module.authenticateAccessToken = authenticateAccessToken;
   module.authenticationStrategy = authenticationStrategy;
   module.authenticationAPIStrategy = authenticationAPIStrategy;
   return module;

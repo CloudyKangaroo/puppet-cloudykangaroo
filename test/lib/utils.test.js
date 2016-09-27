@@ -19,7 +19,7 @@ describe("utils getFormattedISO8601", function (){
     it('should return an ISO8601 formatted timestamp', function () {
         var req = {};
         var utils = require('../../src/lib/utils');
-        assert.equal('2016-06-20T08:15:11.000Z', utils.getFormattedISO8601('2016-06-20 01:15:11+6'));
+        assert.equal('2016-06-20T01:15:11.000Z', utils.getFormattedISO8601('2016-06-20 01:15:11+6'));
     });
 });
 
@@ -28,7 +28,7 @@ describe("utils getFormattedTimestamp", function (){
     it('should return an MMM DD H:mm:ss', function () {
         var req = {};
         var utils = require('../../src/lib/utils');
-        assert.equal('Jun 19 5:15:11', utils.getFormattedTimestamp('1466338511'));
+        assert.equal('Jun 19 12:15:11', utils.getFormattedTimestamp('1466338511'));
     });
     it('should return MMM DD', function () {
         var req = {};
