@@ -31,10 +31,10 @@ module.exports = function(grunt) {
       development : {
         USE_NOCK: 'true',
         NODE_ENV : 'development',
-        MGMT_DOMAIN: '.unittest.us',
+        MGMT_DOMAIN: '.perspica.io',
         CREDS_CLASS: './config/system-dev-credentials',
         CRM_CLASS: 'cloudy-localsmith',
-        MON_CLASS: './lib/mockMonitoring',
+        MON_CLASS: './lib/monitoring',
         INST_CLASS: './lib/instrumentation',
         REDIS_CLASS: 'fakeredis',
         TZ: 'Etc/GMT'

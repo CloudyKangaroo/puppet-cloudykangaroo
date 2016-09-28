@@ -11,6 +11,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
       {
         getEventsCallback(new Error('could not retrieve device hostnames'));
       } else {
+        logger.log('debug', 'getting facts from Sensu', { url: config.sensu.uri + '/events', json: true });
         request({ url: config.sensu.uri + '/events', json: true }, function (error, response, body) {
           if (!error && response.statusCode === 200) {
             var events = [];
@@ -50,6 +51,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
       } else {
 
         var url = config.sensu.uri + '/events/' + device.dev_desc + config.mgmtDomain;
+        logger.log('debug', 'getting events from Sensu', { url: url, json: true });
         request({ url: url, json: true }, function (error, response, body) {
           if (!error && response.statusCode === 200) {
             var events = [];
@@ -92,6 +94,7 @@ module.exports = function (config, logger, crmModule, redisClient) {
       expire: expires
     };
     logger.log('silly', reqBody);
+    logger.log('debug', 'getting stashes from Sensu', { method: 'POST', url: config.sensu.uri + '/stashes', json: true, body: JSON.stringify(reqBody) });
     request({ method: 'POST', url: config.sensu.uri + '/stashes', json: true, body: JSON.stringify(reqBody) }, function (error, msg, response) {
         logger.log('info', response);
         silenceCheckCallback(error, response);
@@ -116,60 +119,44 @@ module.exports = function (config, logger, crmModule, redisClient) {
 
   var getDevice = function(hostname, getDevCallback) {
     var async = require('async');
-    redisClient.get('sensu:devices:' + hostname, function (err, deviceJSON) {
-      if (!err && deviceJSON)
+    logger.log('debug', 'getting device from sensu');
+    async.parallel([
+      function (asyncCallback) {
+        var request = require('request');
+        logger.log('debug', 'getting facts from Sensu', { url: config.sensu.uri+ '/clients/' + hostname, json: true });
+        request({ url: config.sensu.uri+ '/clients/' + hostname, json: true }, function (error, response) {
+            asyncCallback(error, response.body);
+          });
+      },
+      function (asyncCallback) {
+        var request = require('request');
+        logger.log('debug', 'getting facts from Sensu', { url: config.sensu.uri + '/events/' + hostname, json: true });
+        request({ url: config.sensu.uri + '/events/' + hostname, json: true }, function (error, response) {
+            asyncCallback(error, response.body);
+          });
+      }
+    ], function(err, results) {
+      if (err)
       {
-        logger.log('debug', 'got device from Redis');
-        var device = {};
-        try {
-          device = JSON.parse(deviceJSON);
-        }
-        catch (e) {
-          logger.log('error','uncaught exception');
-          getDevCallback(new Error('uncaught exception' + e.message));
-        } finally {
-          getDevCallback(null, device);
-        }
+        logger.log('error', 'could not get data from Sensu', { err: err.message });
+        getDevCallback(err);
       } else {
-        logger.log('debug', 'getting device from sensu');
-        async.parallel([
-          function (asyncCallback) {
-            var request = require('request');
-            request({ url: config.sensu.uri+ '/client/' + hostname, json: true }, function (error, response) {
-                asyncCallback(error, response.body);
-              });
-          },
-          function (asyncCallback) {
-            var request = require('request');
-            request({ url: config.sensu.uri + '/events/' + hostname, json: true }, function (error, response) {
-                asyncCallback(error, response.body);
-              });
-          }
-        ], function(err, results) {
-          if (err)
+        if (results && results.length === 2)
+        {
+          var sensuDevice = {};
+          if (!results[0])
           {
-            getDevCallback(err);
+            var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
+            var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
+            sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
           } else {
-            if (results && results.length === 2)
-            {
-              var sensuDevice = {};
-              if (!results[0])
-              {
-                var node = { address: 'unknown', name: hostname, safe_mode: 0, subscriptions: [], timestamp: 0 };
-                var events = [ { output: "No Events Found", status: 1, issued: Date.now(), handlers: [], flapping: false, occurrences: 0, client: hostname, check: 'N/A'}];
-                sensuDevice = {error: 'No information is known about ' + hostname, events: events, node: node};
-              } else {
-                sensuDevice = {node: results[0], events: results[1]};
-              }
-              redisClient.set('sensu:devices:' + hostname, JSON.stringify(sensuDevice));
-              redisClient.expire('sensu:devices:' + hostname, 5);
-              getDevCallback(err, sensuDevice);
-            } else {
-              logger.log('error', 'could not retrieve events and node from Sensu', { results: JSON.stringify(results) });
-              getDevCallback(new Error('could not retrieve events and node from Sensu'));
-            }
+            sensuDevice = {node: results[0], events: results[1]};
           }
-        });
+          getDevCallback(err, sensuDevice);
+        } else {
+          logger.log('error', 'could not retrieve events and node from Sensu', { results: JSON.stringify(results) });
+          getDevCallback(new Error('could not retrieve events and node from Sensu'));
+        }
       }
     });
   };
