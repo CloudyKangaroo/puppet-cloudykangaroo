@@ -9,6 +9,11 @@ module.exports = function (app) {
       groups: ['users'],
       users: []
     },
+    devops: {
+      name: 'devops',
+      description: 'devops',
+      groups: ['DevOps']
+    },
     super: {
       name: 'super',
       description: 'super user role',

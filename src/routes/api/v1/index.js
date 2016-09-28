@@ -1077,7 +1077,8 @@ module.exports = function (app, config, authenticator) {
         });
       },
       function (asyncCallback) {
-        app.locals.puppetModule.getDevice(hostname, function (err, device) {
+        app.locals.logger.log('debug', 'requesting data from puppet module');
+        app.locals.puppetModule.getDevice(hostname + '.perspica.io', function (err, device) {
           if (err) {
             asyncCallback(null, {});
           } else {
@@ -1086,7 +1087,8 @@ module.exports = function (app, config, authenticator) {
         });
       },
       function (asyncCallback) {
-        app.locals.monModule.getDevice(hostname, function (err, device) {
+        app.locals.logger.log('debug', 'requesting data from monitoring module');
+        app.locals.monModule.getDevice(hostname+ '.perspica.io', function (err, device) {
           if (err) {
             asyncCallback(null, {});
           } else {
