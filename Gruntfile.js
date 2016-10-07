@@ -26,6 +26,8 @@ module.exports = function(grunt) {
         MON_CLASS: './lib/mockMonitoring',
         INST_CLASS: './lib/insturmentation',
         REDIS_CLASS: 'fakeredis',
+        LOG_LEVEL: 'hide',
+        LOG_LEVEL_SCREEN: 'hide',
         TZ: 'Etc/GMT'
       },
       development : {
@@ -37,6 +39,8 @@ module.exports = function(grunt) {
         MON_CLASS: './lib/monitoring',
         INST_CLASS: './lib/instrumentation',
         REDIS_CLASS: 'fakeredis',
+        LOG_LEVEL: 'hide',
+        LOG_LEVEL_SCREEN: 'info',
         TZ: 'Etc/GMT'
       }
     },

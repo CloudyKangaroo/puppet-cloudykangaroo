@@ -62,6 +62,8 @@ module.exports = function(logger, config) {
       req.kvLog.Platform = req.useragent.Platform;
       req.kvLog.isMobile = req.useragent.isMobile;
       req.kvLog.isDesktop = req.useragent.isDesktop;
+      req.kvLog.sessionID = req.sessionID;
+      req.kvLog.requestID = req.id;
 
       delete req.kvLog._rlLevel;
 

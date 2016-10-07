@@ -58,9 +58,11 @@ module.exports = function (config, logger, crmModule, redisClient) {
             _.each(body, function(event) {
               _.defaults(event, device);
               event.issued = utils.getFormattedTimestamp(event.issued);
+              logger.log('silly', 'event', { event: event});
+              event.output = event.check.output;
               events.push(event);
             });
-            logger.log('debug', 'fetched data from Sensu', { uri: config.sensu.uri + '/events'});
+            logger.log('silly', 'fetched data from Sensu', { uri: config.sensu.uri + '/events', events: events});
             getEventsCallback( error, events );
           } else {
             logger.log('error', 'Error processing request', { error: error, uri: config.sensu.uri + '/events'});

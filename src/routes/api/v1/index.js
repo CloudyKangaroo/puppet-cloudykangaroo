@@ -257,6 +257,7 @@ module.exports = function (app, config, authenticator) {
         app.locals.logger.log('error', 'Error handling request', {message: err.message});
         res.send(500);
       } else {
+        app.locals.logger.log('silly', 'events', {events: JSON.stringify(events) });
         res.type('application/json');
         res.send(JSON.stringify({ aaData: events }));
       }

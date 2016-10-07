@@ -222,14 +222,19 @@ module.exports = function (app) {
     return accessGranted;
   };
 
-  var hasRequiredRoles = function (user, requiredRoles, join) {
+  var hasRequiredRoles = function (user, requiredRoles, join, req) {
     app.locals.logger.log('debug', 'Authorization Request', {requiredRoles: requiredRoles, username: user});
+
+    if (req === undefined || ! req ){
+      req = {};
+      req.originalURL = 'undefined';
+    }
 
     if (arguments.length <= 1) {
       requiredRoles = ['users'];
     }
 
-    if (arguments.length <= 2) {
+    if (arguments.length <= 2 || join === null) {
       join = 'AND';
     }
 
@@ -251,13 +256,13 @@ module.exports = function (app) {
       } else {
         message = 'Authorization Denied';
       }
-      app.locals.logger.log('audit', message, {requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
+      app.locals.logger.log('audit', message, { url: req.originalURL || req.url, requiredRoles: requiredRoles, username: user.username, userGroups: user.groups, join: join, accessGranted: accessGranted});
     } else if (_.contains(requiredRoles, 'guest')) {
       accessGranted = true;
-      app.locals.logger.log('audit', 'Authorization Granted', {requiredRoles: requiredRoles, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'Authorization Granted', { url: req.originalURL || req.url, requiredRoles: requiredRoles, accessGranted: accessGranted});
     } else {
       accessGranted = false;
-      app.locals.logger.log('audit', 'Authorization Denied', {requiredRoles: requiredRoles, accessGranted: accessGranted});
+      app.locals.logger.log('audit', 'Authorization Denied', { url: req.originalURL || req.url, requiredRoles: requiredRoles, accessGranted: accessGranted});
     }
 
     return accessGranted;
@@ -309,34 +314,34 @@ module.exports = function (app) {
   };
 
   var isUsers = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users']);
+    return hasRequiredRoles(req.currentUser, ['users'], null, req);
   };
 
   var isSales = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'sales']);
+    return hasRequiredRoles(req.currentUser, ['users', 'sales'], null, req);
   };
 
   var isHelpdesk = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'helpdesk']);
+    return hasRequiredRoles(req.currentUser, ['users', 'helpdesk'], null, req);
   };
 
   var isMonitoring = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'monitoring']);
+    return hasRequiredRoles(req.currentUser, ['users', 'monitoring'], null, req);
   };
 
   var isAdmin = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'admin']);
+    return hasRequiredRoles(req.currentUser, ['users', 'admin'], null, req);
   };
 
   var isSuper = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'super']);
+    return hasRequiredRoles(req.currentUser, ['users', 'super'], null, req);
   };
 
   var isGuest = function (req) {
     if (req.hasOwnProperty('currentUser')) {
-      return hasRequiredRoles(req.currentUser, ['guest']);
+      return hasRequiredRoles(req.currentUser, ['guest'], null, req);
     } else {
-      return hasRequiredRoles(null, ['guest']);
+      return hasRequiredRoles(null, ['guest'], null, req);
     }
 
   };
