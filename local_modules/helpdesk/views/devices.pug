@@ -1,6 +1,6 @@
-extends ../layout
+extends /layout
 block head
-  include ../datatables_css
+  include /datatables_css
 
 block content
     .page-header
@@ -28,7 +28,7 @@ block content
                   tbody
 
 block footer
-  include ../datatables_js
+  include /datatables_js
   each group,group_id in device_types
     if group_id != 0
         script(type='text/javascript').

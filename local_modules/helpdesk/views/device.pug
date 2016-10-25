@@ -1,6 +1,6 @@
-extends ../layout
+extends /layout
 block head
-  include ../datatables_css
+  include /datatables_css
   link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css')
 
 block content
@@ -11,24 +11,24 @@ block content
       .row
         .col-md-12
           .panel.panel-default
-            include ../partials/monitoring/events
+            include /partials/monitoring/events
       .row
         .col-md-12
-          include ../partials/tickets/list
+          include /partials/tickets/list
       .row
         .col-md-6
-          include ../partials/device/system_stats
+          include /partials/device/system_stats
         .col-md-6
-          include ../partials/device/owner_details
+          include /partials/device/owner_details
       .row
         .col-md-12
-          include ../partials/monitoring/checks
+          include /partials/monitoring/checks
       .row
         .col-md-12
-          include ../partials/monitoring/facts
+          include /partials/monitoring/facts
 
 block footer
-  include ../datatables_js
+  include /datatables_js
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.1.0/bootbox.min.js')
   script(src='//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js')
   script(src='/javascripts/sensu-helper.js')

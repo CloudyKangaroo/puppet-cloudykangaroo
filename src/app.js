@@ -5,7 +5,6 @@
 var config = require('./config');
 
 var userPropertyConfig = { userProperty: 'currentUser' };
-var menus = require('./lib/menus')(userPropertyConfig);
 var utils = require('./lib/utils');
 var express = require('express');
 var path = require('path');
@@ -37,6 +36,9 @@ var logger = ctxlog('main', config.log.level, config.log.directory, { level: con
 var reqLogger = require('express-request-logger');
 var fs = require('fs');
 var logstream = fs.createWriteStream(config.log.accessLog, {flags: 'a'});
+
+//Menu System
+var menus = require('./lib/menus')(userPropertyConfig, logger);
 
 // Generic Requirements
 var redis = {};
@@ -179,9 +181,10 @@ app.locals.appMetrics = appMetrics;
 app.locals.puppetModule = puppetModule;
 app.locals.title = 'Cloudy Kangaroo';
 app.locals.version = pjson.version;
+app.locals.addMenuSection = menus.addMenuSection;
 app.locals.addMenuContent = menus.addMenuContent;
 app.locals.addMenuItem = menus.addMenuItem;
-
+app.locals.basedir = path.join(__dirname, 'views');
 app.enable('trust proxy');
 
 app.set('title', 'Cloudy Kangaroo');
@@ -189,7 +192,7 @@ app.set('port', config.http.port || 3000);
 /*jslint nomen: true*/
 app.set('views', path.join(__dirname, 'views'));
 /*jslint nomen: false*/
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 /*jslint nomen: true*/
 app.set('base_config_dir', __dirname + '/config');
 app.set('base_lib_dir', __dirname + '/lib');

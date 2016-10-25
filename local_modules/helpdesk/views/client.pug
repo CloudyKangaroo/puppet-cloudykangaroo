@@ -1,6 +1,6 @@
-extends ../layout
+extends /layout
 block head
-  include ../datatables_css
+  include /datatables_css
 
 block content
   .page-header
@@ -92,7 +92,7 @@ block content
                     span.pull-right  #{client.phone}
 
 block footer
-  include ../datatables_js
+  include /datatables_js
   script(type='text/javascript').
     $(document).ready(function() {
       $('#table_tickets').dataTable( {

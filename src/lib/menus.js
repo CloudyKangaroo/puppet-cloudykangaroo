@@ -1,4 +1,4 @@
-module.exports = function(params) {
+module.exports = function(params, logger) {
   "use strict";
 
   var userProperty = 'currentUser';
@@ -23,24 +23,6 @@ module.exports = function(params) {
   };
 
   var navSections = {
-    'sales':
-    {
-      label: 'Sales',
-      key: 'sales',
-      roles: ['sales', 'admin', 'super']
-    },
-    'helpdesk':
-    {
-      label: 'Helpdesk',
-      key: 'helpdesk',
-      roles: ['helpdesk', 'admin', 'super'],
-      content: [
-        { label: 'Dashboard', key: 'dashboard', path: '/helpdesk' },
-        { label: 'Customers', key: 'clients', path: '/helpdesk/clients' },
-        { label: 'Devices', key: 'devices', path: '/helpdesk/devices' }
-
-      ]
-    },
     'monitoring':
     {
       label: 'Monitoring',
@@ -95,8 +77,15 @@ module.exports = function(params) {
     }
   };
 
+  var addMenuSection = function(section, label, key, roles) {
+    var menuSection = { label: label, key: key, roles: roles};
+    logger.log('debug', 'Adding menu section', {section: section, menuSection: menuSection});
+    navSections[section] = menuSection;
+  };
+
   var addMenuItem = function (section, label, key, path, roles) {
     var menuItem = {section: section, label: label, key: key, path: path, roles: roles};
+    logger.log('debug', 'Adding menu item', {menuItem: menuItem});
     addMenuContent(menuItem);
   };
 
@@ -153,6 +142,7 @@ module.exports = function(params) {
     next();
   };
 
+  module.addMenuSection = addMenuSection;
   module.addMenuContent = addMenuContent;
   module.addMenuItem = addMenuItem;
 
