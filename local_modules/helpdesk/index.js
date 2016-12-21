@@ -10,7 +10,8 @@ module.exports = function (app, config, authenticator) {
     app.locals.addMenuContent({ section: moduleName, label: 'Devices', key: 'devices', path: '/helpdesk/devices' });
     app.locals.addMenuContent({ section: moduleName, label: 'Customers', key: 'clients', path: '/helpdesk/clients' });
 
-    authenticator.roleManager.registerDefaultAction(moduleName, 'view helpdesk ticket', 'view helpdesk tickets', ['helpdesk']);
+    authenticator.roleManager.registerDefaultAction(moduleName, 'view helpdesk tickets', 'view helpdesk tickets', ['helpdesk']);
+    authenticator.roleManager.registerDefaultAction(moduleName, 'view helpdesk clients', 'Ability to view clients', ['helpdesk']);
     authenticator.roleManager.registerDefaultAction(moduleName, 'view helpdesk devices', 'Create new Leads', ['helpdesk']);
     authenticator.roleManager.registerDefaultAction(moduleName, 'view helpdesk device detail', 'Submit new Activites related to leads and accounts', ['helpdesk']);
     authenticator.roleManager.registerDefaultAction(moduleName, 'view helpdesk', 'View existing account and lead non-billing information', ['users']);
@@ -38,6 +39,10 @@ module.exports = function (app, config, authenticator) {
             navSections: req.navSections
         };
         res.render(__dirname + '/views', renderParams);
+    });
+
+    app.get('/helpdesk/clients', authenticator.roleHandler.can('view helpdesk clients'), function (req, res) {
+        res.render(__dirname + '/views/clients', { user:req.currentUser, section: 'helpdesk', key: 'clients', navSections: req.navSections  });
     });
 
     app.get('/helpdesk/tickets',  authenticator.roleHandler.can('view helpdesk tickets'), function (req, res) {
@@ -193,10 +198,6 @@ module.exports = function (app, config, authenticator) {
                 res.redirect('/helpdesk/devices/deviceid/' + uberDevice.dev);
             }
         });
-    });
-
-    app.get('/helpdesk/clients', authenticator.roleHandler.can('view helpdesk clients'), function (req, res) {
-        res.render(__dirname + '/views/clients', { user:req.currentUser, section: 'helpdesk', key: 'clients', navSections: req.navSections  });
     });
 
     app.get('/helpdesk/clients/clientid/:clientid', authenticator.roleHandler.can('view helpdesk client detail'), function (req, res) {

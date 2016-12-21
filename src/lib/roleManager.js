@@ -150,7 +150,7 @@ module.exports = function (app) {
   var authFailureHandler = function (req, res, action) {
     var accept = req.headers.accept || '';
     if (req.currentUser) {
-      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
+      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups, roles: req.currentUser.roles});
     } else {
       app.locals.logger.log('debug', 'user is not authenticated', {action: action, groups: []});
     }
@@ -194,11 +194,6 @@ module.exports = function (app) {
     } else {
       return hasRoleGroups(user.groups, role);
     }
-  };
-
-  /* Placeholder for When I make this Async */
-  var cachedUserRoles = function (user, requiredRoles, join) {
-    return authorizeUserRoles(user, requiredRoles, join);
   };
 
   var authorizeUserRoles = function (user, requiredRoles, join) {
@@ -253,7 +248,7 @@ module.exports = function (app) {
     var message = '';
 
     if (user) {
-      accessGranted = cachedUserRoles(user, requiredRoles, join);
+      accessGranted = authorizeUserRoles(user, requiredRoles, join);
       if (accessGranted === true) {
         message = 'Authorization Granted';
       //} else if (cachedUserRoles(user, 'super'), join) {

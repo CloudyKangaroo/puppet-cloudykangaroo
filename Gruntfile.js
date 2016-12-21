@@ -40,7 +40,7 @@ module.exports = function(grunt) {
         INST_CLASS: './lib/instrumentation',
         REDIS_CLASS: 'fakeredis',
         LOG_LEVEL: 'hide',
-        LOG_LEVEL_SCREEN: 'info',
+        LOG_LEVEL_SCREEN: 'debug',
         TZ: 'Etc/GMT'
       }
     },
