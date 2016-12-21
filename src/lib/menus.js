@@ -47,17 +47,6 @@ module.exports = function(params, logger) {
         { label: 'Log Viewer', key: 'logviewer', path: '/instrumentation/logs' },
         { label: 'Signage', key: 'signage', path: '/instrumentation/signage' }
       ]
-    },
-    'admin':
-    {
-      label: 'Admin',
-      key: 'admin',
-      roles: ['super'],
-      content: [
-        { label: 'Dashboard', key: 'dashboard', path: '/admin' },
-        { label: 'Access Control', key: 'security', path: '/admin/security' },
-        { label: 'Audit Log', key: 'events', path: '/admin/audit' }
-      ]
     }
   };
 

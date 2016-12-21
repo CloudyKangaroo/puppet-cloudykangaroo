@@ -4,6 +4,7 @@ module.exports = function (app, config, authenticator, redisClient) {
   require('./auth')(app, config, authenticator, redisClient);
 //  require(app.get('base_lib_dir') + '/modules/helpdesk')(app, config, authenticator, redisClient);
   require('features-helpdesk')(app, config, authenticator, redisClient);
+  require('features-configuration')(app, config, authenticator, redisClient);
   require('./monitoring')(app, config, authenticator, redisClient);
   require('./account')(app, config, authenticator, redisClient);
   require('./events')(app, config, authenticator, redisClient);
