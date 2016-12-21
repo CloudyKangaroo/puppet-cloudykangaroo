@@ -1,6 +1,12 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
 
+  authenticator.roleManager.registerDefaultAction('helpdesk', 'view helpdesk', 'Ability to view ', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('helpdesk', 'view devices', 'Ability to view ', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('helpdesk', 'view helpdesk tickets', 'Ability to view ', ['users']);
+  authenticator.roleManager.registerDefaultAction('helpdesk', 'view helpdesk device detail', 'Ability to view ', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('helpdesk', 'view helpdesk clients', 'Ability to view ', ['users']);
+
   app.get('/helpdesk', authenticator.roleHandler.can('view helpdesk'), function (req, res) {
     var ticketLow = 0;
     var ticketNormal = 0;

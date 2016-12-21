@@ -1,6 +1,11 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
-  
+
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring', 'Ability to view monitoring', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring events', 'Ability to view monitoring events', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring devices', 'Ability to view ', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view devices', 'Ability to view ', ['helpdesk']);
+
   app.get('/monitoring', authenticator.roleHandler.can('view monitoring'), function (req, res) {
     app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
