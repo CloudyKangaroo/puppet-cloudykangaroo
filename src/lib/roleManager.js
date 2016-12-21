@@ -351,6 +351,7 @@ module.exports = function (app) {
 
   registerDefaultAction('internal', 'use api', 'Minimal API Access Level', ['users']);
   registerDefaultAction('internal', 'view devices', 'Ability to view customer equipment information', ['helpdesk']);
+  registerDefaultAction('internal', 'view nodeMgt', 'Ability to provide node configuration ', ['configuration_wizard']);
 
   roleHandler.use('guest', function (req) {
     return isGuest(req);
@@ -398,6 +399,9 @@ module.exports = function (app) {
   roleHandler.use('view helpdesk devices', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });
+  roleHandler.use('view configuration_wizard nodeMgt', function (req) {
+	    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
+	  });
   roleHandler.use('view helpdesk device detail', function (req) {
     return isHelpdesk(req) || isAdmin(req) || isSuper(req);
   });

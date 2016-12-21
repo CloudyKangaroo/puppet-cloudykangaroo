@@ -25,7 +25,6 @@ module.exports = function(grunt) {
         CRM_CLASS: 'cloudy-localsmith',
         MON_CLASS: './lib/mockMonitoring',
         INST_CLASS: './lib/insturmentation',
-        ADMIN_CLASS: './lib/admin',
         REDIS_CLASS: 'fakeredis',
         LOG_LEVEL: 'hide',
         LOG_LEVEL_SCREEN: 'hide',

@@ -56,8 +56,7 @@ module.exports = function(params, logger) {
       content: [
         { label: 'Dashboard', key: 'dashboard', path: '/admin' },
         { label: 'Access Control', key: 'security', path: '/admin/security' },
-        { label: 'Audit Log', key: 'events', path: '/admin/audit' },
-        { label: 'Configuration Wizard', key: 'configurationwizard', path: '/admin/configurationwizard' }
+        { label: 'Audit Log', key: 'events', path: '/admin/audit' }
       ]
     }
   };

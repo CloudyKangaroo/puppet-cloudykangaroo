@@ -27,9 +27,6 @@ config.crmModule.class = process.env.CRM_CLASS || 'cloudy-localsmith';
 config.instModule = {};
 config.instModule.class = process.env.INST_CLASS || './lib/instrumentation';
 
-config.adminModule = {};
-config.adminModule.class = process.env.ADMIN_CLASS || './lib/admin';
-
 config.monModule = {};
 config.monModule.class = process.env.MON_CLASS || './lib/monitoring';
 
