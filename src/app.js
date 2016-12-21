@@ -147,6 +147,20 @@ try {
   throw e;
 }
 
+/* Load the admin module */
+try {
+  if (config.adminModule && config.adminModule.class) {
+	 /* adminModule = require(config.adminModule.class)(config, logger, crmModule, redisClient);*/
+  } else {
+    var err = new Error('no admin specified in configuration');
+    throw err;
+  }
+
+} catch (e) {
+  logger.log('error', 'Could not initialize admin Module', { error: e.message});
+  throw e;
+}
+
 /* Load the puppet module */
 try {
   var puppetModule = require('./lib/puppet')(config, logger, redisClient);
@@ -177,6 +191,7 @@ app.locals.logger = logger;
 app.locals.crmModule = crmModule;
 app.locals.monModule = monModule;
 app.locals.instModule = instModule;
+//app.locals.adminModule = adminModule;
 app.locals.appMetrics = appMetrics;
 app.locals.puppetModule = puppetModule;
 app.locals.title = 'Cloudy Kangaroo';
