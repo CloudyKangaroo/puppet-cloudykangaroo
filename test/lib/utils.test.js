@@ -19,7 +19,7 @@ describe("utils getFormattedISO8601", function (){
     it('should return an ISO8601 formatted timestamp', function () {
         var req = {};
         var utils = require('../../src/lib/utils');
-        assert.equal('2016-06-20T01:15:11.000Z', utils.getFormattedISO8601('2016-06-20 01:15:11+6'));
+        assert.equal('2016-06-20T01:15:11.000Z', utils.getFormattedISO8601('2016-06-20 01:15:11'));
     });
 });
 
