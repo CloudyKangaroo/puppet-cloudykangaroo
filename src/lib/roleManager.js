@@ -9,10 +9,15 @@ module.exports = function (app) {
       groups: ['users'],
       users: []
     },
-    devops: {
-      name: 'devops',
-      description: 'devops',
-      groups: ['DevOps']
+    helpdesk: {
+      name: 'helpdesk',
+      description: 'helpdesk',
+      groups: ['helpdesk']
+    },
+    admin: {
+      name: 'admin',
+      description: 'Administrators',
+      groups: ['helpdesk']
     },
     super: {
       name: 'super',
@@ -85,19 +90,22 @@ module.exports = function (app) {
     return newRole;
   };
 
-  var authorizeRoles = function (action, roles) {
-    nconf.set('authorizations:' + action, roles);
-    /*saveConfig(function (err, results) {
-     if (err) {
-     app.locals.logger.log('error', 'error', { err: JSON.stringify(err)});
-     } else {
-     app.locals.logger.log('debug', 'saved', {results: JSON.stringify(results)});
-     }
-     });*/
+  var authorizeRoles = function (action, authorizedRoles) {
+    nconf.set('authorizations:' + action, authorizedRoles);
+    roleHandler.use(action, function (req) {
+      return hasRequiredRoles(req.currentUser, authorizedRoles, null, req);
+    });
+    saveConfig(function (err, results) {
+      if (err) {
+        app.locals.logger.log('error', 'error', { err: JSON.stringify(err)});
+      } else {
+        app.locals.logger.log('debug', 'saved', {results: JSON.stringify(results)});
+      }
+    });
   };
 
   var saveConfig = function (done) {
-    nconf.save(function (err) {
+    /*nconf.save(function (err) {
       if (err) {
         done(err);
       } else {
@@ -114,7 +122,8 @@ module.exports = function (app) {
           done(ex);
         }
       }
-    });
+    });*/
+    done(null, null);
   };
 
   function initializeRoles() {
@@ -123,9 +132,6 @@ module.exports = function (app) {
     }
     if (!roles.hasOwnProperty('guest')) {
       registerRole('guest', 'Built-In Role for unauthenticated Users');
-    }
-    if (!roles.hasOwnProperty('sales')) {
-      registerRole('sales', 'Provides access to lead and account management functionality. Also provides read-only access to monitoring.');
     }
     if (!roles.hasOwnProperty('helpdesk')) {
       registerRole('helpdesk', 'Provides access to helpdesk functionality. Also provides read-only access to monitoring.');
@@ -144,7 +150,7 @@ module.exports = function (app) {
   var authFailureHandler = function (req, res, action) {
     var accept = req.headers.accept || '';
     if (req.currentUser) {
-      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups});
+      app.locals.logger.log('debug', 'user not allowed', {action: action, groups: req.currentUser.groups, roles: req.currentUser.roles});
     } else {
       app.locals.logger.log('debug', 'user is not authenticated', {action: action, groups: []});
     }
@@ -188,11 +194,6 @@ module.exports = function (app) {
     } else {
       return hasRoleGroups(user.groups, role);
     }
-  };
-
-  /* Placeholder for When I make this Async */
-  var cachedUserRoles = function (user, requiredRoles, join) {
-    return authorizeUserRoles(user, requiredRoles, join);
   };
 
   var authorizeUserRoles = function (user, requiredRoles, join) {
@@ -247,7 +248,7 @@ module.exports = function (app) {
     var message = '';
 
     if (user) {
-      accessGranted = cachedUserRoles(user, requiredRoles, join);
+      accessGranted = authorizeUserRoles(user, requiredRoles, join);
       if (accessGranted === true) {
         message = 'Authorization Granted';
       //} else if (cachedUserRoles(user, 'super'), join) {
@@ -313,134 +314,17 @@ module.exports = function (app) {
     }
   };
 
-  var isUsers = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users'], null, req);
-  };
-
-  var isSales = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'sales'], null, req);
-  };
-
-  var isHelpdesk = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'helpdesk'], null, req);
-  };
-
-  var isMonitoring = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'monitoring'], null, req);
-  };
-
-  var isAdmin = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'admin'], null, req);
-  };
-
-  var isSuper = function (req) {
-    return hasRequiredRoles(req.currentUser, ['users', 'super'], null, req);
-  };
-
-  var isGuest = function (req) {
-    if (req.hasOwnProperty('currentUser')) {
-      return hasRequiredRoles(req.currentUser, ['guest'], null, req);
-    } else {
-      return hasRequiredRoles(null, ['guest'], null, req);
-    }
-
-  };
-
   registerDefaultAction('internal', 'user', 'Minimal Authenticated Access Level', ['users']);
   registerDefaultAction('internal', 'guest', 'Minimal Access Level', ['guests']);
-
   registerDefaultAction('internal', 'use api', 'Minimal API Access Level', ['users']);
-  registerDefaultAction('internal', 'view devices', 'Ability to view customer equipment information', ['helpdesk']);
-  registerDefaultAction('internal', 'view nodeMgt', 'Ability to provide node configuration ', ['configuration_wizard']);
-
-  roleHandler.use('guest', function (req) {
-    return isGuest(req);
-  });
-
-  roleHandler.use('user', function (req) {
-    return isUsers(req);
-  });
-
-  roleHandler.use('use api', function (req) {
-    return isUsers(req);
-  });
-
-  roleHandler.use('view pipeline', function (req) {
-    return isSales(req) || isAdmin(req) || isSuper(req);
-  });
-
-  roleHandler.use('view accounts', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view tickets', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view monitoring', function (req) {
-    return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('deactivate customers', isSuper);
-  roleHandler.use('decommission device', function (req) {
-    return isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('issue credit', isSuper);
-
-  roleHandler.use('view pipeline detail', function (req) {
-    return isSales(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view monitoring events', function (req) {
-    return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view devices', function (req) {
-    return isSales(req) || isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view helpdesk tickets', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view helpdesk devices', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view configuration_wizard nodeMgt', function (req) {
-	    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-	  });
-  roleHandler.use('view helpdesk device detail', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view helpdesk clients', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('view helpdesk', isUsers);
-  roleHandler.use('view helpdesk client detail', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('silence monitoring events', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
-  roleHandler.use('delete monitoring events', function (req) {
-    return isHelpdesk(req) || isAdmin(req) || isSuper(req);
-  });
 
   initializeRoles();
 
-  //module.use = roleHandler.use;
-  //module.can = roleHandler.can;
-  //module.is = roleHandler.is;
-  //module.userCan = roleHandler.userCan;
-  //module.userIs = roleHandler.userIs;
-  //module.test = roleHandler.test;
-  //module.functionList = roleHandler.functionList;
-  //module.failureHandler = roleHandler.failureHandler;
   module.roleHandler = roleHandler;
   module.authorizeUserRoles = authorizeUserRoles;
   module.hasRequiredRoles = hasRequiredRoles;
   module.authFailureHandler = authFailureHandler;
   module.handle = handle;
-  module.isUsers = isUsers;
-  module.isSales = isSales;
-  module.isGuest = isGuest;
-  module.isHelpdesk = isHelpdesk;
-  module.isMonitoring = isMonitoring;
-  module.isAdmin = isAdmin;
-  module.isSuper = isSuper;
   module.registerAction = registerAction;
   module.registerDefaultAction = registerDefaultAction;
   module.registerRole = registerRole;

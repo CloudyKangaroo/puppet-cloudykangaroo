@@ -14,7 +14,7 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      all: ['Gruntfile.js', 'src/app.js', 'src/routes/**/*.js', 'src/lib/**/*.js', 'src/public/javasripts/newTicketWizard.js', 'src/public/javascripts/sensu-helper.js', 'src/public/javascripts/puppet_gauges.js' ]
+      all: ['Gruntfile.js', 'local_modules/**/*.js', 'src/app.js', 'src/routes/**/*.js', 'src/lib/**/*.js', 'src/public/javasripts/newTicketWizard.js', 'src/public/javascripts/sensu-helper.js', 'src/public/javascripts/puppet_gauges.js' ]
     },
     env : {
       test : {
@@ -41,7 +41,7 @@ module.exports = function(grunt) {
         ADMIN_CLASS: './lib/admin',
         REDIS_CLASS: 'fakeredis',
         LOG_LEVEL: 'hide',
-        LOG_LEVEL_SCREEN: 'info',
+        LOG_LEVEL_SCREEN: 'debug',
         TZ: 'Etc/GMT'
       }
     },
@@ -49,8 +49,8 @@ module.exports = function(grunt) {
       test: {
         options: {
           reporter: 'travis-cov',
-          files: 'test/**/*.js',
-          src: ['test/**/*.js']
+          files: ['test/**/*.js', 'local_modules/**/test/**/*.js'],
+          src: ['test/**/*.js', 'local_modules/**/test/**/*.js']
         },
         'pattern': [
           'src'
@@ -60,8 +60,8 @@ module.exports = function(grunt) {
       coverage: {
         options: {
           coveralls: true,
-          files: 'test/**/*.js',
-          src: ['test/**/*.js']
+          files: ['test/**/*.js', 'local_modules/**/test/**/*.js'],
+          src: ['test/**/*.js', 'local_modules/**/test/**/*.js']
         },
         'pattern': [
           'src'
@@ -75,7 +75,7 @@ module.exports = function(grunt) {
           reporter: 'spec',
           timeout: 1000
         },
-        src: ['test/**/*.js']
+        src: ['test/**/*.js', 'local_modules/**/test/**/*.js']
       }
     },
     execute: {

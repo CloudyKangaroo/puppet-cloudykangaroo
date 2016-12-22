@@ -1,6 +1,11 @@
 module.exports = function (app, config, authenticator) {
   "use strict";
-  
+
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring', 'Ability to view monitoring', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring events', 'Ability to view monitoring events', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring devices', 'Ability to view ', ['helpdesk']);
+  authenticator.roleManager.registerDefaultAction('monitoring', 'view monitoring devices', 'Ability to view ', ['helpdesk']);
+
   app.get('/monitoring', authenticator.roleHandler.can('view monitoring'), function (req, res) {
     app.locals.monModule.getInfo(function(error, body) {
       var moment = require('moment');
@@ -49,7 +54,7 @@ module.exports = function (app, config, authenticator) {
     });
   });
 
-  app.get('/monitoring/events/device/:hostname', authenticator.roleHandler.can('view devices'), authenticator.roleHandler.can('view monitoring'), function (req, res) {
+  app.get('/monitoring/events/device/:hostname', authenticator.roleHandler.can('view monitoring devices'), authenticator.roleHandler.can('view monitoring'), function (req, res) {
     var hostname = req.params.hostname;
     app.locals.monModule.getDeviceEvents(hostname, function(error, body) {
       if (!error) {

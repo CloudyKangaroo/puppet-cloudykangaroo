@@ -1,0 +1,52 @@
+extends /layout
+block head
+    include /datatables_css
+
+block content
+    .row
+        .page-header
+            h1 Node Configuration Wizard
+    .row
+        .panel.panel-default
+            .panel-heading Deployment Configuration
+            .panel-body
+                label #MOBS
+                input(type='text')
+                label #DPS
+                input(type='text')
+                label HA
+                input(type='checkbox', value='HA')
+                label Retention Period
+                input(type='radio', value='15 min')
+                |  15 min
+                input(type='radio', value='30 min')
+                |  30 min
+                input(type='radio', value='1 hour')
+                |  1 hour
+                input(type='radio', value='1 day')
+                |  1 day
+    .row
+        .panel.panel-default
+            .panel-heading VM Ware
+            .panel-body
+                label Base OVF
+                input(type='text', placeholder='URL')
+                label.labelFieldWidth(for='inputduration', style='float: left;')
+                span(style='width: 30px;height: 20px;font-weight: bold;') #CPU
+                span(style='width: 30px;height: 20px;font-weight: bold;') #MEM
+                span(style='width: 30px;height: 20px;font-weight: bold;') #I/O
+                label CPU
+                input(type='text',style='width: 30px;height: 20px;margin-right: 7px')
+                input(type='text',style='width: 30px;height: 20px;margin-right: 7px')
+                input(type='text',style='width: 30px;height: 20px;margin-right: 7px')
+    .row
+        button#calculateBtn.btn.btn-primary(type='button', style='float:right') Calculate
+
+block footer
+    include /datatables_js
+    script(type='text/javascript').
+        $(document).ready(function () {
+            $("#calculateBtn").click(function () {
+                alert("sas");
+            });
+        });
