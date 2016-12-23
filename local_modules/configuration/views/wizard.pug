@@ -10,35 +10,115 @@ block content
         .panel.panel-default
             .panel-heading Deployment Configuration
             .panel-body
-                label #MOBS
-                input(type='text')
-                label #DPS
-                input(type='text')
-                label HA
-                input(type='checkbox', value='HA')
-                label Retention Period
-                input(type='radio', value='15 min')
-                |  15 min
-                input(type='radio', value='30 min')
-                |  30 min
-                input(type='radio', value='1 hour')
-                |  1 hour
-                input(type='radio', value='1 day')
-                |  1 day
+              form.margin-bottom-40(role='form')
+              .col-xs-7.col-md-5
+               .form-group
+               label(for='mobs') MOBS
+               |  
+               input#mobsTxtInput.form-control(type='text')
+               |  
+               .form-group
+               label(for='dpsTxtInput') DPS
+               |  
+               input#dpsTxtInput.form-control(type='text')
+               |  
+               .checkbox
+               label
+               input(type='checkbox')
+               |  HA
+               |  
+               .form-group
+               label(for='dpsTxtInput') Retention Period
+               |  
+               .radio
+                label
+                input#retentionRadiosMin(type='radio', name='retentionPeriod', value='15 min', checked='')
+                | 15 min
+               .radio
+                label
+                input#retentionRadiosHour(type='radio', name='retentionPeriod', value='1 hour')
+                | 1 hour
+               .radio
+                label
+                input#retentionRadiosDay(type='radio', name='retentionPeriod', value='1 day')
+                | 1 Day
     .row
         .panel.panel-default
             .panel-heading VM Ware
             .panel-body
-                label Base OVF
-                input(type='text', placeholder='URL')
-                label.labelFieldWidth(for='inputduration', style='float: left;')
-                span(style='width: 30px;height: 20px;font-weight: bold;') #CPU
-                span(style='width: 30px;height: 20px;font-weight: bold;') #MEM
-                span(style='width: 30px;height: 20px;font-weight: bold;') #I/O
-                label CPU
-                input(type='text',style='width: 30px;height: 20px;margin-right: 7px')
-                input(type='text',style='width: 30px;height: 20px;margin-right: 7px')
-                input(type='text',style='width: 30px;height: 20px;margin-right: 7px')
+              form.margin-bottom-40(role='form')
+              .col-xs-7.col-md-5
+                .form-group
+                label(for='ovfTxtInput') Base OVF
+                |  
+                input#ovfTxtInput.form-control(type='text', placeholder='URL')
+                table.table
+                  thead
+                    tr
+                      th(style='text-align:center') 
+                      |                                 
+                      th(style='text-align:center') CPU
+                      |                                 
+                      th(style='text-align:center') MEM
+                      |                                 
+                      th(style='text-align:center') I/O
+                    |                         
+                  tbody
+                    tr
+                      td VM1
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
+                    tr
+                      td VM1
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
+                    tr
+                      td VM3
+                      |                                 
+                      td
+                        input(type='text') 
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
+                    tr
+                      td VM4
+                      |                                 
+                      td
+                        input(type='text') 
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
+                    tr
+                      td VM5
+                      |                                 
+                      td
+                        input(type='text') 
+                      |                                 
+                      td
+                        input(type='text')
+                      |                                 
+                      td
+                        input(type='text')
     .row
         button#calculateBtn.btn.btn-primary(type='button', style='float:right') Calculate
 
