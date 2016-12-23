@@ -7,7 +7,7 @@ block content
         .page-header
             h1 Node Configuration Wizard
     .row
-        .panel.panel-default
+        .panel#deploymentForm.panel-default
             .panel-heading Deployment Configuration
             .panel-body
               form.margin-bottom-40(role='form')
@@ -43,7 +43,7 @@ block content
                 input#retentionRadiosDay(type='radio', name='retentionPeriod', value='1 day')
                 | 1 Day
     .row
-        .panel.panel-default
+        .panel#vmWareForm.panel-default
             .panel-heading VM Ware
             .panel-body
               form.margin-bottom-40(role='form')
@@ -52,16 +52,17 @@ block content
                 label(for='ovfTxtInput') Base OVF
                 |  
                 input#ovfTxtInput.form-control(type='text', placeholder='URL')
-                table.table
+                .col-xs-7.col-md-5
+                table.table.borderless
                   thead
                     tr
-                      th(style='text-align:center') 
+                      th
                       |                                 
-                      th(style='text-align:center') CPU
+                      th CPU
                       |                                 
-                      th(style='text-align:center') MEM
+                      th MEM
                       |                                 
-                      th(style='text-align:center') I/O
+                      th I/O
                     |                         
                   tbody
                     tr
@@ -120,13 +121,205 @@ block content
                       td
                         input(type='text')
     .row
+        .panel#resultPage.panel-default(style='display:none')
+            .panel-heading Results
+            .panel-body
+              form.margin-bottom-40(role='form')
+                .form-group
+                table.table.borderless
+                  thead
+                    tr
+                      th Services
+                      |                                 
+                      th ZooKeeper
+                      |                                 
+                      th HDFS Name Node
+                      |                                 
+                      th HDFS ZKFC
+                      |                                 
+                      th HDFS Journal Node
+                      |                                 
+                      th HDFS Data Node
+                      |                                 
+                      th Hbase Master
+                      |                                 
+                      th Hbase Regionserver
+                      |                                 
+                      th OpenTSDB (Write)
+                      |                                 
+                      th OpenTSDB Docker (Read)
+                      
+                    |                         
+                  tbody
+                    tr
+                      td Needed
+                      td
+                      td
+                      td
+                      td 
+                      td
+                      td
+                      td
+                      td 
+                      td
+                    tr
+                      td Alloted
+                      td
+                      td
+                      td
+                      td 
+                      td
+                      td
+                      td
+                      td 
+                      td
+                    tr
+                      td CPU1
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                    tr
+                      td CPU2
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                    tr
+                      td MEM1
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                    tr
+                      td MEM2
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                    tr
+                      td I/O 1
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                    tr
+                      td I/O 2
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox')
+                      td
+                        input(type='checkbox') 
+                      td
+                        input(type='checkbox')
+                      
+
+    .row#calculateContainer
         button#calculateBtn.btn.btn-primary(type='button', style='float:right') Calculate
+    .row#generateContainer(style='display:none')
+        button#backBtn.btn.btn-primary(type='button', style='float:left') Back
+        button#generatBtn.btn.btn-primary(type='button', style='float:right') Generate
 
 block footer
     include /datatables_js
     script(type='text/javascript').
         $(document).ready(function () {
             $("#calculateBtn").click(function () {
-                alert("sas");
+            	$("#deploymentForm").hide();
+            	$("#vmWareForm").hide();
+            	$("#calculateContainer").hide();
+                $("#resultPage").show();
+                $("#generateContainer").show();
+            });
+            $("#backBtn").click(function () {
+            	$("#deploymentForm").show();
+            	$("#vmWareForm").show();
+            	$("#calculateContainer").show();
+                $("#resultPage").hide();
+                $("#generateContainer").hide();
+            });
+            $("#generatBtn").click(function () {
+            	alert('click on Generate button');
             });
         });
