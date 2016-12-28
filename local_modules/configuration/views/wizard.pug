@@ -160,14 +160,14 @@ block footer
                     nodeIndx++;
                   }
                 }
-                console.log(nodeList);
+               // console.log(nodeList);
                 
                 var row = "";
                 var tbody = $("#vmwarePageBody").empty();
                 $.each(nodeList,function(rowIndex,item){
                   row = $("<tr/>");
                   row.append($("<td/>").text(item.name));
-                  row.append("<td><input type='text'/></td>");
+                  row.append("<td><input type='text' value='8'/></td>");
                   row.append("<td><input type='text' value='"+item.MEM+"'/></td>");
                   row.append("<td><input type='text'/></td>");
                   tbody.append(row);
@@ -193,77 +193,28 @@ block footer
                 header.append(row);
                 
                 var tbody = $("#resultPageBody").empty();
-                row = $("<tr><td style='text-align: left;'>Needed</td></tr>");
+                row = $("<tr><td style='text-align: left;font-weight: bold;'>Needed</td></tr>");
                 $.each(updatedServiceList,function(rowIndex,item){
                   row.append($("<td/>").text(item.totalMemory));
                 });
                 tbody.append(row);
-                row = $("<tr><td style='text-align: left;'>Alloted</td></tr>");
+                row = $("<tr><td style='text-align: left;font-weight: bold;'>Alloted</td></tr>");
                 $.each(services,function(rowIndex,item){
-                  row.append($("<td/>").text(''));
+                  row.append($("<td/>").text(item.totalMemory));
                 });
                 tbody.append(row);
                 
                 $.each(nodeList,function(rowIndex,item){
-                  row = $("<tr><td style='text-align: left;'>CPU "+(rowIndex+1)+"</td></tr>");
-                  $.each(services,function(rowIndex1,item1){
-                    var chkId = "chkbx_"+rowIndex+rowIndex1;
-                    row.append($("<td><input id='"+chkId+"' type='checkbox' /></td>"));
-                    //row.append($("<td><input id='chkbx' type='checkbox' /></td>"));
-                   // console.log("#"+chkId);
-                    $("#"+chkId).prop( "checked", true );
-                  });
-                  tbody.append(row);
-                  
-                  row = $("<tr><td style='text-align: left;'>MEM "+(rowIndex+1)+"</td></tr>");
+                  row = $("<tr><td style='text-align: left;'>"+item.name+"</td></tr>");
                   $.each(services,function(rowIndex,item1){
-                    row.append($("<td><input type='checkbox'/></td>"));
+                  
+                    if(item.services.indexOf(item1.serviceName)!=-1)
+                      row.append($("<td><input type='checkbox' checked/></td>"));
+                    else
+                      row.append($("<td><input type='checkbox' /></td>"));
                   });
                   tbody.append(row);
-                  
-                  row = $("<tr><td style='text-align: left;'>I/O "+(rowIndex+1)+"</td></tr>");
-                  $.each(services,function(rowIndex,item1){
-                    row.append($("<td><input type='checkbox'/></td>"));
-                  });
-                  tbody.append(row);
-                  
                 });
-                
-                /*row = $("<tr><td>CPU 1</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td><input type='checkbox'/></td>"));
-                });
-                tbody.append(row);
-                
-                row = $("<tr><td>CPU 2</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td><input type='checkbox'/></td>"));
-                });
-                tbody.append(row);
-                
-                row = $("<tr><td>MEM 1</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td><input type='checkbox'/></td>"));
-                });
-                tbody.append(row);
-                
-                row = $("<tr><td>MEM 2</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td><input type='checkbox'/></td>"));
-                });
-                tbody.append(row);
-                
-                row = $("<tr><td>I/O 1</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td><input type='checkbox'/></td>"));
-                });
-                tbody.append(row);
-                
-                row = $("<tr><td>I/O 2</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td><input type='checkbox'/></td>"));
-                });
-                tbody.append(row);*/
             });
             
             $("#previewBackBtn").click(function () {
