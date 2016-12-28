@@ -96,6 +96,7 @@ block footer
         
         var nodeList = [];
         var updatedServiceList = [];
+        var services = !{JSON.stringify(configuration.services)};
             function search(nameKey, myArray)
             {
               for (var i=0; i < myArray.length; i++) 
@@ -106,16 +107,68 @@ block footer
                 }
               }
             };
-            
+            function populateTableOnPreviewPage(serviceList,updatedServiceList,nodeList)
+            {
+              var row = "";
+                var header = $("#resultPageHeader").empty();
+                row = $("<tr><th>Services</th></tr>");
+                $.each(serviceList,function(rowIndex,item){
+                  row.append($("<th title='"+item.serviceName+"'/>").text(item.serviceName));
+                });
+                header.append(row);
+                
+                var tbody = $("#resultPageBody").empty();
+                row = $("<tr><td style='text-align: left;font-weight: bold;'>Needed</td></tr>");
+                $.each(serviceList,function(rowIndex,item){
+                  row.append($("<td/>").text(item.totalMemory));
+                });
+                tbody.append(row);
+                row = $("<tr><td style='text-align: left;font-weight: bold;'>Alloted</td></tr>");
+                $.each(updatedServiceList,function(rowIndex,item){
+                  row.append($("<td/>").text(item.totalMemory));
+                });
+                tbody.append(row);
+                
+                $.each(nodeList,function(rowIndex,item){
+                  row = $("<tr><td style='text-align: left;'>"+item.name+"</td></tr>");
+                  $.each(services,function(rowIndex1,item1){
+                  
+                    if(item.services.indexOf(item1.serviceName)!=-1)
+                      row.append($("<td><input id='"+rowIndex+"_"+rowIndex1+"' type='checkbox' checked/></td>"));
+                    else
+                      row.append($("<td><input id='"+rowIndex+"_"+rowIndex1+"' type='checkbox' /></td>"));
+                  });
+                  tbody.append(row);
+                });
+            };
+            $("#resultPageBody").on("change", "input[type='checkbox']", function(evt){
+              var nodeRowIndex = evt.target.id.split('_')[0];
+              var serviceColumnIndex = evt.target.id.split('_')[1];
+              if (this.checked)
+              {
+              	 nodeList[nodeRowIndex].services.push(updatedServiceList[serviceColumnIndex].serviceName);
+                 updatedServiceList[serviceColumnIndex].totalMemory = Number(updatedServiceList[serviceColumnIndex].totalMemory)+Number(updatedServiceList[serviceColumnIndex].MPN);
+              } 
+              else 
+              {
+                 var index = nodeList[nodeRowIndex].services.indexOf(updatedServiceList[serviceColumnIndex].serviceName);    
+                 if (index !== -1) 
+                 {
+                   nodeList[nodeRowIndex].services.splice(index, 1);
+                 }
+                 updatedServiceList[serviceColumnIndex].totalMemory = Number(updatedServiceList[serviceColumnIndex].totalMemory)-Number(updatedServiceList[serviceColumnIndex].MPN);
+              } 
+              console.log(services);
+              populateTableOnPreviewPage(services,updatedServiceList,nodeList);
+            });
             $("#calculateBtn").click(function () {
                 var mobs = $("#mobsTxtInput").val();
-                var services = !{JSON.stringify(configuration.services)};
                 updatedServiceList = [];
                 var totalNoOfNode  = 0;
                 var totalMemory = 0;
                 for(i=0;i<services.length;i++)
                 {
-                  var obj = services[i];
+                  var obj = jQuery.extend({}, services[i]);//services[i];
                   if(Number(obj.memoryThreshold))
                   {
                     obj.NON = mobs/obj.memoryThreshold;
@@ -183,38 +236,7 @@ block footer
             	$("#priviewBtnContainer").hide();
                 $("#resultPage").show();
                 $("#generateContainer").show();
-                var services = !{JSON.stringify(configuration.services)};
-                var row = "";
-                var header = $("#resultPageHeader").empty();
-                row = $("<tr><th>Services</th></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<th title='"+item.serviceName+"'/>").text(item.serviceName));
-                });
-                header.append(row);
-                
-                var tbody = $("#resultPageBody").empty();
-                row = $("<tr><td style='text-align: left;font-weight: bold;'>Needed</td></tr>");
-                $.each(updatedServiceList,function(rowIndex,item){
-                  row.append($("<td/>").text(item.totalMemory));
-                });
-                tbody.append(row);
-                row = $("<tr><td style='text-align: left;font-weight: bold;'>Alloted</td></tr>");
-                $.each(services,function(rowIndex,item){
-                  row.append($("<td/>").text(item.totalMemory));
-                });
-                tbody.append(row);
-                
-                $.each(nodeList,function(rowIndex,item){
-                  row = $("<tr><td style='text-align: left;'>"+item.name+"</td></tr>");
-                  $.each(services,function(rowIndex,item1){
-                  
-                    if(item.services.indexOf(item1.serviceName)!=-1)
-                      row.append($("<td><input type='checkbox' checked/></td>"));
-                    else
-                      row.append($("<td><input type='checkbox' /></td>"));
-                  });
-                  tbody.append(row);
-                });
+                populateTableOnPreviewPage(services,updatedServiceList,nodeList);
             });
             
             $("#previewBackBtn").click(function () {
