@@ -16,10 +16,20 @@ html
       .borderless th{
         border: none !important;
         text-align:center;
+        max-width:80px;
+        width:80px; 
+        white-space:nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     style(type='text/css').
       .borderless input{
         width: 80px !important;
+      }
+    style(type='text/css').
+      .inputForm {
+        overflow: auto;
+        margin-bottom:40px;
       }
     if IE
       script(src='//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js')

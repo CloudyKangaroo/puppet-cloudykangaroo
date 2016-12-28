@@ -5,7 +5,7 @@ block head
 block content
     .row
         .page-header
-            h1 Node Configuration Wizard
+            h1 Node Configuration Wizard 
     .row
         .panel#deploymentForm.panel-default
             .panel-heading Deployment Configuration
@@ -42,8 +42,11 @@ block content
                 label
                 input#retentionRadiosDay(type='radio', name='retentionPeriod', value='1 day')
                 | 1 Day
+    .row#calculateContainer
+        button#calculateBtn.btn.btn-primary(type='button', style='float:right') Calculate
+
     .row
-        .panel#vmWareForm.panel-default
+        .panel#vmWareForm.panel-default(style='display:none')
             .panel-heading VM Ware
             .panel-body
               form.margin-bottom-40(role='form')
@@ -64,239 +67,24 @@ block content
                       |                                 
                       th I/O
                     |                         
-                  tbody
-                    tr
-                      td VM1
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
-                    tr
-                      td VM1
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
-                    tr
-                      td VM3
-                      |                                 
-                      td
-                        input(type='text') 
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
-                    tr
-                      td VM4
-                      |                                 
-                      td
-                        input(type='text') 
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
-                    tr
-                      td VM5
-                      |                                 
-                      td
-                        input(type='text') 
-                      |                                 
-                      td
-                        input(type='text')
-                      |                                 
-                      td
-                        input(type='text')
+                  tbody#vmwarePageBody
+
     .row
         .panel#resultPage.panel-default(style='display:none')
             .panel-heading Results
             .panel-body
-              form.margin-bottom-40(role='form')
+              form.inputForm(role='form')
                 .form-group
                 table.table.borderless
-                  thead
-                    tr
-                      th Services
-                      |                                 
-                      th ZooKeeper
-                      |                                 
-                      th HDFS Name Node
-                      |                                 
-                      th HDFS ZKFC
-                      |                                 
-                      th HDFS Journal Node
-                      |                                 
-                      th HDFS Data Node
-                      |                                 
-                      th Hbase Master
-                      |                                 
-                      th Hbase Regionserver
-                      |                                 
-                      th OpenTSDB (Write)
-                      |                                 
-                      th OpenTSDB Docker (Read)
+                  thead#resultPageHeader
                       
                     |                         
-                  tbody
-                    tr
-                      td Needed
-                      td
-                      td
-                      td
-                      td 
-                      td
-                      td
-                      td
-                      td 
-                      td
-                    tr
-                      td Alloted
-                      td
-                      td
-                      td
-                      td 
-                      td
-                      td
-                      td
-                      td 
-                      td
-                    tr
-                      td CPU1
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                    tr
-                      td CPU2
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                    tr
-                      td MEM1
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                    tr
-                      td MEM2
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                    tr
-                      td I/O 1
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                    tr
-                      td I/O 2
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox')
-                      td
-                        input(type='checkbox') 
-                      td
-                        input(type='checkbox')
+                  tbody#resultPageBody
                       
 
-    .row#calculateContainer
-        button#calculateBtn.btn.btn-primary(type='button', style='float:right') Calculate
+    .row#priviewBtnContainer(style='display:none')
+        button#previewBackBtn.btn.btn-primary(type='button', style='float:left') Back    
+        button#previewBtn.btn.btn-primary(type='button', style='float:right') Preview
     .row#generateContainer(style='display:none')
         button#backBtn.btn.btn-primary(type='button', style='float:left') Back
         button#generatBtn.btn.btn-primary(type='button', style='float:right') Generate
@@ -305,17 +93,188 @@ block footer
     include /datatables_js
     script(type='text/javascript').
         $(document).ready(function () {
+        
+        var nodeList = [];
+        var updatedServiceList = [];
+            function search(nameKey, myArray)
+            {
+              for (var i=0; i < myArray.length; i++) 
+              {
+                if (myArray[i].serviceName === nameKey) 
+                {
+                  return myArray[i];
+                }
+              }
+            };
+            
             $("#calculateBtn").click(function () {
-            	$("#deploymentForm").hide();
+                var mobs = $("#mobsTxtInput").val();
+                var services = !{JSON.stringify(configuration.services)};
+                updatedServiceList = [];
+                var totalNoOfNode  = 0;
+                var totalMemory = 0;
+                for(i=0;i<services.length;i++)
+                {
+                  var obj = services[i];
+                  if(Number(obj.memoryThreshold))
+                  {
+                    obj.NON = mobs/obj.memoryThreshold;
+                    obj.totalMemory =(isNaN(obj.MPN))?"NA":obj.MPN*obj.NON;
+                  }
+                  updatedServiceList.push(obj);
+                  totalNoOfNode += Number(obj.NON);
+                  if(!isNaN(obj.totalMemory))
+                  {
+                    totalMemory += Number(obj.totalMemory);
+                  }
+                }
+                nodeList = [];
+                var memorySize = [12,36,24,24];
+                var item1 = search('ZooKeeper',updatedServiceList);
+                var item2 = search('HDFS Data Node',updatedServiceList);
+                var item3 = search('Kafka',updatedServiceList);
+                var item4 = search('Datapipeline',updatedServiceList);
+                var tempArray = [item1,item2,item3,item4];
+                var nodeIndx = 0;
+                for(var i=0;i<tempArray.length;i++)
+                {
+                  var noOfNode = tempArray[i].NON;
+                  for(var k=0;k<noOfNode;k++)
+                  {
+                    var node = {};
+                    node.name = "node00"+(nodeIndx+1);
+                    node.MEM = memorySize[i];
+                    node.allotedMem = 0;
+                    node.services = [];
+                    for(var l=0; l<updatedServiceList.length;l++)
+                    {
+                      var allocatedM = Number(node.allotedMem)+Number(updatedServiceList[l].MPN);
+                      if(Number(allocatedM)<Number(node.MEM) && Number(updatedServiceList[l].NON)>0)
+                      {
+            	        node.allotedMem = allocatedM;
+                        node.services.push(updatedServiceList[l].serviceName);
+                        updatedServiceList[l].NON = Number(updatedServiceList[l].NON)-1;
+                      }
+                    }
+                    nodeList.push(node);
+                    nodeIndx++;
+                  }
+                }
+                console.log(nodeList);
+                
+                var row = "";
+                var tbody = $("#vmwarePageBody").empty();
+                $.each(nodeList,function(rowIndex,item){
+                  row = $("<tr/>");
+                  row.append($("<td/>").text(item.name));
+                  row.append("<td><input type='text'/></td>");
+                  row.append("<td><input type='text' value='"+item.MEM+"'/></td>");
+                  row.append("<td><input type='text'/></td>");
+                  tbody.append(row);
+                });
+                
+                $("#deploymentForm").hide();
+                $("#calculateContainer").hide();
+                $("#vmWareForm").show();
+                $("#priviewBtnContainer").show();
+            });
+            $("#previewBtn").click(function () {
             	$("#vmWareForm").hide();
-            	$("#calculateContainer").hide();
+            	$("#priviewBtnContainer").hide();
                 $("#resultPage").show();
                 $("#generateContainer").show();
+                var services = !{JSON.stringify(configuration.services)};
+                var row = "";
+                var header = $("#resultPageHeader").empty();
+                row = $("<tr><th>Services</th></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<th title='"+item.serviceName+"'/>").text(item.serviceName));
+                });
+                header.append(row);
+                
+                var tbody = $("#resultPageBody").empty();
+                row = $("<tr><td style='text-align: left;'>Needed</td></tr>");
+                $.each(updatedServiceList,function(rowIndex,item){
+                  row.append($("<td/>").text(item.totalMemory));
+                });
+                tbody.append(row);
+                row = $("<tr><td style='text-align: left;'>Alloted</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td/>").text(''));
+                });
+                tbody.append(row);
+                
+                $.each(nodeList,function(rowIndex,item){
+                  row = $("<tr><td style='text-align: left;'>CPU "+(rowIndex+1)+"</td></tr>");
+                  $.each(services,function(rowIndex1,item1){
+                    var chkId = "chkbx_"+rowIndex+rowIndex1;
+                    row.append($("<td><input id='"+chkId+"' type='checkbox' /></td>"));
+                    //row.append($("<td><input id='chkbx' type='checkbox' /></td>"));
+                   // console.log("#"+chkId);
+                    $("#"+chkId).prop( "checked", true );
+                  });
+                  tbody.append(row);
+                  
+                  row = $("<tr><td style='text-align: left;'>MEM "+(rowIndex+1)+"</td></tr>");
+                  $.each(services,function(rowIndex,item1){
+                    row.append($("<td><input type='checkbox'/></td>"));
+                  });
+                  tbody.append(row);
+                  
+                  row = $("<tr><td style='text-align: left;'>I/O "+(rowIndex+1)+"</td></tr>");
+                  $.each(services,function(rowIndex,item1){
+                    row.append($("<td><input type='checkbox'/></td>"));
+                  });
+                  tbody.append(row);
+                  
+                });
+                
+                /*row = $("<tr><td>CPU 1</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td><input type='checkbox'/></td>"));
+                });
+                tbody.append(row);
+                
+                row = $("<tr><td>CPU 2</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td><input type='checkbox'/></td>"));
+                });
+                tbody.append(row);
+                
+                row = $("<tr><td>MEM 1</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td><input type='checkbox'/></td>"));
+                });
+                tbody.append(row);
+                
+                row = $("<tr><td>MEM 2</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td><input type='checkbox'/></td>"));
+                });
+                tbody.append(row);
+                
+                row = $("<tr><td>I/O 1</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td><input type='checkbox'/></td>"));
+                });
+                tbody.append(row);
+                
+                row = $("<tr><td>I/O 2</td></tr>");
+                $.each(services,function(rowIndex,item){
+                  row.append($("<td><input type='checkbox'/></td>"));
+                });
+                tbody.append(row);*/
+            });
+            
+            $("#previewBackBtn").click(function () {
+            	$("#deploymentForm").show();
+            	$("#vmWareForm").hide();
+            	$("#calculateContainer").show();
+            	$("#priviewBtnContainer").hide();
             });
             $("#backBtn").click(function () {
-            	$("#deploymentForm").show();
             	$("#vmWareForm").show();
-            	$("#calculateContainer").show();
+            	$("#priviewBtnContainer").show();
                 $("#resultPage").hide();
                 $("#generateContainer").hide();
             });
