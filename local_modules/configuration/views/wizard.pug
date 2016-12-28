@@ -230,6 +230,7 @@ block footer
                 $("#generateContainer").hide();
             });
             $("#generatBtn").click(function () {
-            	alert('click on Generate button');
+                var url = 'data:text/json;charset=utf8,' + encodeURIComponent(JSON.stringify(nodeList) );
+                window.open(url);
             });
         });
