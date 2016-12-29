@@ -61,7 +61,6 @@
     "express-useragent": "0.0.11",
     "features-configuration": "file:local_modules/configuration",
     "features-helpdesk": "file:local_modules/helpdesk",
-    "configuration_wizard": "file:local_modules/configuration_wizard",
     "formidable": "1.0.x",
     "helmet": "^2.2.0",
     "measured": "0.1.x",
