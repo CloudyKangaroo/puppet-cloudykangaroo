@@ -13,7 +13,8 @@ var should = require('should');
 // https://github.com/visionmedia/supertest
 // https://github.com/visionmedia/express/tree/master/test
 
-describe('GET /admin/configuration', function(){
+// commented out this test case because not using it now
+/*describe('GET /admin/configuration', function(){
     "use strict";
     this.timeout(2400);
     it('should return code 200', function(done){
@@ -27,14 +28,14 @@ describe('GET /admin/configuration', function(){
             .get('/admin/configuration')
             .expect('Content-Type', 'text/html; charset=utf-8', done);
     });
-});
+});*/
 
 describe('GET /admin/configuration/wizard', function(){
     "use strict";
     this.timeout(2400);
     it('should return code 200', function(done){
         request(app)
-            .get('/admin/configuration')
+            .get('/admin/configuration/wizard')
             .set('Accept', 'application/json')
             .expect(200, done);
     });
