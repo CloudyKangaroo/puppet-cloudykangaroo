@@ -252,7 +252,7 @@ module.exports = function (app, config, authenticator) {
             if (error) {
                 res.send(500);
             } else {
-                res.redirect('/admin/configuration')
+                res.redirect('/admin/configuration');
             }
         });
     });

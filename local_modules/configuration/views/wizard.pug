@@ -280,6 +280,8 @@ block footer
                                         "version":"nginx-1.10.1"
                                         }
                                     ]}.services;
+                                    
+            /* util function for finding object by string from array */                        
             function search(nameKey, myArray)
             {
               for (var i=0; i < myArray.length; i++) 
@@ -290,6 +292,8 @@ block footer
                 }
               }
             };
+            
+            /* populate table on preview page based on provided data */
             function populateTableOnPreviewPage(serviceList,updatedServiceList,nodeList)
             {
               var row = "";
@@ -324,6 +328,8 @@ block footer
                   tbody.append(row);
                 });
             };
+            
+            /* used for re-selection of service and node on preview page */
             $("#resultPageBody").on("change", "input[type='checkbox']", function(evt){
               var nodeRowIndex = evt.target.id.split('_')[0];
               var serviceColumnIndex = evt.target.id.split('_')[1];
@@ -344,6 +350,10 @@ block footer
               console.log(services);
               populateTableOnPreviewPage(services,updatedServiceList,nodeList);
             });
+            
+            /* calulating how many nodes required for each service based on user enteres mobs count on input form.*/
+            /* and after that calculating how many total nodes required for all services*/
+            /* and which service runs on which node */
             $("#calculateBtn").click(function () {
                 var mobs = $("#mobsTxtInput").val();
                 updatedServiceList = [];
@@ -413,6 +423,7 @@ block footer
                 $("#vmWareForm").show();
                 $("#priviewBtnContainer").show();
             });
+            
             $("#previewBtn").click(function () {
             	$("#vmWareForm").hide();
             	$("#priviewBtnContainer").hide();
@@ -427,12 +438,14 @@ block footer
             	$("#calculateContainer").show();
             	$("#priviewBtnContainer").hide();
             });
+            
             $("#backBtn").click(function () {
             	$("#vmWareForm").show();
             	$("#priviewBtnContainer").show();
                 $("#resultPage").hide();
                 $("#generateContainer").hide();
             });
+            
             $("#generatBtn").click(function () {
                 var url = 'data:text/json;charset=utf8,' + encodeURIComponent(JSON.stringify(nodeList) );
                 window.open(url);
